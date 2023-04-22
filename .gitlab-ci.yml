@@ -1,0 +1,88 @@
+---
+stages:
+  - build
+  - deploy
+  - test
+
+.default_build_step:
+  script:
+    - yarn install
+    - yarn build:$SCRIPT_NAME
+
+.default_deploy_step:
+  script:
+    - aws s3 sync --delete ./build/ s3://$AWS_BUCKET/
+    - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_ID --paths "/*"
+
+build-testnet:
+  image:
+    name: node:14-alpine
+    pull_policy: if-not-present
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "testnet"'
+  allow_failure: false
+  variables:
+    SCRIPT_NAME: test
+  script:
+    - !reference [ .default_build_step, script ]
+  artifacts:
+    paths:
+      - build/
+
+deploy-testnet:
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  stage: deploy
+  dependencies:
+    - build-testnet
+  variables:
+    AWS_BUCKET: $AWS_TESTNET_BUCKET
+    AWS_CLOUDFRONT_ID: $AWS_CLOUDFRONT_ID_TESTNET
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "testnet"'
+  script:
+    - !reference [ .default_deploy_step, script ]
+
+build-production:
+  image:
+    name: node:14-alpine
+    pull_policy: if-not-present
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  allow_failure: false
+  variables:
+    SCRIPT_NAME: staging
+  script:
+    - !reference [ .default_build_step, script ]
+  artifacts:
+    paths:
+      - build/
+
+deploy-production:
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  stage: deploy
+  variables:
+    AWS_BUCKET: $AWS_MAIN_BUCKET
+    AWS_CLOUDFRONT_ID: $AWS_CLOUDFRONT_ID_MAIN
+  dependencies:
+    - build-production
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - !reference [ .default_deploy_step, script ]
+
+validate-pr:
+  image:
+    name: node:14-alpine
+    pull_policy: if-not-present
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - yarn install
+    - yarn lint
