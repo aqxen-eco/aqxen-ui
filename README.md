@@ -30,10 +30,22 @@ const Component = () => (
   
 ### As URL
 
-The `url` query parameter is used to import the SVG as a URL.
+#### Public folder
+The `url` query parameter is used to import the SVG as a URL when the asset is located in the public folder (vite.js uses absolute import from root to referer to public folder).
 
 ```jsx
-import iconUrl from './icon.svg?url';
+import iconUrl from '/icon.svg?url';
+
+const Component = () => (
+  <img src={iconUrl} />
+);
+```
+  
+#### Inside SRC folder
+Just use a normal default import relative to the current file without the `url` query param (it can be used if you want it).
+
+```jsx
+import iconUrl from '../assets/icon.svg';
 
 const Component = () => (
   <img src={iconUrl} />
