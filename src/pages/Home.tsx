@@ -3,9 +3,9 @@ import { Link } from '@/components/ui/Link'
 
 export function Home() {
   return (
-    <div className="mx-auto grid h-screen max-w-container-lg grid-cols-12 items-center gap-8 px-4">
-      <div className="col-span-4 max-w-sm space-y-6">
-        <h1 className="text-display-1 text-white">Eden on EOS Reputation System</h1>
+    <header className="relative mx-auto max-w-container-lg overflow-hidden px-4 py-16 mobile:min-h-[42rem] desktop:flex desktop:min-h-screen desktop:items-center">
+      <div className="space-y-6 desktop:max-w-sm">
+        <h1 className="text-display-1 text-white">UpScale Reputation System</h1>
         <p className="text-body-1 text-gray-3">
           Participate in enjoyable community activities, recognize fellow members, collect badges and elevate your
           reputation.
@@ -14,9 +14,7 @@ export function Home() {
           Recognize
         </Link>
       </div>
-      <div className="col-span-8 justify-self-end">
-        <Hero />
-      </div>
-    </div>
+      <Hero className="absolute -z-10 mobile:bottom-0 mobile:left-1/2 mobile:-translate-x-1/2 mobile:translate-y-1/2 desktop:right-4 desktop:top-1/2 desktop:-translate-y-1/2" />
+    </header>
   )
 }
