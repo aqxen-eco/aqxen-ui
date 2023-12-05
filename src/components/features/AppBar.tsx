@@ -19,12 +19,12 @@ export function AppBar() {
               className="flex cursor-pointer items-center gap-2 rounded-full pl-2 pr-3 text-2xl leading-10 text-white duration-150 desktop:hover:bg-gray-2"
             >
               <Logo />
-              Upscale
+              UpScale
             </RouterLink>
             {isAuthenticated ? (
               <div className="flex gap-2">
                 <NavLink
-                  to="/Recognize"
+                  to="/recognize"
                   className={({ isActive }) => button({ variant: isActive ? 'secondary' : 'primary' })}
                 >
                   Recognize
