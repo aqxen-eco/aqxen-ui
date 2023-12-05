@@ -16,6 +16,9 @@ export default {
         'container-lg': '80rem', // 1280px
         'container-md': '53.375rem', // 854px
       },
+      backgroundImage: {
+        gradient: 'linear-gradient(90deg, #A36AB7 0%, #D17650 25%, #8CA3DA 50%, #B6C190 75%, #E6C97E 100%)'
+      },
       colors: {
         gray: {
           1: '#111111',

@@ -13,12 +13,12 @@ export const avatar = tv({
     size: {
       sm: 'h-6 w-6 text-[0.625rem]',
       md: 'h-10 w-10 text-body-2',
-      lg: 'h-24 w-24 text-title-1'
+      lg: 'h-24 w-24 border-4 text-title-1'
     }
   },
   defaultVariants: {
     size: 'md',
-    variant: 'red'
+    color: 'red'
   }
 })
 
