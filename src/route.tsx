@@ -10,7 +10,7 @@ export const route = createBrowserRouter(
     <Route path="/" element={<AppLayout />}>
       <Route path="/" element={<Home />} />
       <Route path="/recognize" element={<Recognize />} />
-      <Route path="/profile" element={<Profile />} />
+      <Route path="/profile/:user" element={<Profile />} />
     </Route>
   )
 )

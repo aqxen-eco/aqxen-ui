@@ -1,13 +1,20 @@
-import { Link as RouterLink, NavLink } from 'react-router-dom'
+import { Link as RouterLink, NavLink, useNavigate } from 'react-router-dom'
 
 import { ReactComponent as Logo } from '@/assets/logo.svg'
 import { Avatar } from '@/components/ui/Avatar'
 import { Box } from '@/components/ui/Box'
 import { Button } from '@/components/ui/Button'
+import { useChain } from '@/hooks/useChain'
 import { button } from '@/styles/button'
 
 export function AppBar() {
-  const isAuthenticated = true
+  const { isAuthenticated, login, logout, actor } = useChain()
+  const navigate = useNavigate()
+
+  function logoutAndGoToHome() {
+    logout()
+    navigate('/')
+  }
 
   return (
     <>
@@ -29,16 +36,19 @@ export function AppBar() {
                 >
                   Recognize
                 </NavLink>
-                <NavLink to="/profile">
+                <NavLink to={'/profile/' + actor}>
                   {({ isActive }) => (
                     <Avatar className={isActive ? 'border-white' : ''} color="red">
-                      EP
+                      {actor ? actor.slice(0, 2) : 'un'}
                     </Avatar>
                   )}
                 </NavLink>
+                <Button onClick={logoutAndGoToHome}>Log out</Button>
               </div>
             ) : (
-              <Button variant="primary">Sign in</Button>
+              <Button onClick={login} variant="primary">
+                Log in
+              </Button>
             )}
           </Box>
         </div>
