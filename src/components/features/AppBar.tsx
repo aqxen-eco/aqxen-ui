@@ -4,6 +4,7 @@ import { ReactComponent as Logo } from '@/assets/logo.svg'
 import { Avatar } from '@/components/ui/Avatar'
 import { Box } from '@/components/ui/Box'
 import { Button } from '@/components/ui/Button'
+import { useSeasons } from '@/hooks/seasons'
 import { useChain } from '@/hooks/useChain'
 import { button } from '@/styles/button'
 
@@ -11,9 +12,16 @@ export function AppBar() {
   const { isAuthenticated, login, logout, actor } = useChain()
   const navigate = useNavigate()
 
+  const { orgAggregates, orgSequences } = useSeasons()
+
   function logoutAndGoToHome() {
     logout()
     navigate('/')
+  }
+
+  function printOrgAggregates() {
+    console.log(orgAggregates)
+    console.log(orgSequences)
   }
 
   return (
@@ -28,6 +36,9 @@ export function AppBar() {
               <Logo />
               UpScale
             </RouterLink>
+            <Button onClick={printOrgAggregates} variant="secondary">
+              Current season
+            </Button>
             {isAuthenticated ? (
               <div className="flex gap-2">
                 <NavLink

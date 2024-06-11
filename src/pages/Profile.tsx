@@ -7,12 +7,16 @@ import { Badge } from '@/components/ui/Badge'
 import { Box } from '@/components/ui/Box'
 import { Button } from '@/components/ui/Button'
 import { useBadges } from '@/hooks/badges'
+import { useSeasons } from '@/hooks/seasons'
 import { BadgeFilterType, BadgeType } from '@/models/badges'
+import { AchievementType } from '@/models/seasons'
 
 export function Profile() {
   const [badges, setBadges] = useState([] as BadgeType[])
+  const [seasonalBadges, setSeasonalBadges] = useState([] as AchievementType[])
 
   const { orgBadges, userBadges } = useBadges()
+  const { userSeasonalBadges } = useSeasons()
   const { user } = useParams()
 
   async function getBadges() {
@@ -24,6 +28,16 @@ export function Profile() {
     })
     if (response?.rows?.length) {
       setBadges(response.rows)
+    }
+
+    const responseSeasonal = await userSeasonalBadges({
+      scope: user,
+      queryType: BadgeFilterType.DEFAULT,
+      lowerBound: '',
+      upperBound: ''
+    })
+    if (responseSeasonal?.rows?.length) {
+      setSeasonalBadges(responseSeasonal.rows)
     }
   }
 
@@ -73,13 +87,26 @@ export function Profile() {
           </div>
           <div className="col-span-5"></div>
           <div className="col-span-8 border-t border-gray-2 p-8">
-            <h3 className="text-title-2 text-white">Received badges (All)</h3>
+            <h3 className="text-title-2 text-white">Received badges (Lifetime)</h3>
             <div className="my-4 flex items-center justify-center gap-4 align-middle">
               {badges?.map((badge, index) => (
                 <Badge
                   key={index}
                   symbol={badge.balance.split(' ', 2)[1]}
                   balance={badge.balance.split(' ', 1)[0]}
+                  orgBadges={orgBadges}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="col-span-8 border-t border-gray-2 p-8">
+            <h3 className="text-title-2 text-white">Received badges (Seasonal)</h3>
+            <div className="my-4 flex items-center justify-center gap-4 align-middle">
+              {seasonalBadges?.map((badge, index) => (
+                <Badge
+                  key={index}
+                  symbol={badge.badge_agg_seq_id.toString()}
+                  balance={badge.count.toString()}
                   orgBadges={orgBadges}
                 />
               ))}
