@@ -14,8 +14,10 @@ import { AchievementType } from '@/models/seasons'
 export function Profile() {
   const [badges, setBadges] = useState([] as BadgeType[])
   const [seasonalBadges, setSeasonalBadges] = useState([] as AchievementType[])
+  const [badgesCount, setBadgesCount] = useState(0)
+  const [seasonalBadgesCount, setSeasonalBadgesCount] = useState(0)
 
-  const { orgBadges, userBadges } = useBadges()
+  const { userBadges } = useBadges()
   const { userSeasonalBadges } = useSeasons()
   const { user } = useParams()
 
@@ -28,6 +30,7 @@ export function Profile() {
     })
     if (response?.rows?.length) {
       setBadges(response.rows)
+      setBadgesCount(response.rows.reduce((sum, badge) => parseInt(badge.balance.split(' ', 1)[0]) + sum, 0) ?? 0)
     }
 
     const responseSeasonal = await userSeasonalBadges({
@@ -38,6 +41,7 @@ export function Profile() {
     })
     if (responseSeasonal?.rows?.length) {
       setSeasonalBadges(responseSeasonal.rows)
+      setSeasonalBadgesCount(responseSeasonal.rows.reduce((sum, badge) => badge.count + sum, 0) ?? 0)
     }
   }
 
@@ -70,14 +74,22 @@ export function Profile() {
               <div className="mt-4 space-y-4 border-t border-gray-2 pt-4">
                 <h4 className="text-white">Badges stats</h4>
                 <p className="flex justify-between text-white">
-                  <span className="text-gray-3">Total</span>
-                  {badges?.reduce((sum, badge) => parseInt(badge.balance.split(' ', 1)[0]) + sum, 0) ?? 0}
+                  <span className="text-gray-3">Lifetime</span>
+                  {badgesCount}
                 </p>
                 <p className="flex justify-between text-white">
-                  <span className="text-gray-3">Official</span>
-                  {badges?.reduce((sum, badge) => parseInt(badge.balance.split(' ', 1)[0]) + sum, 0) ?? 0}
+                  <span className="text-gray-3">Seasonal</span>
+                  {seasonalBadgesCount}
                 </p>
-                {/* Enable when mutual badges info is available */}
+                <p className="flex justify-between text-white">
+                  <span className="text-gray-3">Total</span>
+                  {badgesCount + seasonalBadgesCount}
+                </p>
+                {/* Enable when official and mutual badges info is available */}
+                {/* <p className="flex justify-between text-white">
+                  <span className="text-gray-3">Official</span>
+                  50
+                </p> */}
                 {/* <p className="flex justify-between text-white">
                   <span className="text-gray-3">Mutual</span>
                   411
@@ -90,12 +102,7 @@ export function Profile() {
             <h3 className="text-title-2 text-white">Received badges (Lifetime)</h3>
             <div className="my-4 flex items-center justify-center gap-4 align-middle">
               {badges?.map((badge, index) => (
-                <Badge
-                  key={index}
-                  symbol={badge.balance.split(' ', 2)[1]}
-                  balance={badge.balance.split(' ', 1)[0]}
-                  orgBadges={orgBadges}
-                />
+                <Badge key={index} symbol={badge.balance.split(' ', 2)[1]} balance={badge.balance.split(' ', 1)[0]} />
               ))}
             </div>
           </div>
@@ -105,9 +112,9 @@ export function Profile() {
               {seasonalBadges?.map((badge, index) => (
                 <Badge
                   key={index}
+                  seasonal
                   symbol={badge.badge_agg_seq_id.toString()}
                   balance={badge.count.toString()}
-                  orgBadges={orgBadges}
                 />
               ))}
             </div>

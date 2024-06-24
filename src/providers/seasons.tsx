@@ -183,6 +183,8 @@ export default function SeasonsProvider({ children }: SeasonsProviderProps) {
   const [orgAggregates, setOrgAggregates] = useState<OrgAggregateType[]>([])
   const [orgSequences, setOrgSequences] = useState<OrgSequenceType[]>([])
   const [orgSeasonalBadges, setOrgSeasonalBadges] = useState<OrgBadgeStatusType[]>([])
+  const [currentOrgAggregate, setCurrentOrgAggregate] = useState<number>(0)
+  const [currentOrgSequence, setCurrentOrgSequence] = useState<number>(0)
 
   async function getSeasons() {
     const responseOrgAggregates = await getOrgAggregates({
@@ -190,14 +192,21 @@ export default function SeasonsProvider({ children }: SeasonsProviderProps) {
     })
     if (responseOrgAggregates?.rows?.length) {
       setOrgAggregates(responseOrgAggregates.rows)
-    }
 
-    const responseOrgSequences = await getOrgSequences({
-      scope: responseOrgAggregates?.rows?.[0]?.agg_symbol?.split(',', 2)[1] ?? '',
-      queryType: SeasonFilterType.DEFAULT
-    })
-    if (responseOrgSequences?.rows?.length) {
-      setOrgSequences(responseOrgSequences.rows)
+      let allSequences = [] as OrgSequenceType[]
+
+      for (const agg in responseOrgAggregates.rows) {
+        const responseOrgSequences = await getOrgSequences({
+          scope: responseOrgAggregates?.rows?.[agg]?.agg_symbol?.split(',', 2)[1] ?? '',
+          queryType: SeasonFilterType.DEFAULT
+        })
+        // TODO: Still need to assign each specific sequence to its aggregate
+        if (responseOrgSequences?.rows?.length) {
+          allSequences = allSequences.concat(responseOrgSequences.rows)
+        }
+      }
+
+      setOrgSequences(allSequences)
     }
 
     const responseOrgBadges = await getOrgSeasonalBadges({
@@ -214,7 +223,16 @@ export default function SeasonsProvider({ children }: SeasonsProviderProps) {
 
   return (
     <SeasonsContext.Provider
-      value={{ orgAggregates, orgSequences, orgSeasonalBadges, userSeasonalBadges: getUserSeasonalBadges }}
+      value={{
+        orgAggregates,
+        orgSequences,
+        orgSeasonalBadges,
+        userSeasonalBadges: getUserSeasonalBadges,
+        currentOrgAggregate,
+        setCurrentOrgAggregate,
+        currentOrgSequence,
+        setCurrentOrgSequence
+      }}
     >
       {children}
     </SeasonsContext.Provider>

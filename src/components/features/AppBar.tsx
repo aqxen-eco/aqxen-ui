@@ -12,7 +12,14 @@ export function AppBar() {
   const { isAuthenticated, login, logout, actor } = useChain()
   const navigate = useNavigate()
 
-  const { orgAggregates, orgSequences } = useSeasons()
+  const {
+    orgAggregates,
+    orgSequences,
+    currentOrgAggregate,
+    setCurrentOrgAggregate,
+    currentOrgSequence,
+    setCurrentOrgSequence
+  } = useSeasons()
 
   function logoutAndGoToHome() {
     logout()
@@ -20,7 +27,22 @@ export function AppBar() {
   }
 
   function printOrgAggregates() {
+    if (orgAggregates.length == currentOrgAggregate + 1) {
+      setCurrentOrgAggregate(0)
+    } else {
+      setCurrentOrgAggregate(currentOrgAggregate + 1)
+    }
     console.log(orgAggregates)
+  }
+
+  function printOrgSequences() {
+    console.log(orgSequences.length)
+    console.log(currentOrgSequence)
+    if (orgSequences.length == currentOrgSequence + 1) {
+      setCurrentOrgSequence(0)
+    } else {
+      setCurrentOrgSequence(currentOrgSequence + 1)
+    }
     console.log(orgSequences)
   }
 
@@ -29,16 +51,21 @@ export function AppBar() {
       <nav className="sticky top-2 z-30 w-full ">
         <div className="mx-auto max-w-container-lg px-4">
           <Box className="flex items-center justify-between rounded-full p-2">
-            <RouterLink
-              to="/"
-              className="flex cursor-pointer items-center gap-2 rounded-full pl-2 pr-3 text-2xl leading-10 text-white duration-150 desktop:hover:bg-gray-2"
-            >
-              <Logo />
-              UpScale
-            </RouterLink>
-            <Button onClick={printOrgAggregates} variant="secondary">
-              Current season
-            </Button>
+            <div className="flex gap-2">
+              <RouterLink
+                to="/"
+                className="flex cursor-pointer items-center gap-2 rounded-full pl-2 pr-3 text-2xl leading-10 text-white duration-150 desktop:hover:bg-gray-2"
+              >
+                <Logo />
+                UpScale
+              </RouterLink>
+              <Button onClick={printOrgAggregates} variant="secondary">
+                {orgAggregates[currentOrgAggregate]?.agg_description}
+              </Button>
+              <Button onClick={printOrgSequences} variant="secondary">
+                {orgSequences[currentOrgSequence]?.sequence_description}
+              </Button>
+            </div>
             {isAuthenticated ? (
               <div className="flex gap-2">
                 <NavLink
