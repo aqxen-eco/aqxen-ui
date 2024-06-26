@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button'
 import { useChain } from '@/hooks/useChain'
 import { button } from '@/styles/button'
 
+import { DropdownItem, DropdownRoot } from '../ui/Dropdown'
+
 export function AppBar() {
   const { isAuthenticated, login, logout, actor } = useChain()
   const navigate = useNavigate()
@@ -28,6 +30,13 @@ export function AppBar() {
               <Logo />
               UpScale
             </RouterLink>
+            <DropdownRoot label="Dropdown">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((item) => (
+                <DropdownItem key={item} isSelected={item === 1} onClick={() => console.log(`click item ${item}`)}>
+                  Item {item}
+                </DropdownItem>
+              ))}
+            </DropdownRoot>
             {isAuthenticated ? (
               <div className="flex gap-2">
                 <NavLink
