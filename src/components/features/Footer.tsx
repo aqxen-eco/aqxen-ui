@@ -8,7 +8,7 @@ export function Footer() {
   const year = today.getFullYear()
 
   return (
-    <footer className="mx-auto flex max-w-container-lg items-center justify-between border-t border-gray-2 px-4 py-16">
+    <footer className="mx-auto flex max-w-container-lg items-center justify-between gap-4 border-t border-gray-2 px-4 py-16 mobile:flex-col">
       <RouterLink to="/" className="flex cursor-pointer items-center gap-1.5 text-gray-3 desktop:hover:text-white">
         <Logo className="h-6 w-6" />
         <span className="text-body-1">UpScale © {year}</span>

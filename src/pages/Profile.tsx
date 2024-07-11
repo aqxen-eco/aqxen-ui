@@ -15,8 +15,6 @@ import { AchievementType } from '@/models/seasons'
 export function Profile() {
   const [badges, setBadges] = useState([] as BadgeType[])
   const [seasonalBadges, setSeasonalBadges] = useState([] as AchievementType[])
-  const [badgesCount, setBadgesCount] = useState(0)
-  const [seasonalBadgesCount, setSeasonalBadgesCount] = useState(0)
 
   const { userBadges } = useBadges()
   const { orgAggregates, userSeasonalBadges } = useSeasons()
@@ -24,26 +22,27 @@ export function Profile() {
 
   useEffect(() => {
     async function getBadges() {
-      const response = await userBadges({
-        scope: user,
-        queryType: BadgeFilterType.DEFAULT,
-        lowerBound: '',
-        upperBound: ''
-      })
-      if (response?.rows?.length) {
-        setBadges(response.rows)
-        setBadgesCount(response.rows.reduce((sum, badge) => parseInt(badge.balance.split(' ', 1)[0]) + sum, 0) ?? 0)
+      const [responseBadges, responseSeasonal] = await Promise.all([
+        userBadges({
+          scope: user,
+          queryType: BadgeFilterType.DEFAULT,
+          lowerBound: '',
+          upperBound: ''
+        }),
+        userSeasonalBadges({
+          scope: user,
+          queryType: BadgeFilterType.DEFAULT,
+          lowerBound: '',
+          upperBound: ''
+        })
+      ])
+
+      if (responseBadges?.rows?.length) {
+        setBadges(responseBadges.rows)
       }
 
-      const responseSeasonal = await userSeasonalBadges({
-        scope: user,
-        queryType: BadgeFilterType.DEFAULT,
-        lowerBound: '',
-        upperBound: ''
-      })
       if (responseSeasonal?.rows?.length) {
         setSeasonalBadges(responseSeasonal.rows)
-        setSeasonalBadgesCount(responseSeasonal.rows.reduce((sum, badge) => badge.count + sum, 0) ?? 0)
       }
     }
 
@@ -52,58 +51,45 @@ export function Profile() {
     }
   }, [user, userBadges, userSeasonalBadges])
 
+  const badgesCount = badges.reduce((sum, badge) => parseInt(badge.balance.split(' ', 1)[0]) + sum, 0) ?? 0
+  const seasonalBadgesCount = seasonalBadges.reduce((sum, badge) => badge.count + sum, 0) ?? 0
+
   return (
-    <div className="mx-auto max-w-container-md space-y-8 px-4 py-8">
-      <Box className="overflow-hidden p-0">
+    <div className="mx-auto max-w-container-md space-y-8 py-8 mobile:pt-0 desktop:px-4">
+      <Box className="divide-y divide-gray-2 overflow-hidden p-0 mobile:rounded-none mobile:border-0 mobile:bg-black">
         <div className="relative h-52 w-full bg-gradient">
           {/* Later control disabled based on the logged in account vs profile link */}
           <Button variant="secondary" className="absolute right-4 top-4 z-10" disabled>
             <MdOutlineModeEdit className="h-6 w-6" />
           </Button>
         </div>
-        <div className="grid grid-cols-8">
-          <div className="col-span-3 border-r border-gray-2 text-body-2">
-            <div className="p-8">
-              <Avatar size="lg" className="mb-4">
-                {user ? user.slice(0, 2) : 'un'}
-              </Avatar>
-              <h1 className="text-white">{user ?? 'unknown'}</h1>
-              {/* Enable when user profile info is available */}
-              {/* <h1 className="text-white">User Full Name</h1> */}
-              {/* <p className="text-gray-3">user@email.com</p> */}
-              {/* <p className="text-gray-3">@userhandle</p> */}
-              <div className="mt-4 space-y-4 border-t border-gray-2 pt-4">
-                <h4 className="text-white">Badges stats</h4>
-                <p className="flex justify-between text-white">
-                  <span className="text-gray-3">Lifetime</span>
-                  {badgesCount}
-                </p>
-                <p className="flex justify-between text-white">
-                  <span className="text-gray-3">Seasonal</span>
-                  {seasonalBadgesCount}
-                </p>
-                <p className="flex justify-between text-white">
-                  <span className="text-gray-3">Total</span>
-                  {badgesCount + seasonalBadgesCount}
-                </p>
-                {/* Enable when official and mutual badges info is available */}
-                {/* <p className="flex justify-between text-white">
-                  <span className="text-gray-3">Official</span>
-                  50
-                </p> */}
-                {/* <p className="flex justify-between text-white">
-                  <span className="text-gray-3">Mutual</span>
-                  411
-                </p> */}
-              </div>
+
+        <div className="flex gap-4 p-8 mobile:flex-col mobile:px-4 desktop:items-center">
+          <Avatar size="lg" className="flex-none ">
+            {user ? user.slice(0, 2) : 'un'}
+          </Avatar>
+          <div className="text-white">
+            <h1 className="text-title-2">{user ?? 'unknown'}</h1>
+            <div className="mt-2 flex gap-8">
+              <p>
+                <span className="mb-0.5 block text-body-3 text-gray-3">Lifetime</span>
+                <strong className="font-medium">{badgesCount}</strong>
+              </p>
+              <p>
+                <span className="mb-0.5 block text-body-3 text-gray-3">Seasonal</span>
+                <strong className="font-medium">{seasonalBadgesCount}</strong>
+              </p>
+              <p>
+                <span className="mb-0.5 block text-body-3 text-gray-3">Total</span>
+                <strong className="font-medium">{badgesCount + seasonalBadgesCount}</strong>
+              </p>
             </div>
           </div>
-          <div className="col-span-5"></div>
-          <BadgeSection title="Lifetime Badges" badges={badges} />
-          {orgAggregates.map((agg, index) => (
-            <SeasonalBadgeSection agg={agg} seasonalBadges={seasonalBadges} key={index} />
-          ))}
         </div>
+        <BadgeSection title="Lifetime Badges" badges={badges} />
+        {orgAggregates.map((agg, index) => (
+          <SeasonalBadgeSection agg={agg} seasonalBadges={seasonalBadges} key={index} />
+        ))}
       </Box>
       {/* Enable when message info is available */}
       {/* <Box>

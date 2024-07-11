@@ -6,22 +6,26 @@ import { MdKeyboardArrowDown } from 'react-icons/md'
 import { Button } from '@/components/ui/Button'
 
 type DropdownRootProps = {
-  label: string
+  label?: string
   align?: 'start' | 'center' | 'end'
+  customTrigger?: React.ReactNode
   children: React.ReactNode
 }
 
-export function DropdownRoot({ label, align, children }: DropdownRootProps) {
+export function DropdownRoot({ label, customTrigger, align, children }: DropdownRootProps) {
   const [open, setOpen] = useState(false)
 
   return (
     <Root open={open} onOpenChange={setOpen}>
-      <Trigger asChild>
-        <Button variant="secondary" size="md" className="group/dropdown-button">
-          {label}
-          <MdKeyboardArrowDown className="h-6 w-6 duration-150 group-data-[state=open]/dropdown-button:rotate-180" />
-        </Button>
-      </Trigger>
+      {customTrigger && <Trigger asChild>{customTrigger}</Trigger>}
+      {label && (
+        <Trigger asChild>
+          <Button variant="secondary" size="md" className="group/dropdown-button">
+            {label}
+            <MdKeyboardArrowDown className="h-6 w-6 duration-150 group-data-[state=open]/dropdown-button:rotate-180" />
+          </Button>
+        </Trigger>
+      )}
       <AnimatePresence>
         {open && (
           <Portal forceMount>

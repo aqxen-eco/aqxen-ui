@@ -16,9 +16,9 @@ export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...re
   const { orgSeasonalBadges } = useSeasons()
 
   return (
-    <div className="col-span-8 border-t border-gray-2 p-8" {...restProps}>
-      <div className="flex justify-between align-middle">
-        <h3 className="text-title-2 text-white">{agg?.agg_description}</h3>
+    <div className="p-8 mobile:px-4" {...restProps}>
+      <div className="flex items-center justify-between truncate align-middle">
+        <h3 className="truncate text-title-2 text-white">{agg?.agg_description}</h3>
         <DropdownRoot label={selectedSequence?.sequence_description ?? 'Sequence'}>
           {agg?.agg_sequences?.map((seq, index) => (
             <DropdownItem
@@ -31,12 +31,18 @@ export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...re
           ))}
         </DropdownRoot>
       </div>
-      <div className="my-4 flex items-center justify-center gap-4 align-middle">
+      <div className="my-4 flex items-center gap-4 align-middle">
         {seasonalBadges?.map(
           (badge, index) =>
             orgSeasonalBadges?.find((orgSeasonalBadge) => orgSeasonalBadge.badge_agg_seq_id == badge.badge_agg_seq_id)
               ?.seq_id == selectedSequence?.seq_id && (
-              <Badge key={index} symbol={badge.badge_agg_seq_id.toString()} balance={badge.count.toString()} seasonal />
+              <Badge
+                key={index}
+                symbol={badge.badge_agg_seq_id.toString()}
+                balance={badge.count.toString()}
+                seasonal
+                className="flex-none"
+              />
             )
         )}
       </div>
