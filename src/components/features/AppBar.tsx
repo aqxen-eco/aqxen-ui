@@ -5,9 +5,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Box } from '@/components/ui/Box'
 import { Button } from '@/components/ui/Button'
 import { useChain } from '@/hooks/useChain'
-import { button } from '@/styles/button'
-
-import { DropdownItem, DropdownRoot } from '../ui/Dropdown'
+// import { button } from '@/styles/button'
 
 export function AppBar() {
   const { isAuthenticated, login, logout, actor } = useChain()
@@ -30,21 +28,15 @@ export function AppBar() {
               <Logo />
               UpScale
             </RouterLink>
-            <DropdownRoot label="Dropdown">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((item) => (
-                <DropdownItem key={item} isSelected={item === 1} onClick={() => console.log(`click item ${item}`)}>
-                  Item {item}
-                </DropdownItem>
-              ))}
-            </DropdownRoot>
             {isAuthenticated ? (
               <div className="flex gap-2">
-                <NavLink
+                {/* Enable when Recognize is available */}
+                {/* <NavLink
                   to="/recognize"
                   className={({ isActive }) => button({ variant: isActive ? 'secondary' : 'primary' })}
                 >
                   Recognize
-                </NavLink>
+                </NavLink> */}
                 <NavLink to={'/profile/' + actor}>
                   {({ isActive }) => (
                     <Avatar className={isActive ? 'border-white' : ''} color="red">

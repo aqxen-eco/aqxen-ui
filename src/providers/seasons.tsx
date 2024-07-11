@@ -1,0 +1,226 @@
+import { APIClient, Checksum160, Checksum256, Float64, Name, UInt64, UInt128 } from '@wharfkit/antelope'
+import { ReactNode, useEffect, useState } from 'react'
+
+import { CHAIN_API_URL, I64, ORG, SEASONS_INFO_CONTRACT, Tables } from '@/constants'
+import { SeasonsContext } from '@/contexts/seasons.ts'
+import { BadgesFilter } from '@/models/badges'
+import {
+  AchievementResponse,
+  AchievementType,
+  Bound,
+  OrgAggregateResponse,
+  OrgAggregateType,
+  OrgBadgeStatusResponse,
+  OrgBadgeStatusType,
+  OrgSequenceResponse,
+  OrgSequenceType,
+  SeasonFilterType,
+  SeasonsFilter
+} from '@/models/seasons'
+
+type TableIndexType = Name | UInt64 | UInt128 | Float64 | Checksum256 | Checksum160
+
+type IndexPosition =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'fourth'
+  | 'fifth'
+  | 'sixth'
+  | 'seventh'
+  | 'eighth'
+  | 'ninth'
+  | 'tenth'
+  | undefined
+
+const KEY_TYPE: Record<SeasonFilterType, string> = {
+  [SeasonFilterType.DEFAULT]: I64
+}
+
+const INDEX_POSITION: Record<SeasonFilterType, IndexPosition> = {
+  [SeasonFilterType.DEFAULT]: 'primary'
+}
+
+const jungleClient = new APIClient({
+  url: CHAIN_API_URL
+})
+
+export interface SeasonsProviderProps {
+  children: ReactNode
+}
+
+interface GetTableRowsResult<T, K = TableIndexType> {
+  rows: T[]
+  more: boolean
+  next_key: K
+}
+
+async function getOrgAggregates({ queryType, lowerBound, upperBound }: SeasonsFilter): Promise<OrgAggregateResponse> {
+  const data = {
+    code: SEASONS_INFO_CONTRACT,
+    scope: ORG,
+    table: Tables.AGGREGATES,
+    json: true,
+    ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
+    ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
+    ...(lowerBound != null ? { lower_bound: lowerBound as unknown as Bound } : {}),
+    ...(upperBound != null ? { upper_bound: upperBound as unknown as Bound } : {}),
+    limit: 1000
+  }
+
+  const { rows, next_key, more } = (await jungleClient.v1.chain.get_table_rows<Bound>(data)) as GetTableRowsResult<
+    OrgAggregateType,
+    UInt64 | UInt128
+  >
+
+  console.debug('Aggregates')
+  console.debug(rows)
+
+  return {
+    more,
+    rows,
+    next_key: next_key ? next_key.toString() : null
+  }
+}
+
+async function getOrgSequences({ scope, queryType }: SeasonsFilter): Promise<OrgSequenceResponse> {
+  const data = {
+    code: SEASONS_INFO_CONTRACT,
+    scope: scope, // Aggregate Symbol
+    table: Tables.SEQUENCES,
+    json: true,
+    ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
+    ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
+    limit: 1000
+  }
+
+  const { rows, next_key, more } = (await jungleClient.v1.chain.get_table_rows<Bound>(data)) as GetTableRowsResult<
+    OrgSequenceType,
+    UInt64 | UInt128
+  >
+
+  console.debug('Sequences')
+  console.debug(rows)
+
+  return {
+    more,
+    rows,
+    next_key: next_key ? next_key.toString() : null
+  }
+}
+
+async function getOrgSeasonalBadges({ queryType }: SeasonsFilter): Promise<OrgBadgeStatusResponse> {
+  const data = {
+    code: SEASONS_INFO_CONTRACT,
+    scope: ORG,
+    table: Tables.BADGESTATUS,
+    json: true,
+    ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
+    ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
+    limit: 1000
+  }
+
+  const { rows, next_key, more } = (await jungleClient.v1.chain.get_table_rows<Bound>(data)) as GetTableRowsResult<
+    OrgBadgeStatusType,
+    UInt64 | UInt128
+  >
+
+  console.debug('Badge Status')
+  console.debug(rows)
+
+  return {
+    more,
+    rows,
+    next_key: next_key ? next_key.toString() : null
+  }
+}
+
+async function getUserSeasonalBadges({
+  scope,
+  queryType,
+  lowerBound,
+  upperBound
+}: BadgesFilter): Promise<AchievementResponse> {
+  const data = {
+    code: SEASONS_INFO_CONTRACT,
+    scope: scope,
+    table: Tables.ACHIEVEMENTS,
+    json: true,
+    ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
+    ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
+    ...(lowerBound != null ? { lower_bound: lowerBound as unknown as Bound } : {}),
+    ...(upperBound != null ? { upper_bound: upperBound as unknown as Bound } : {}),
+    limit: 1000
+  }
+
+  const { rows, next_key, more } = (await jungleClient.v1.chain.get_table_rows<Bound>(data)) as GetTableRowsResult<
+    AchievementType,
+    UInt64 | UInt128
+  >
+
+  console.debug('Seasonal Badges / Achievements')
+  console.debug(rows)
+
+  return {
+    more,
+    rows,
+    next_key: next_key ? next_key.toString() : null
+  }
+}
+
+export default function SeasonsProvider({ children }: SeasonsProviderProps) {
+  const [orgAggregates, setOrgAggregates] = useState<OrgAggregateType[]>([])
+  const [orgSequences, setOrgSequences] = useState<OrgSequenceType[]>([])
+  const [orgSeasonalBadges, setOrgSeasonalBadges] = useState<OrgBadgeStatusType[]>([])
+
+  async function getSeasons() {
+    const responseOrgAggregates = await getOrgAggregates({
+      queryType: SeasonFilterType.DEFAULT
+    })
+
+    if (responseOrgAggregates?.rows?.length) {
+      let allSequences = [] as OrgSequenceType[]
+
+      for (const agg in responseOrgAggregates.rows) {
+        const responseOrgSequences = await getOrgSequences({
+          scope: responseOrgAggregates?.rows?.[agg]?.agg_symbol?.split(',', 2)[1] ?? '',
+          queryType: SeasonFilterType.DEFAULT
+        })
+
+        if (responseOrgSequences?.rows?.length) {
+          responseOrgAggregates.rows[agg].agg_sequences = responseOrgSequences.rows
+
+          allSequences = allSequences.concat(responseOrgSequences.rows)
+        }
+      }
+
+      setOrgAggregates(responseOrgAggregates.rows)
+      // TODO: Review as we might be able to delete this if Sequences are enough within Aggregates
+      setOrgSequences(allSequences)
+    }
+
+    const responseOrgBadges = await getOrgSeasonalBadges({
+      queryType: SeasonFilterType.DEFAULT
+    })
+    if (responseOrgBadges?.rows?.length) {
+      setOrgSeasonalBadges(responseOrgBadges.rows)
+    }
+  }
+
+  useEffect(() => {
+    getSeasons()
+  }, [])
+
+  return (
+    <SeasonsContext.Provider
+      value={{
+        orgAggregates,
+        orgSequences,
+        orgSeasonalBadges,
+        userSeasonalBadges: getUserSeasonalBadges
+      }}
+    >
+      {children}
+    </SeasonsContext.Provider>
+  )
+}

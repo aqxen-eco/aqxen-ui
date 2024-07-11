@@ -1,23 +1,33 @@
 import { ComponentProps } from 'react'
 
-import { OrgBadgeType } from '@/models/badges'
+import { IPFS_IMAGE_SOURCE } from '@/constants'
+import { useBadges } from '@/hooks/badges'
+import { useSeasons } from '@/hooks/seasons'
 
 interface BadgeProps extends ComponentProps<'div'> {
   symbol: string
   balance: string
-  orgBadges: OrgBadgeType[]
+  seasonal?: boolean
 }
 
-const imgSrc = 'https://facings.mypinata.cloud/ipfs/'
+export function Badge({ children, symbol, balance, seasonal = false, ...restProps }: BadgeProps) {
+  const { orgBadges } = useBadges()
+  const { orgSeasonalBadges } = useSeasons()
 
-export function Badge({ children, symbol, balance, orgBadges, ...restProps }: BadgeProps) {
+  if (seasonal) {
+    symbol =
+      orgSeasonalBadges
+        ?.find((orgSeasonalBadge) => orgSeasonalBadge.badge_agg_seq_id.toString() == symbol)
+        ?.badge_symbol?.split(',', 2)[1] ?? ''
+  }
+
   return (
     <div className="flex flex-1 flex-col items-center gap-2" {...restProps}>
       {/* TODO: Update this to parse badges lookup data */}
       <img
         className="h-32 w-32 rounded-full object-cover"
         src={
-          imgSrc +
+          IPFS_IMAGE_SOURCE +
             orgBadges
               ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
               ?.offchain_lookup_data.split('"', 4)[3] ?? './src/assets/badge_0.png'
