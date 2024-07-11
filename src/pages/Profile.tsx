@@ -6,6 +6,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { BadgeSection } from '@/components/ui/BadgeSection'
 import { Box } from '@/components/ui/Box'
 import { Button } from '@/components/ui/Button'
+import { SeasonalBadgeSection } from '@/components/ui/SeasonalBadgeSection'
 import { useBadges } from '@/hooks/badges'
 import { useSeasons } from '@/hooks/seasons'
 import { BadgeFilterType, BadgeType } from '@/models/badges'
@@ -100,7 +101,7 @@ export function Profile() {
           <div className="col-span-5"></div>
           <BadgeSection title="Lifetime Badges" badges={badges} />
           {orgAggregates.map((agg, index) => (
-            <BadgeSection title={agg.agg_description} seasonalBadges={seasonalBadges} seasonal key={index} />
+            <SeasonalBadgeSection title={agg.agg_description} seasonalBadges={seasonalBadges} key={index} />
           ))}
         </div>
       </Box>
