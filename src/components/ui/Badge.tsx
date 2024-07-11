@@ -34,14 +34,14 @@ export function Badge({ children, symbol, balance, seasonal = false, ...restProp
         }
       />
       <div className="flex flex-col items-center">
-        <p className="font-medium text-white">
+        <p className="font-medium capitalize text-white">
           {
             orgBadges
               ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
               ?.onchain_lookup_data.split('"', 4)[3]
           }
         </p>
-        <p className="font-medium text-white">{symbol}</p>
+        {/* <p className="font-medium text-white">{symbol}</p> */}
         <p className="font-medium text-white">{balance}</p>
       </div>
       {children}

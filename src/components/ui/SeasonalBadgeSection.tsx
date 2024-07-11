@@ -45,13 +45,9 @@ export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...re
         {sequenceBadges.length > 0 ? (
           <>
             {sequenceBadges.map((badge, index) => (
-              <Badge
-                key={index}
-                symbol={badge.badge_agg_seq_id.toString()}
-                balance={badge.count.toString()}
-                seasonal
-                className="flex-none"
-              />
+              <div className="flex-none" key={index}>
+                <Badge symbol={badge.badge_agg_seq_id.toString()} balance={badge.count.toString()} seasonal />
+              </div>
             ))}
           </>
         ) : (
