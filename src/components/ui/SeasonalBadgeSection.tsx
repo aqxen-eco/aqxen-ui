@@ -2,6 +2,7 @@ import { ComponentProps, useState } from 'react'
 
 import { Badge } from '@/components/ui/Badge'
 import { DropdownItem, DropdownRoot } from '@/components/ui/Dropdown'
+import { useSeasons } from '@/hooks/seasons'
 import { AchievementType, OrgAggregateType } from '@/models/seasons'
 
 interface SeasonalBadgeSectionProps extends ComponentProps<'div'> {
@@ -11,6 +12,8 @@ interface SeasonalBadgeSectionProps extends ComponentProps<'div'> {
 
 export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...restProps }: SeasonalBadgeSectionProps) {
   const [selectedSequence, setSelectedSequence] = useState(agg?.agg_sequences?.[0])
+
+  const { orgSeasonalBadges } = useSeasons()
 
   return (
     <div className="col-span-8 border-t border-gray-2 p-8" {...restProps}>
@@ -29,9 +32,13 @@ export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...re
         </DropdownRoot>
       </div>
       <div className="my-4 flex items-center justify-center gap-4 align-middle">
-        {seasonalBadges?.map((badge, index) => (
-          <Badge key={index} symbol={badge.badge_agg_seq_id.toString()} balance={badge.count.toString()} seasonal />
-        ))}
+        {seasonalBadges?.map(
+          (badge, index) =>
+            orgSeasonalBadges?.find((orgSeasonalBadge) => orgSeasonalBadge.badge_agg_seq_id == badge.badge_agg_seq_id)
+              ?.seq_id == selectedSequence?.seq_id && (
+              <Badge key={index} symbol={badge.badge_agg_seq_id.toString()} balance={badge.count.toString()} seasonal />
+            )
+        )}
       </div>
       {children}
     </div>

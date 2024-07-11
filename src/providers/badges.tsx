@@ -66,6 +66,9 @@ async function getOrgBadges({ queryType }: BadgesFilter): Promise<OrgBadgeRespon
     UInt64 | UInt128
   >
 
+  console.debug('Org Badges')
+  console.debug(rows)
+
   return {
     more,
     rows,
@@ -90,6 +93,9 @@ async function getUserBadges({ scope, queryType, lowerBound, upperBound }: Badge
     BadgeType,
     UInt64 | UInt128
   >
+
+  console.debug('User Lifetime Badges')
+  console.debug(rows)
 
   return {
     more,
