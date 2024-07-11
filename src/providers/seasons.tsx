@@ -183,16 +183,13 @@ export default function SeasonsProvider({ children }: SeasonsProviderProps) {
   const [orgAggregates, setOrgAggregates] = useState<OrgAggregateType[]>([])
   const [orgSequences, setOrgSequences] = useState<OrgSequenceType[]>([])
   const [orgSeasonalBadges, setOrgSeasonalBadges] = useState<OrgBadgeStatusType[]>([])
-  const [currentOrgAggregate, setCurrentOrgAggregate] = useState<number>(0)
-  const [currentOrgSequence, setCurrentOrgSequence] = useState<number>(0)
 
   async function getSeasons() {
     const responseOrgAggregates = await getOrgAggregates({
       queryType: SeasonFilterType.DEFAULT
     })
-    if (responseOrgAggregates?.rows?.length) {
-      setOrgAggregates(responseOrgAggregates.rows)
 
+    if (responseOrgAggregates?.rows?.length) {
       let allSequences = [] as OrgSequenceType[]
 
       for (const agg in responseOrgAggregates.rows) {
@@ -200,12 +197,16 @@ export default function SeasonsProvider({ children }: SeasonsProviderProps) {
           scope: responseOrgAggregates?.rows?.[agg]?.agg_symbol?.split(',', 2)[1] ?? '',
           queryType: SeasonFilterType.DEFAULT
         })
-        // TODO: Still need to assign each specific sequence to its aggregate
+
         if (responseOrgSequences?.rows?.length) {
+          responseOrgAggregates.rows[agg].agg_sequences = responseOrgSequences.rows
+
           allSequences = allSequences.concat(responseOrgSequences.rows)
         }
       }
 
+      setOrgAggregates(responseOrgAggregates.rows)
+      // TODO: Review as we might be able to delete this if Sequences are enough within Aggregates
       setOrgSequences(allSequences)
     }
 
@@ -227,11 +228,7 @@ export default function SeasonsProvider({ children }: SeasonsProviderProps) {
         orgAggregates,
         orgSequences,
         orgSeasonalBadges,
-        userSeasonalBadges: getUserSeasonalBadges,
-        currentOrgAggregate,
-        setCurrentOrgAggregate,
-        currentOrgSequence,
-        setCurrentOrgSequence
+        userSeasonalBadges: getUserSeasonalBadges
       }}
     >
       {children}

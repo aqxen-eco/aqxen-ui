@@ -4,46 +4,16 @@ import { ReactComponent as Logo } from '@/assets/logo.svg'
 import { Avatar } from '@/components/ui/Avatar'
 import { Box } from '@/components/ui/Box'
 import { Button } from '@/components/ui/Button'
-import { useSeasons } from '@/hooks/seasons'
 import { useChain } from '@/hooks/useChain'
-import { button } from '@/styles/button'
+// import { button } from '@/styles/button'
 
 export function AppBar() {
   const { isAuthenticated, login, logout, actor } = useChain()
   const navigate = useNavigate()
 
-  const {
-    orgAggregates,
-    orgSequences,
-    currentOrgAggregate,
-    setCurrentOrgAggregate,
-    currentOrgSequence,
-    setCurrentOrgSequence
-  } = useSeasons()
-
   function logoutAndGoToHome() {
     logout()
     navigate('/')
-  }
-
-  function printOrgAggregates() {
-    if (orgAggregates.length == currentOrgAggregate + 1) {
-      setCurrentOrgAggregate(0)
-    } else {
-      setCurrentOrgAggregate(currentOrgAggregate + 1)
-    }
-    console.log(orgAggregates)
-  }
-
-  function printOrgSequences() {
-    console.log(orgSequences.length)
-    console.log(currentOrgSequence)
-    if (orgSequences.length == currentOrgSequence + 1) {
-      setCurrentOrgSequence(0)
-    } else {
-      setCurrentOrgSequence(currentOrgSequence + 1)
-    }
-    console.log(orgSequences)
   }
 
   return (
@@ -59,21 +29,16 @@ export function AppBar() {
                 <Logo />
                 UpScale
               </RouterLink>
-              <Button onClick={printOrgAggregates} variant="secondary">
-                {orgAggregates[currentOrgAggregate]?.agg_description}
-              </Button>
-              <Button onClick={printOrgSequences} variant="secondary">
-                {orgSequences[currentOrgSequence]?.sequence_description}
-              </Button>
             </div>
             {isAuthenticated ? (
               <div className="flex gap-2">
-                <NavLink
+                {/* Enable when Recognize is available */}
+                {/* <NavLink
                   to="/recognize"
                   className={({ isActive }) => button({ variant: isActive ? 'secondary' : 'primary' })}
                 >
                   Recognize
-                </NavLink>
+                </NavLink> */}
                 <NavLink to={'/profile/' + actor}>
                   {({ isActive }) => (
                     <Avatar className={isActive ? 'border-white' : ''} color="red">

@@ -3,7 +3,7 @@ import { MdOutlineModeEdit } from 'react-icons/md'
 import { useParams } from 'react-router-dom'
 
 import { Avatar } from '@/components/ui/Avatar'
-import { Badge } from '@/components/ui/Badge'
+import { BadgeSection } from '@/components/ui/BadgeSection'
 import { Box } from '@/components/ui/Box'
 import { Button } from '@/components/ui/Button'
 import { useBadges } from '@/hooks/badges'
@@ -18,7 +18,7 @@ export function Profile() {
   const [seasonalBadgesCount, setSeasonalBadgesCount] = useState(0)
 
   const { userBadges } = useBadges()
-  const { userSeasonalBadges } = useSeasons()
+  const { orgAggregates, userSeasonalBadges } = useSeasons()
   const { user } = useParams()
 
   async function getBadges() {
@@ -98,30 +98,13 @@ export function Profile() {
             </div>
           </div>
           <div className="col-span-5"></div>
-          <div className="col-span-8 border-t border-gray-2 p-8">
-            <h3 className="text-title-2 text-white">Received badges (Lifetime)</h3>
-            <div className="my-4 flex items-center justify-center gap-4 align-middle">
-              {badges?.map((badge, index) => (
-                <Badge key={index} symbol={badge.balance.split(' ', 2)[1]} balance={badge.balance.split(' ', 1)[0]} />
-              ))}
-            </div>
-          </div>
-          <div className="col-span-8 border-t border-gray-2 p-8">
-            <h3 className="text-title-2 text-white">Received badges (Seasonal)</h3>
-            <div className="my-4 flex items-center justify-center gap-4 align-middle">
-              {seasonalBadges?.map((badge, index) => (
-                <Badge
-                  key={index}
-                  seasonal
-                  symbol={badge.badge_agg_seq_id.toString()}
-                  balance={badge.count.toString()}
-                />
-              ))}
-            </div>
-          </div>
+          <BadgeSection title="Lifetime Badges" badges={badges} />
+          {orgAggregates.map((agg, index) => (
+            <BadgeSection title={agg.agg_description} seasonalBadges={seasonalBadges} seasonal key={index} />
+          ))}
         </div>
       </Box>
-      {/* Enable when messages info is available */}
+      {/* Enable when message info is available */}
       {/* <Box>
         <h2 className="text-title-1 text-white">Messages</h2>
       </Box> */}

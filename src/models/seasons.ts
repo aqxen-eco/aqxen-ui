@@ -8,6 +8,7 @@ export interface OrgAggregateType {
   active_seq_ids: number[]
   end_seq_ids: number[]
   init_badge_symbols: string[]
+  agg_sequences: OrgSequenceType[] | null
 }
 
 export interface OrgAggregateResponse {
