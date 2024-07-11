@@ -1,6 +1,7 @@
 import { APIClient, Checksum160, Checksum256, Float64, Name, UInt64, UInt128 } from '@wharfkit/antelope'
 import { ReactNode, useEffect, useState } from 'react'
 
+import { BADGES_INFO_CONTRACT, CHAIN_API_URL, I64, ORG, Tables, USER_BADGES_CONTRACT } from '@/constants'
 import { BadgesContext } from '@/contexts/badges.ts'
 import {
   BadgeFilterType,
@@ -11,12 +12,6 @@ import {
   OrgBadgeResponse,
   OrgBadgeType
 } from '@/models/badges'
-
-const I64 = 'i64'
-const CHAIN_API_URL = 'https://jungle.eosusa.io/'
-const USER_BADGES_CONTRACT = 'cumulativeyy'
-const BADGES_INFO_CONTRACT = 'orchyyyyyyyy'
-const ORG = 'alexandresjr'
 
 type TableIndexType = Name | UInt64 | UInt128 | Float64 | Checksum256 | Checksum160
 
@@ -32,11 +27,6 @@ type IndexPosition =
   | 'ninth'
   | 'tenth'
   | undefined
-
-enum Tables {
-  ACCOUNTS = 'accounts',
-  BADGE = 'badge'
-}
 
 const KEY_TYPE: Record<BadgeFilterType, string> = {
   [BadgeFilterType.DEFAULT]: I64

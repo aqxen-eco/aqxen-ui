@@ -1,5 +1,6 @@
 import { ComponentProps } from 'react'
 
+import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useBadges } from '@/hooks/badges'
 import { useSeasons } from '@/hooks/seasons'
 
@@ -8,8 +9,6 @@ interface BadgeProps extends ComponentProps<'div'> {
   balance: string
   seasonal?: boolean
 }
-
-const imgSrc = 'https://facings.mypinata.cloud/ipfs/'
 
 export function Badge({ children, symbol, balance, seasonal = false, ...restProps }: BadgeProps) {
   const { orgBadges } = useBadges()
@@ -28,7 +27,7 @@ export function Badge({ children, symbol, balance, seasonal = false, ...restProp
       <img
         className="h-32 w-32 rounded-full object-cover"
         src={
-          imgSrc +
+          IPFS_IMAGE_SOURCE +
             orgBadges
               ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
               ?.offchain_lookup_data.split('"', 4)[3] ?? './src/assets/badge_0.png'

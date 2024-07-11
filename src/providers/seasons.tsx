@@ -1,6 +1,7 @@
 import { APIClient, Checksum160, Checksum256, Float64, Name, UInt64, UInt128 } from '@wharfkit/antelope'
 import { ReactNode, useEffect, useState } from 'react'
 
+import { CHAIN_API_URL, I64, ORG, SEASONS_INFO_CONTRACT, Tables } from '@/constants'
 import { SeasonsContext } from '@/contexts/seasons.ts'
 import { BadgesFilter } from '@/models/badges'
 import {
@@ -17,11 +18,6 @@ import {
   SeasonsFilter
 } from '@/models/seasons'
 
-const I64 = 'i64'
-const CHAIN_API_URL = 'https://jungle.eosusa.io/'
-const SEASONS_INFO_CONTRACT = 'baggyyyyyyyy'
-const ORG = 'alexandresjr'
-
 type TableIndexType = Name | UInt64 | UInt128 | Float64 | Checksum256 | Checksum160
 
 type IndexPosition =
@@ -36,13 +32,6 @@ type IndexPosition =
   | 'ninth'
   | 'tenth'
   | undefined
-
-enum Tables {
-  AGGREGATES = 'aggdetails',
-  SEQUENCES = 'sequence',
-  BADGESTATUS = 'badgestatus',
-  ACHIEVEMENTS = 'achievements'
-}
 
 const KEY_TYPE: Record<SeasonFilterType, string> = {
   [SeasonFilterType.DEFAULT]: I64
@@ -84,8 +73,8 @@ async function getOrgAggregates({ queryType, lowerBound, upperBound }: SeasonsFi
     UInt64 | UInt128
   >
 
-  console.log('Aggregates')
-  console.log(rows)
+  console.debug('Aggregates')
+  console.debug(rows)
 
   return {
     more,
@@ -110,8 +99,8 @@ async function getOrgSequences({ scope, queryType }: SeasonsFilter): Promise<Org
     UInt64 | UInt128
   >
 
-  console.log('Sequences')
-  console.log(rows)
+  console.debug('Sequences')
+  console.debug(rows)
 
   return {
     more,
@@ -136,8 +125,8 @@ async function getOrgSeasonalBadges({ queryType }: SeasonsFilter): Promise<OrgBa
     UInt64 | UInt128
   >
 
-  console.log('Badge Status')
-  console.log(rows)
+  console.debug('Badge Status')
+  console.debug(rows)
 
   return {
     more,
@@ -169,8 +158,8 @@ async function getUserSeasonalBadges({
     UInt64 | UInt128
   >
 
-  console.log('Seasonal Badges / Achievements')
-  console.log(rows)
+  console.debug('Seasonal Badges / Achievements')
+  console.debug(rows)
 
   return {
     more,

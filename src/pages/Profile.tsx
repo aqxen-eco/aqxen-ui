@@ -101,7 +101,7 @@ export function Profile() {
           <div className="col-span-5"></div>
           <BadgeSection title="Lifetime Badges" badges={badges} />
           {orgAggregates.map((agg, index) => (
-            <SeasonalBadgeSection title={agg.agg_description} seasonalBadges={seasonalBadges} key={index} />
+            <SeasonalBadgeSection agg={agg} seasonalBadges={seasonalBadges} key={index} />
           ))}
         </div>
       </Box>
