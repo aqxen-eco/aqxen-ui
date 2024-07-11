@@ -20,7 +20,7 @@ export function Home() {
         </Link> */}
         {isAuthenticated ? (
           <Link to={'/profile/' + actor} variant="primary">
-            Your Profile
+            Profile
           </Link>
         ) : (
           <Button onClick={login} variant="primary">

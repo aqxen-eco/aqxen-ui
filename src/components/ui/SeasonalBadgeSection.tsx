@@ -1,6 +1,7 @@
 import { ComponentProps, useState } from 'react'
 
 import { Badge } from '@/components/ui/Badge'
+import { Box } from '@/components/ui/Box'
 import { DropdownItem, DropdownRoot } from '@/components/ui/Dropdown'
 import { useSeasons } from '@/hooks/seasons'
 import { AchievementType, OrgAggregateType } from '@/models/seasons'
@@ -11,9 +12,18 @@ interface SeasonalBadgeSectionProps extends ComponentProps<'div'> {
 }
 
 export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...restProps }: SeasonalBadgeSectionProps) {
-  const [selectedSequence, setSelectedSequence] = useState(agg?.agg_sequences?.[0])
+  const [selectedSequence, setSelectedSequence] = useState(agg?.agg_sequences?.[agg?.agg_sequences?.length - 1])
 
   const { orgSeasonalBadges } = useSeasons()
+
+  const sequenceBadges = seasonalBadges.filter((badge) => {
+    const sequence = orgSeasonalBadges?.find(
+      (orgSeasonalBadge) => orgSeasonalBadge.badge_agg_seq_id == badge.badge_agg_seq_id
+    )
+    if (sequence?.seq_id == selectedSequence?.seq_id) {
+      return badge
+    }
+  })
 
   return (
     <div className="p-8 mobile:px-4" {...restProps}>
@@ -32,10 +42,9 @@ export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...re
         </DropdownRoot>
       </div>
       <div className="my-4 flex items-center gap-4 overflow-x-auto">
-        {seasonalBadges?.map(
-          (badge, index) =>
-            orgSeasonalBadges?.find((orgSeasonalBadge) => orgSeasonalBadge.badge_agg_seq_id == badge.badge_agg_seq_id)
-              ?.seq_id == selectedSequence?.seq_id && (
+        {sequenceBadges.length > 0 ? (
+          <>
+            {sequenceBadges.map((badge, index) => (
               <Badge
                 key={index}
                 symbol={badge.badge_agg_seq_id.toString()}
@@ -43,7 +52,12 @@ export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...re
                 seasonal
                 className="flex-none"
               />
-            )
+            ))}
+          </>
+        ) : (
+          <Box className="flex h-[12.5rem] w-full items-center justify-center text-center">
+            <p className="text-body-2 text-gray-3">No Badges received yet</p>
+          </Box>
         )}
       </div>
       {children}
