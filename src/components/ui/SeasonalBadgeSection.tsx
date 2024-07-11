@@ -31,7 +31,7 @@ export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...re
           ))}
         </DropdownRoot>
       </div>
-      <div className="my-4 flex items-center gap-4 align-middle">
+      <div className="my-4 flex items-center gap-4 overflow-x-auto">
         {seasonalBadges?.map(
           (badge, index) =>
             orgSeasonalBadges?.find((orgSeasonalBadge) => orgSeasonalBadge.badge_agg_seq_id == badge.badge_agg_seq_id)

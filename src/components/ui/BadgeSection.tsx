@@ -12,7 +12,7 @@ export function BadgeSection({ children, title, badges = [], ...restProps }: Bad
   return (
     <div className="p-8 mobile:px-4" {...restProps}>
       <h3 className="text-title-2 text-white">{title}</h3>
-      <div className="my-4 flex items-center gap-4 align-middle">
+      <div className="my-4 flex items-center gap-4 overflow-x-auto">
         {badges?.map((badge, index) => (
           <Badge
             key={index}
