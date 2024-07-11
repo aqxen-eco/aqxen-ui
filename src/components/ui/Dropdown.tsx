@@ -20,7 +20,7 @@ export function DropdownRoot({ label, customTrigger, align, children }: Dropdown
       {customTrigger && <Trigger asChild>{customTrigger}</Trigger>}
       {label && (
         <Trigger asChild>
-          <Button variant="secondary" size="md" className="group/dropdown-button">
+          <Button variant="secondary" size="md" className="group/dropdown-button inline-flex items-center">
             {label}
             <MdKeyboardArrowDown className="h-6 w-6 duration-150 group-data-[state=open]/dropdown-button:rotate-180" />
           </Button>

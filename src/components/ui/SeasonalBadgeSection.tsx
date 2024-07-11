@@ -17,9 +17,9 @@ export function SeasonalBadgeSection({ children, agg, seasonalBadges = [], ...re
 
   return (
     <div className="p-8 mobile:px-4" {...restProps}>
-      <div className="flex items-center justify-between truncate align-middle">
-        <h3 className="truncate text-title-2 text-white">{agg?.agg_description}</h3>
-        <DropdownRoot label={selectedSequence?.sequence_description ?? 'Sequence'}>
+      <div className="flex items-center justify-between gap-4 align-middle">
+        <h3 className="text-title-2 text-white">{agg?.agg_description}</h3>
+        <DropdownRoot label={selectedSequence?.sequence_description ?? 'Sequence'} align="end">
           {agg?.agg_sequences?.map((seq, index) => (
             <DropdownItem
               key={index}
