@@ -22,35 +22,35 @@ export function Profile() {
   const { orgAggregates, userSeasonalBadges } = useSeasons()
   const { user } = useParams()
 
-  async function getBadges() {
-    const response = await userBadges({
-      scope: user,
-      queryType: BadgeFilterType.DEFAULT,
-      lowerBound: '',
-      upperBound: ''
-    })
-    if (response?.rows?.length) {
-      setBadges(response.rows)
-      setBadgesCount(response.rows.reduce((sum, badge) => parseInt(badge.balance.split(' ', 1)[0]) + sum, 0) ?? 0)
-    }
-
-    const responseSeasonal = await userSeasonalBadges({
-      scope: user,
-      queryType: BadgeFilterType.DEFAULT,
-      lowerBound: '',
-      upperBound: ''
-    })
-    if (responseSeasonal?.rows?.length) {
-      setSeasonalBadges(responseSeasonal.rows)
-      setSeasonalBadgesCount(responseSeasonal.rows.reduce((sum, badge) => badge.count + sum, 0) ?? 0)
-    }
-  }
-
   useEffect(() => {
+    async function getBadges() {
+      const response = await userBadges({
+        scope: user,
+        queryType: BadgeFilterType.DEFAULT,
+        lowerBound: '',
+        upperBound: ''
+      })
+      if (response?.rows?.length) {
+        setBadges(response.rows)
+        setBadgesCount(response.rows.reduce((sum, badge) => parseInt(badge.balance.split(' ', 1)[0]) + sum, 0) ?? 0)
+      }
+
+      const responseSeasonal = await userSeasonalBadges({
+        scope: user,
+        queryType: BadgeFilterType.DEFAULT,
+        lowerBound: '',
+        upperBound: ''
+      })
+      if (responseSeasonal?.rows?.length) {
+        setSeasonalBadges(responseSeasonal.rows)
+        setSeasonalBadgesCount(responseSeasonal.rows.reduce((sum, badge) => badge.count + sum, 0) ?? 0)
+      }
+    }
+
     if (user) {
       getBadges()
     }
-  }, [user])
+  }, [user, userBadges, userSeasonalBadges])
 
   return (
     <div className="mx-auto max-w-container-md space-y-8 px-4 py-8">
