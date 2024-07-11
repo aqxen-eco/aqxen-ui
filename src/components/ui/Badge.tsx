@@ -1,5 +1,7 @@
+import * as Avatar from '@radix-ui/react-avatar'
 import { ComponentProps } from 'react'
 
+import fallbackImg from '@/assets/badge_2.png'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useBadges } from '@/hooks/badges'
 import { useSeasons } from '@/hooks/seasons'
@@ -10,7 +12,7 @@ interface BadgeProps extends ComponentProps<'div'> {
   seasonal?: boolean
 }
 
-export function Badge({ children, symbol, balance, seasonal = false, ...restProps }: BadgeProps) {
+export function Badge({ children, symbol, balance, seasonal = false }: BadgeProps) {
   const { orgBadges } = useBadges()
   const { orgSeasonalBadges } = useSeasons()
 
@@ -22,17 +24,20 @@ export function Badge({ children, symbol, balance, seasonal = false, ...restProp
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center gap-2" {...restProps}>
+    <Avatar.Root className="flex flex-1 flex-col items-center gap-2">
       {/* TODO: Update this to parse badges lookup data */}
-      <img
+      <Avatar.Image
         className="h-32 w-32 rounded-full object-cover"
         src={
           IPFS_IMAGE_SOURCE +
-            orgBadges
-              ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
-              ?.offchain_lookup_data.split('"', 4)[3] ?? './src/assets/badge_0.png'
+          orgBadges
+            ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
+            ?.offchain_lookup_data.split('"', 4)[3]
         }
       />
+      <Avatar.Fallback className="h-32 w-32 rounded-full object-cover">
+        <img src={fallbackImg} />
+      </Avatar.Fallback>
       <div className="flex flex-col items-center">
         <p className="font-medium capitalize text-white">
           {
@@ -45,6 +50,6 @@ export function Badge({ children, symbol, balance, seasonal = false, ...restProp
         <p className="font-medium text-white">{balance}</p>
       </div>
       {children}
-    </div>
+    </Avatar.Root>
   )
 }
