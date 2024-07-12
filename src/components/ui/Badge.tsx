@@ -12,7 +12,7 @@ interface BadgeProps extends ComponentProps<'div'> {
   seasonal?: boolean
 }
 
-export function Badge({ children, symbol, balance, seasonal = false }: BadgeProps) {
+export function Badge({ symbol, balance, seasonal = false }: BadgeProps) {
   const { orgBadges } = useBadges()
   const { orgSeasonalBadges } = useSeasons()
 
@@ -23,33 +23,26 @@ export function Badge({ children, symbol, balance, seasonal = false }: BadgeProp
         ?.badge_symbol?.split(',', 2)[1] ?? ''
   }
 
+  const badgeImage =
+    IPFS_IMAGE_SOURCE +
+    orgBadges
+      ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
+      ?.offchain_lookup_data.split('"', 4)[3]
+
+  const badgeName = orgBadges
+    ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
+    ?.onchain_lookup_data.split('"', 4)[3]
+
   return (
-    <Avatar.Root className="flex flex-1 flex-col items-center gap-2">
+    <Avatar.Root className="text-center">
       {/* TODO: Update this to parse badges lookup data */}
-      <Avatar.Image
-        className="h-32 w-32 rounded-full object-cover"
-        src={
-          IPFS_IMAGE_SOURCE +
-          orgBadges
-            ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
-            ?.offchain_lookup_data.split('"', 4)[3]
-        }
-      />
-      <Avatar.Fallback className="h-32 w-32 rounded-full object-cover">
+      <Avatar.Image className="mx-auto block h-32 w-32 rounded-full object-cover" src={badgeImage} />
+      <Avatar.Fallback className="mx-auto block h-32 w-32 rounded-full object-cover">
         <img src={fallbackImg} />
       </Avatar.Fallback>
-      <div className="flex flex-col items-center">
-        <p className="font-medium capitalize text-white">
-          {
-            orgBadges
-              ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
-              ?.onchain_lookup_data.split('"', 4)[3]
-          }
-        </p>
-        {/* <p className="font-medium text-white">{symbol}</p> */}
-        <p className="font-medium text-white">{balance}</p>
-      </div>
-      {children}
+      <p className="mt-2 font-medium capitalize text-white">{badgeName}</p>
+      {/* <p className="font-medium text-white">{symbol}</p> */}
+      <p className="font-medium text-white">{balance}</p>
     </Avatar.Root>
   )
 }

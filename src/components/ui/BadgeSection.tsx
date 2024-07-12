@@ -1,25 +1,68 @@
-import { ComponentProps } from 'react'
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 import { Badge } from '@/components/ui/Badge'
-import { BadgeType } from '@/models/badges'
+import { BadgeSectionLoading } from '@/components/ui/BadgeSectionLoading'
+import { BadgeSwiper, BadgeSwiperSlide, BadgeSwiperWrapper } from '@/components/ui/BadgeSwiper'
+import { useBadges } from '@/hooks/badges'
+import { BadgeFilterType, BadgeType } from '@/models/badges'
 
-interface BadgeSectionProps extends ComponentProps<'div'> {
-  title: string
-  badges: BadgeType[]
-}
+export function BadgeSection() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [badges, setBadges] = useState([] as BadgeType[])
 
-export function BadgeSection({ children, title, badges = [], ...restProps }: BadgeSectionProps) {
+  const { userBadges } = useBadges()
+  const { user } = useParams()
+
+  useEffect(() => {
+    async function getBadges() {
+      const responseBadges = await userBadges({
+        scope: user,
+        queryType: BadgeFilterType.DEFAULT,
+        lowerBound: '',
+        upperBound: ''
+      })
+
+      if (responseBadges?.rows?.length) {
+        setBadges(responseBadges.rows)
+      }
+
+      setIsLoading(false)
+    }
+
+    let intervalId: NodeJS.Timeout
+    if (user) {
+      getBadges()
+      intervalId = setInterval(getBadges, 60000)
+    }
+
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [user, userBadges])
+
+  const badgesCount = badges.reduce((sum, badge) => parseInt(badge.balance.split(' ', 1)[0]) + sum, 0) ?? 0
+
+  if (isLoading) {
+    return <BadgeSectionLoading />
+  }
+
   return (
-    <div className="p-8 mobile:px-4" {...restProps}>
-      <h3 className="text-title-2 text-white">{title}</h3>
-      <div className="my-4 flex items-center gap-4 overflow-x-auto">
-        {badges?.map((badge, index) => (
-          <div className="flex-none" key={index}>
-            <Badge key={index} symbol={badge.balance.split(' ', 2)[1]} balance={badge.balance.split(' ', 1)[0]} />
-          </div>
-        ))}
-      </div>
-      {children}
-    </div>
+    <section className="py-8">
+      <header className="mb-4 px-8 mobile:px-4">
+        <h3 className="text-title-2 text-white">
+          Lifetime Badges <span className="text-gray-3">({badgesCount})</span>
+        </h3>
+      </header>
+      <BadgeSwiper>
+        <BadgeSwiperWrapper>
+          {badges?.map((badge, index) => (
+            <BadgeSwiperSlide key={index}>
+              <Badge symbol={badge.balance.split(' ', 2)[1]} balance={badge.balance.split(' ', 1)[0]} />
+            </BadgeSwiperSlide>
+          ))}
+        </BadgeSwiperWrapper>
+      </BadgeSwiper>
+    </section>
   )
 }
