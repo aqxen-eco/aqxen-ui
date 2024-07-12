@@ -21,9 +21,11 @@ export function BadgeSwiper({ children }: { children: React.ReactNode }) {
         prevEl: '.swiper-button-prev'
       },
       slidesPerView: 2,
+      slidesPerGroup: 2,
       breakpoints: {
         768: {
-          slidesPerView: 4
+          slidesPerView: 4,
+          slidesPerGroup: 4
         }
       }
     })
@@ -36,7 +38,7 @@ export function BadgeSwiper({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <div className="swiper !px-8">
+    <div className="swiper select-none !px-8">
       {children}
       <div className="swiper-pagination [&_>_.swiper-pagination-bullet]:bg-white"></div>
       <div className="swiper-button-prev !h-10 !w-10 p-1 after:hidden">
