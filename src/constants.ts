@@ -1,4 +1,4 @@
-export const ORG = 'alexandresjr'
+export const ORG = 'neworgneworg'
 
 export const CHAIN_API_URL = 'https://jungle.eosusa.io/'
 
