@@ -23,7 +23,7 @@ export function Badge({ symbol, balance, seasonal = false }: BadgeProps) {
         ?.badge_symbol?.split(',', 2)[1] ?? ''
   }
 
-  const src =
+  const badgeImage =
     IPFS_IMAGE_SOURCE +
     orgBadges
       ?.find((orgBadge) => orgBadge.badge_symbol.split(',', 2)[1] == symbol)
@@ -36,7 +36,7 @@ export function Badge({ symbol, balance, seasonal = false }: BadgeProps) {
   return (
     <Avatar.Root className="text-center">
       {/* TODO: Update this to parse badges lookup data */}
-      <Avatar.Image className="mx-auto block h-32 w-32 rounded-full object-cover" src={src} />
+      <Avatar.Image className="mx-auto block h-32 w-32 rounded-full object-cover" src={badgeImage} />
       <Avatar.Fallback className="mx-auto block h-32 w-32 rounded-full object-cover">
         <img src={fallbackImg} />
       </Avatar.Fallback>
