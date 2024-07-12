@@ -15,7 +15,7 @@ interface SeasonalBadgeSectionProps {
 }
 
 export function SeasonalBadgeSection({ agg }: SeasonalBadgeSectionProps) {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [selectedSequence, setSelectedSequence] = useState(agg?.agg_sequences?.[agg?.agg_sequences?.length - 1])
   const [sequenceBadges, setSequenceBadges] = useState([] as AchievementType[])
 
