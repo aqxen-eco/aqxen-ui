@@ -1,4 +1,5 @@
 export const ORG = 'neworgneworg'
+export const ORG_SYMBOL = 'NEWO'
 
 export const CHAIN_API_URL = 'https://jungle.eosusa.io/'
 

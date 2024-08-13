@@ -1,7 +1,7 @@
 import { APIClient, Checksum160, Checksum256, Float64, Name, UInt64, UInt128 } from '@wharfkit/antelope'
 import { ReactNode, useEffect, useState } from 'react'
 
-import { BADGES_INFO_CONTRACT, CHAIN_API_URL, I64, ORG, Tables, USER_BADGES_CONTRACT } from '@/constants'
+import { BADGES_INFO_CONTRACT, CHAIN_API_URL, I64, ORG, ORG_SYMBOL, Tables, USER_BADGES_CONTRACT } from '@/constants'
 import { BadgesContext } from '@/contexts/badges.ts'
 import {
   BadgeFilterType,
@@ -97,9 +97,16 @@ async function getUserBadges({ scope, queryType, lowerBound, upperBound }: Badge
   console.debug('User Lifetime Badges')
   console.debug(rows)
 
+  // TODO: Tech Debt. There should be a way to filter or scope this request from the blockchain.
+  // In the future, with many different orgs and badges, this could easily get too cluttered.
+  const orgRows = rows.filter((row) => row.balance.includes(ORG_SYMBOL))
+
+  console.debug('User Lifetime Badges (Org Filtered)')
+  console.debug(orgRows)
+
   return {
     more,
-    rows,
+    rows: orgRows,
     next_key: next_key ? next_key.toString() : null
   }
 }
