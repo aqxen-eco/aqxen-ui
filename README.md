@@ -1,93 +1,36 @@
-# React Base Template
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This is a base template for React projects. It includes:
-- Vite.js as bundler
-- React 18
-- React Router
-- Axios with:
-  - Base URL already set
-  - JWT token interceptor
-- ESLint with:
-  - Prettier
-  - React
-  - React hooks plugin
-  - TypeScript
-  - TailWind CSS
-- SVG icons as React components
-- SVG icons as URL
+## Getting Started
 
-## How to use SVGs
+First, run the development server:
 
-### As React components
-
-```jsx
-import { ReactComponent as Icon } from './icon.svg';
-
-const Component = () => (
-  <Icon />
-);
-```
-  
-### As URL
-
-#### Public folder
-The `url` query parameter is used to import the SVG as a URL when the asset is located in the public folder (vite.js uses absolute import from root to referer to public folder).
-
-```jsx
-import iconUrl from '/icon.svg?url';
-
-const Component = () => (
-  <img src={iconUrl} />
-);
-```
-  
-#### Inside SRC folder
-Just use a normal default import relative to the current file without the `url` query param (it can be used if you want it).
-
-```jsx
-import iconUrl from '../assets/icon.svg';
-
-const Component = () => (
-  <img src={iconUrl} />
-);
-```
-  
-## Scripts
-
-### Development server
 ```bash
-$ yarn dev
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### Production build
-```bash
-$ yarn build
-```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### Lint
-```bash
-$ yarn lint
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### Fixing lint errors 
-```bash
-$ yarn lint:fix
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Environment variables
+## Learn More
 
-Vite doesn't use the `process.env.*` variables. Instead, it uses the `import.meta.env.*` variables. You can find more information [here](https://vitejs.dev/guide/env-and-mode.html).
+To learn more about Next.js, take a look at the following resources:
 
-### `.env` files
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-`.env` files are loaded in the following order:
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-```text
-.env                # loaded in all cases
-.env.local          # loaded in all cases, ignored by git
-.env.[mode]         # only loaded in specified mode
-.env.[mode].local   # only loaded in specified mode, ignored by git
-```
+## Deploy on Vercel
 
-`mode` is the value of the `--mode` option when running `vite` or `vite build`. If not specified, it defaults to `development`. If you are using `vite serve` it will be `development` and if you are using `vite build` it will be `production`.
-More information regarding `mode` can be found [here](https://vitejs.dev/guide/env-and-mode.html#modes).
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
