@@ -1,0 +1,17 @@
+name: upscale
+
+services:
+  pg:
+    image: postgres:latest
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=upscale
+      
+volumes:
+  db_data:
+
