@@ -8,3 +8,13 @@ CREATE TABLE "organization" (
 
     CONSTRAINT "organization_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateTable
+CREATE TABLE "badges" (
+    "id" SERIAL NOT NULL,
+    "symbol" TEXT,
+    "name" TEXT,
+    "rarity_counts" TEXT,
+
+    CONSTRAINT "badges_pkey" PRIMARY KEY ("id")
+);

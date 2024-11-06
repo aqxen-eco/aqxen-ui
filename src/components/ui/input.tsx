@@ -7,13 +7,13 @@ type InputComponentProps = {
 } & React.ComponentProps<"input">;
 
 function InputComponent(
-  { label, error, ...restProps }: InputComponentProps,
+  { label, error, disabled, ...restProps }: InputComponentProps,
   forwardedRef: React.ForwardedRef<HTMLInputElement>,
 ) {
   const id = useId();
 
   return (
-    <div className="group/input" data-error={!!error}>
+    <div className="group/input data-[disabled=true]:opacity-50" data-error={!!error} data-disabled={!!disabled}>
       {label && (
         <label
           htmlFor={id}
@@ -27,6 +27,7 @@ function InputComponent(
           ref={forwardedRef}
           id={id}
           className="flex-1 text-body-2 placeholder-gray-3 text-white pt-2 pb-[calc(1rem-1px)] bg-transparent focus:outline-0"
+          disabled={disabled}
           {...restProps}
         />
         {error && <MdErrorOutline className="size-6 text-red-600" />}

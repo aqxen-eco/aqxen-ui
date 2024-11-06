@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 
-import { ChainProvider } from "@/contexts/chain";
-
-import { AppBar } from "./_components/app-bar";
-import { Footer } from "./_components/footer";
-
 import "@/globals.css";
 
 const dmSans = DM_Sans({
@@ -27,11 +22,7 @@ export default function HomeLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.className} bg-black text-white antialiased`}>
-        <ChainProvider>
-          <AppBar />
-          {children}
-          <Footer />
-        </ChainProvider>
+        {children}
       </body>
     </html>
   );

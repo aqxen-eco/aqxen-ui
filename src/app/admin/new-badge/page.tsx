@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { Badge } from "@/components/ui/badge";
 import { Box } from "@/components/ui/box";
@@ -22,17 +22,14 @@ const newBadgeSchema = z.object({
 
 type NewBadgeSchema = z.infer<typeof newBadgeSchema>;
 
-export function NewBadgeForm({
-  defaultValues,
-}: { defaultValues?: NewBadgeSchema }) {
+export default function NewBadgePage() {
   const {
     control,
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<NewBadgeSchema>({
-    resolver: zodResolver(newBadgeSchema),
-    defaultValues,
+    resolver: zodResolver(newBadgeSchema)
   });
 
   async function onSubmit({
@@ -64,7 +61,6 @@ export function NewBadgeForm({
           {...register("name")}
           label="Name"
           error={errors["name"]?.message}
-          defaultValue={defaultValues?.name}
         />
         <Controller
           name="symbol"
@@ -82,25 +78,21 @@ export function NewBadgeForm({
           {...register("image")}
           label="IPFS Image hash"
           error={errors["image"]?.message}
-          defaultValue={defaultValues?.image}
         />
         <Input
           {...register("description")}
           label="Description"
           error={errors["description"]?.message}
-          defaultValue={defaultValues?.description}
         />
         <Checkbox
           {...register("lifetimeAggregate")}
           label="Lifetime Aggregate"
           error={errors["lifetimeAggregate"]?.message}
-          checked={defaultValues?.lifetimeAggregate}
         />
         <Checkbox
           {...register("lifetimeStats")}
           label="Lifetime Stats"
           error={errors["lifetimeStats"]?.message}
-          checked={defaultValues?.lifetimeStats}
         />
         <Button type="submit" variant="primary" size="lg">
           {isSubmitting ? "Creating..." : "Create"}

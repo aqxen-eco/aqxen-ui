@@ -11,13 +11,14 @@ type LinkProps = {
 export function Link({
   size,
   variant,
+  square,
   className,
   children,
   ...restProps
 }: LinkProps) {
   return (
     <NextLink
-      className={button({ size, variant, class: className })}
+      className={button({ size, variant, square, class: className })}
       {...restProps}
     >
       {children}

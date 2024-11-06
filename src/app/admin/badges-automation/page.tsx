@@ -1,7 +1,12 @@
-export default async function BadgesAutomationPage() {
+import { HeaderAdmin, HeaderAdminMenu, HeaderAdminTitle } from "@/components/header-admin";
+
+export default function BadgesAutomationPage() {
   return (
-    <div className="mx-auto max-w-container-md space-y-8 py-8 mobile:pt-0 desktop:px-4">
-      <h1 className="text-title-1 text-white">Badges Automation</h1>
-    </div>
+    <>
+      <HeaderAdmin>
+        <HeaderAdminMenu activeHref="/admin/badges-automation"/>
+        <HeaderAdminTitle title="Badges Automation" tooltip="Lorem ipsum dolor sit amed" />
+      </HeaderAdmin>
+    </>
   );
 }

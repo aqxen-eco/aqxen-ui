@@ -18,3 +18,12 @@ model Organization {
 
   @@map("organization")
 }
+
+model Badges {
+  id           Int     @id @default(autoincrement())
+  symbol       String?
+  name         String?
+  rarityCounts String? @map("rarity_counts")
+
+  @@map("badges")
+}
