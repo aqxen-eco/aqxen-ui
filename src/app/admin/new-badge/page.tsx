@@ -40,7 +40,6 @@ export default function NewBadgePage() {
     lifetimeAggregate,
     lifetimeStats,
   }: NewBadgeSchema) {
-    console.log("aqui");
     console.log({
       name,
       symbol,

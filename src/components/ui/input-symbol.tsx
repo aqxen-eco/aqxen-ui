@@ -38,7 +38,6 @@ export function InputSymbol({
           style={{ width: "100%" }}
           render={({ slots }) => (
             <>
-              {console.log(slots)}
               {slots.map((slot, index) => (
                 <div
                   key={index}

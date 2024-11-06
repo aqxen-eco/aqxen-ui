@@ -17,8 +17,6 @@ export default async function ProfilePage(props: {
   const params = await props.params;
   const { orgAggregates } = await getSeasons();
 
-  console.log(orgAggregates);
-
   return (
     <div className="mx-auto max-w-container-md space-y-8 py-8 mobile:pt-0 desktop:px-4">
       <Box className="divide-y divide-gray-2 overflow-hidden p-0 mobile:rounded-none mobile:border-0 mobile:bg-black">
