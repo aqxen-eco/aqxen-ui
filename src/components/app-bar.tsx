@@ -2,9 +2,7 @@
 
 import Image from "next/image";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
-
-import logoImg from "@/assets/logo.svg";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Box } from "@/components/ui/box";
@@ -15,6 +13,7 @@ import { useChain } from "@/contexts/chain";
 
 export function AppBar() {
   const { isAuthenticated, login, logout, actor } = useChain();
+  const pathname = usePathname();
   const router = useRouter();
 
   function logoutAndGoToHome() {
@@ -31,10 +30,10 @@ export function AppBar() {
               href="/"
               className="flex cursor-pointer items-center gap-2 rounded-full pl-2 pr-3 text-2xl leading-10 text-white duration-150 desktop:hover:bg-gray-2"
             >
-              <Image priority src={logoImg} alt="" />
+              <img src="/img/logo.svg" alt="" />
               UpScale
             </NextLink>
-            <Link href="/admin/organization">Admin</Link>
+            <Link href="/admin/organization" variant={pathname.includes('/admin') ? 'link' : 'default'}>Admin</Link>
             {isAuthenticated ? (
               <DropdownRoot
                 customTrigger={

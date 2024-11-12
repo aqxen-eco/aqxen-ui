@@ -25,7 +25,7 @@ function CheckboxComponent(
         >
           {label}
         </label>
-        <div className="relative">
+        <div className="relative pr-2">
           <input
             ref={forwardedRef}
             type="checkbox"

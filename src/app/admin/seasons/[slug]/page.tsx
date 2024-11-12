@@ -1,13 +1,14 @@
 import { HeaderAdmin, HeaderAdminBack, HeaderAdminTitle } from "@/components/header-admin";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
 import { Tooltip } from "@/components/ui/tooltip";
 import { MdOutlineInfo } from "react-icons/md";
+import { Tag } from '@/components/ui/tag';
 
 import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -31,7 +32,13 @@ const seasonBadges = [
   }
 ]
 
-export default function SeasonPage() {
+type SeasonPageProps ={
+  params: {
+    slug: string
+  }
+}
+
+export default async function SeasonPage({ params }: SeasonPageProps) {
   return (
     <>
       <HeaderAdmin>
@@ -52,9 +59,9 @@ export default function SeasonPage() {
               </Tooltip>
             </div>
             <div className="flex-none">
-              <Button variant="secondary" size="md">
+              <Link href={`/admin/seasons/${params.slug}/add-badges`} variant="secondary" size="md">
                 Add badges
-              </Button>
+              </Link>
             </div>
           </header>
           <Table>
@@ -87,9 +94,9 @@ export default function SeasonPage() {
               </Tooltip>
             </div>
             <div className="flex-none">
-              <Button variant="secondary" size="md">
+              <Link href={`/admin/seasons/${params.slug}/add-series`} variant="secondary" size="md">
                 Add series
-              </Button>
+              </Link>
             </div>
           </header>
           <Table>
@@ -107,7 +114,9 @@ export default function SeasonPage() {
                 <TableCell className="text-gray-3 text-center">1</TableCell>
                 <TableCell>2025</TableCell>
                 <TableCell>Badges</TableCell>
-                <TableCell>CREATED</TableCell>
+                <TableCell>
+                  <Tag variant="blue">Created</Tag>
+                </TableCell>
                 <TableCell className="flex gap-2 justify-end">
                   <Button variant="secondary" size="md">
                     Start
@@ -115,13 +124,40 @@ export default function SeasonPage() {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className="text-gray-3 text-center">1</TableCell>
+                <TableCell className="text-gray-3 text-center">2</TableCell>
                 <TableCell>2024</TableCell>
                 <TableCell>Badges</TableCell>
-                <TableCell>STARTED</TableCell>
+                <TableCell>
+                  <Tag variant="green">Started</Tag>
+                </TableCell>
                 <TableCell className="flex gap-2 justify-end">
                   <Button variant="secondary" size="md">
                     Pause
+                  </Button>
+                  <Button variant="secondary" size="md">
+                    End
+                  </Button>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="text-gray-3 text-center">3</TableCell>
+                <TableCell>2023</TableCell>
+                <TableCell>Badges</TableCell>
+                <TableCell>
+                  <Tag variant="red">Ended</Tag>
+                </TableCell>
+                <TableCell className="flex gap-2 justify-end"></TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="text-gray-3 text-center">4</TableCell>
+                <TableCell>2022</TableCell>
+                <TableCell>Badges</TableCell>
+                <TableCell>
+                  <Tag variant="yellow">Paused</Tag>
+                </TableCell>
+                <TableCell className="flex gap-2 justify-end">
+                  <Button variant="secondary" size="md">
+                    Resume
                   </Button>
                   <Button variant="secondary" size="md">
                     End

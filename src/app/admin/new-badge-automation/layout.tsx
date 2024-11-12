@@ -1,18 +1,18 @@
 import { HeaderAdmin, HeaderAdminBack, HeaderAdminTitle } from "@/components/header-admin";
 
-type NewBadgeLayoutProps = {
+type NewBadgeLayoutAutomationProps = {
   children: React.ReactNode
 }
 
-export default async function NewBadgeLayout({ children }: NewBadgeLayoutProps) {
+export default async function NewBadgeLayoutAutomation({ children }: NewBadgeLayoutAutomationProps) {
   return (
     <>
       <HeaderAdmin>
-        <HeaderAdminBack href="/admin/badges">
+        <HeaderAdminBack href="/admin/badges-automation">
           Badges
         </HeaderAdminBack>
         <HeaderAdminTitle 
-          title="New Badge" 
+          title="New Badge Automation" 
           tooltip="Lorem ipsum dolor sit amed" 
           className="max-w-container-md" 
         />

@@ -1,7 +1,7 @@
 import { ChainProvider } from "@/contexts/chain";
 
-import { AppBar } from "./_components/app-bar";
-import { Footer } from "./_components/footer";
+import { AppBar } from "@/components/app-bar";
+import { Footer } from "@/components/footer";
 
 type HomeTemplateProps = {
   children: React.ReactNode

@@ -24,7 +24,7 @@ export default async function NewBadgeLayout({ children }: NewBadgeLayoutProps) 
           Season
         </HeaderAdminBack>
       </HeaderAdmin>
-      <div className="mx-auto max-w-container-md py-8 px-4 space-y-8">
+      <div className="mx-auto max-w-container-md py-8 px-4 space-y-8 pb-8 min-h-[calc(100vh-24rem)]">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             <h1 className="text-title-1 text-white">New Season</h1>

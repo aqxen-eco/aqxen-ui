@@ -2,7 +2,7 @@
 
 import { OTPInput, REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import type { OTPInputProps } from "input-otp";
-import { useId } from "react";
+import { forwardRef, useId } from "react";
 import { MdErrorOutline } from "react-icons/md";
 
 type InputSymbolComponentProps = {
@@ -10,11 +10,13 @@ type InputSymbolComponentProps = {
   error?: string;
 } & Omit<OTPInputProps, "children">;
 
-export function InputSymbol({
+export function InputSymbolComponent({
   label,
   error,
-  ...restProps
-}: InputSymbolComponentProps) {
+  ...props
+}: InputSymbolComponentProps,
+forwardedRef: React.ForwardedRef<React.ElementRef<"input">>
+) {
   const id = useId();
 
   return (
@@ -29,7 +31,8 @@ export function InputSymbol({
       )}
       <div className="flex gap-1 items-center">
         <OTPInput
-          {...restProps}
+          ref={forwardedRef}
+          {...props}
           id={id}
           textAlign="center"
           inputMode="text"
@@ -62,3 +65,5 @@ export function InputSymbol({
     </div>
   );
 }
+
+export const InputSymbol = forwardRef(InputSymbolComponent);

@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Tooltip } from "@/components/ui/tooltip";
 import { Select, SelectItem } from "@/components/ui/select";
-import { HeaderAdmin, HeaderAdminMenu } from "@/components/header-admin";
+import { HeaderAdmin, HeaderAdminMenu, HeaderAdminTitle } from "@/components/header-admin";
 
 const seasons = [
   {
@@ -49,22 +49,13 @@ export default function SeasonsPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/seasons" />
-      </HeaderAdmin>
-      <div className="mx-auto max-w-container-lg py-8 px-4">
-        <header className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-1">
-            <h1 className="text-title-1 text-white">Seasons</h1>
-            <Tooltip content="Lorem ipsum dolor sit amed">
-              <Button variant="link" size="md" square>
-                <MdOutlineInfo className="size-6" />
-              </Button>
-            </Tooltip>
-          </div>
+        <HeaderAdminTitle title="Seasons" tooltip="Lorem ipsum dolor sit amed">
           <Link href="/admin/new-season" variant="primary" size="md">
             New season
           </Link>
-        </header>
-
+        </HeaderAdminTitle>
+      </HeaderAdmin>
+      <div className="mx-auto max-w-container-lg pb-8 px-4 min-h-[calc(100vh-24rem)]">
         <Table>
           <TableHeader>
             <TableRow>

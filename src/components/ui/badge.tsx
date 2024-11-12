@@ -1,7 +1,4 @@
-import * as Avatar from "@radix-ui/react-avatar";
-import Image from "next/image";
-
-import fallbackImg from "@/assets/badges/badge_2.png";
+import { BadgeImage } from "@/components/ui/badge-image";
 // import { IPFS_IMAGE_SOURCE } from '@/constants'
 // import { useBadges } from '@/hooks/badges'
 // import { useSeasons } from '@/hooks/seasons'
@@ -35,16 +32,7 @@ export function Badge({ imageSrc, name, balance }: BadgeProps) {
 
   return (
     <div className="text-center">
-      <Avatar.Root>
-        {/* TODO: Update this to parse badges lookup data */}
-        <Avatar.Image
-          className="mx-auto block h-32 w-32 rounded-full object-cover"
-          src={imageSrc}
-        />
-        <Avatar.Fallback className="mx-auto block h-32 w-32 rounded-full object-cover">
-          <Image src={fallbackImg} alt="" />
-        </Avatar.Fallback>
-      </Avatar.Root>
+      <BadgeImage src={imageSrc} className="mx-auto" />
       <p className="mt-2 text-body-2 font-medium capitalize text-white">
         {name}
       </p>

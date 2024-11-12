@@ -29,7 +29,7 @@ export default async function BadgesPage() {
         </HeaderAdminTitle>
       </HeaderAdmin>
     
-      <div className="mx-auto max-w-container-lg by-8 px-4">
+      <div className="mx-auto max-w-container-lg pb-8 px-4 min-h-[calc(100vh-24rem)]">
         {badges.length > 0 && (
           <Table>
             <TableHeader>

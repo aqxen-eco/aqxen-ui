@@ -84,7 +84,7 @@ export function HeaderAdminBack({ children, ...props}: HeaderAdminBackProps) {
 }
 
 type HeaderAdminTitleProps = {
-  title: string
+  title: string | React.ReactNode
   tooltip?: string
   className?: string
   children?: React.ReactNode

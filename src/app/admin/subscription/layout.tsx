@@ -12,10 +12,9 @@ export default async function SubscriptionLayout({ children }: SubscriptionLayou
         <HeaderAdminTitle 
           title="Subscription" 
           tooltip="Lorem ipsum dolor sit amed" 
-          className="max-w-container-md" 
         />
       </HeaderAdmin>
-      <div className="max-w-container-md mx-auto px-4 pb-8">
+      <div className="max-w-container-lg mx-auto px-4 pb-8 min-h-[calc(100vh-24rem)]">
         {children}
       </div>
     </>
