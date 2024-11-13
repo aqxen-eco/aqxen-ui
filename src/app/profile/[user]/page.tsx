@@ -1,3 +1,5 @@
+import { MdOutlineModeEdit } from "react-icons/md";
+
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -7,15 +9,28 @@ import {
 } from "@/components/ui/badge-swiper";
 import { Box } from "@/components/ui/box";
 import { Button } from "@/components/ui/button";
-import { MdOutlineModeEdit } from "react-icons/md";
 
-import { getSeasons } from "./_functions/seasons";
+import { getUserBadges } from "./functions";
+import { SeasonalBadgesSection } from "./seasonal-badges-section";
 
-export default async function ProfilePage(props: {
-  params: Promise<{ user: string }>;
-}) {
-  const params = await props.params;
-  const { orgAggregates } = await getSeasons();
+type ProfilePageProps = {
+  params: {
+    user: string;
+  };
+};
+
+export default async function ProfilePage({ params }: ProfilePageProps) {
+  const { user } = await params;
+
+  const { badges, seasons } = await getUserBadges({
+    user,
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  // const { orgAggregates } = await getSeasons();
 
   return (
     <div className="mx-auto max-w-container-md space-y-8 py-8 mobile:pt-0 desktop:px-4">
@@ -33,35 +48,32 @@ export default async function ProfilePage(props: {
 
         <div className="flex flex-wrap items-center gap-4 p-8 mobile:px-4">
           <Avatar size="lg" className="flex-none">
-            {params.user ? params.user.slice(0, 2) : "un"}
+            {user.slice(0, 2)}
           </Avatar>
-          <h1 className="text-title-2 text-white">
-            {params.user ?? "unknown"}
-          </h1>
+          <h1 className="text-title-2 text-white">{user}</h1>
         </div>
 
-        {/* <BadgeSection /> */}
+        {badges.length > 0 && (
+          <section className="py-8">
+            <header className="mb-4 px-8 mobile:px-4">
+              <h3 className="text-title-2 text-white">
+                Lifetime Badges{" "}
+                <span className="text-gray-3">({badges.length})</span>
+              </h3>
+            </header>
+            <BadgeSwiper>
+              <BadgeSwiperWrapper>
+                {badges.map((badge, index) => (
+                  <BadgeSwiperSlide key={index}>
+                    <Badge name={badge.name} balance="0" ipfs={badge.ipfs} />
+                  </BadgeSwiperSlide>
+                ))}
+              </BadgeSwiperWrapper>
+            </BadgeSwiper>
+          </section>
+        )}
 
-        <section className="py-8">
-          <header className="mb-4 px-8 mobile:px-4">
-            <h3 className="text-title-2 text-white">
-              Lifetime Badges <span className="text-gray-3">({10})</span>
-            </h3>
-          </header>
-          <BadgeSwiper>
-            <BadgeSwiperWrapper>
-              {[1, 2, 3, 4, 5, 6, 7].map((_, index) => (
-                <BadgeSwiperSlide key={index}>
-                  <Badge name="Badge name" balance="Badge balance" />
-                </BadgeSwiperSlide>
-              ))}
-            </BadgeSwiperWrapper>
-          </BadgeSwiper>
-        </section>
-
-        {/* {orgAggregates.map((agg, index) => (
-          <SeasonalBadgeSection key={index} agg={agg} />
-        ))} */}
+        <SeasonalBadgesSection seasons={seasons} />
       </Box>
     </div>
   );

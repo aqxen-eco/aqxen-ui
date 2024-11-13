@@ -14,9 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Select, SelectItem } from "@/components/ui/select";
 import { getBadges } from "./functions";
+import { BadgeImage } from "@/components/ui/badge-image";
 
 export default async function BadgesPage() {
-  const badges = await getBadges();
+  const { rows, more } = await getBadges();
 
   return (
     <>
@@ -30,7 +31,7 @@ export default async function BadgesPage() {
       </HeaderAdmin>
     
       <div className="mx-auto max-w-container-lg pb-8 px-4 min-h-[calc(100vh-24rem)]">
-        {badges.length > 0 && (
+        {rows.length > 0 && (
           <Table>
             <TableHeader>
               <TableRow>
@@ -41,13 +42,16 @@ export default async function BadgesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {badges.map((badge) => (
-                <TableRow key={badge.id}>
-                  <TableCell className="text-gray-3">{badge.symbol}</TableCell>
-                  <TableCell>{badge.name}</TableCell>
-                  <TableCell className="text-center">
-                    {badge.rarityCounts}
+              {rows.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell className="text-gray-3">{row.symbol}</TableCell>
+                  <TableCell>
+                    <div className="inline-flex items-center gap-2">
+                      <BadgeImage src={row.ipfs} size="xs" />
+                      <span className="text-body-2 font-sans font-medium text-white text-nowrap capitalize">{row.name}</span>
+                    </div>
                   </TableCell>
+                  <TableCell className="text-center">{row.rarity_counts}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="secondary" size="md">
                       Send
@@ -56,23 +60,25 @@ export default async function BadgesPage() {
                 </TableRow>
               ))}
             </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={Object.keys(badges[0]).length + 1}>
-                  <div className="pt-8 flex items-center justify-center gap-2 text-body-2 text-white">
-                    Page
-                    <Select label="Page" placeholder="Page" defaultValue="1">
-                      {["1", "2", "3", "4", "5", "6"].map((item) => (
-                        <SelectItem key={item} value={item}>
-                          {item}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                    of 6
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableFooter>
+            {more && (
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={Object.keys(rows[0]).length + 1}>
+                    <div className="pt-8 flex items-center justify-center gap-2 text-body-2 text-white">
+                      Page
+                      <Select label="Page" placeholder="Page" defaultValue="1">
+                        {["1", "2", "3", "4", "5", "6"].map((item) => (
+                          <SelectItem key={item} value={item}>
+                            {item}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                      of 6
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            )}
           </Table>
         )}
       </div>

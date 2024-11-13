@@ -1,11 +1,9 @@
 import { jungleClient } from "@/jungle-client";
-import type { UInt64, UInt128 } from "@wharfkit/antelope";
 
-import { I64, ORG, SEASONS_INFO_CONTRACT, Tables } from "@/constants";
+import { I64, ORG, SEASONS_INFO_CONTRACT, Table } from "@/constants";
 import type { BadgesFilter } from "../_models/badges";
 import type {
   AchievementResponse,
-  AchievementType,
   Bound,
   OrgAggregateResponse,
   OrgAggregateType,
@@ -19,7 +17,7 @@ import type {
 
 import { SeasonFilterType as SeasonFilterEnum } from "../_models/seasons";
 
-import type { IndexPosition, TableIndexType } from "../_models/types";
+import type { IndexPosition } from "../_models/types";
 
 const KEY_TYPE: Record<SeasonFilterType, string> = {
   [SeasonFilterEnum.DEFAULT]: I64,
@@ -29,21 +27,15 @@ const INDEX_POSITION: Record<SeasonFilterType, IndexPosition> = {
   [SeasonFilterEnum.DEFAULT]: "primary",
 };
 
-interface GetTableRowsResult<T, K = TableIndexType> {
-  rows: T[];
-  more: boolean;
-  next_key: K;
-}
-
 export async function getOrgAggregates({
   queryType,
   lowerBound,
   upperBound,
 }: SeasonsFilter): Promise<OrgAggregateResponse> {
-  const data = {
+  const { rows, next_key, more } = await jungleClient.v1.chain.get_table_rows({
     code: SEASONS_INFO_CONTRACT,
     scope: ORG,
-    table: Tables.AGGREGATES,
+    table: Table.AGGREGATES,
     json: true,
     ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
     ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
@@ -54,12 +46,7 @@ export async function getOrgAggregates({
       ? { upper_bound: upperBound as unknown as Bound }
       : {}),
     limit: 1000,
-  };
-
-  const { rows, next_key, more } =
-    (await jungleClient.v1.chain.get_table_rows<Bound>(
-      data,
-    )) as GetTableRowsResult<OrgAggregateType, UInt64 | UInt128>;
+  })
 
   console.debug("Aggregates");
   console.debug(rows);
@@ -75,20 +62,15 @@ export async function getOrgSequences({
   scope,
   queryType,
 }: SeasonsFilter): Promise<OrgSequenceResponse> {
-  const data = {
+  const { rows, next_key, more } =await jungleClient.v1.chain.get_table_rows({
     code: SEASONS_INFO_CONTRACT,
     scope: scope, // Aggregate Symbol
-    table: Tables.SEQUENCES,
+    table: Table.SEQUENCES,
     json: true,
     ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
     ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
     limit: 1000,
-  };
-
-  const { rows, next_key, more } =
-    (await jungleClient.v1.chain.get_table_rows<Bound>(
-      data,
-    )) as GetTableRowsResult<OrgSequenceType, UInt64 | UInt128>;
+  });
 
   console.debug("Sequences");
   console.debug(rows);
@@ -103,20 +85,15 @@ export async function getOrgSequences({
 export async function getOrgSeasonalBadges({
   queryType,
 }: SeasonsFilter): Promise<OrgBadgeStatusResponse> {
-  const data = {
+  const { rows, next_key, more } = await jungleClient.v1.chain.get_table_rows({
     code: SEASONS_INFO_CONTRACT,
     scope: ORG,
-    table: Tables.BADGESTATUS,
+    table: Table.BADGESTATUS,
     json: true,
     ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
     ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
     limit: 1000,
-  };
-
-  const { rows, next_key, more } =
-    (await jungleClient.v1.chain.get_table_rows<Bound>(
-      data,
-    )) as GetTableRowsResult<OrgBadgeStatusType, UInt64 | UInt128>;
+  })
 
   console.debug("Badge Status");
   console.debug(rows);
@@ -134,10 +111,10 @@ export async function getUserSeasonalBadges({
   lowerBound,
   upperBound,
 }: BadgesFilter): Promise<AchievementResponse> {
-  const data = {
+  const { rows, next_key, more } = await jungleClient.v1.chain.get_table_rows({
     code: SEASONS_INFO_CONTRACT,
     scope: scope,
-    table: Tables.ACHIEVEMENTS,
+    table: Table.ACHIEVEMENTS,
     json: true,
     ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
     ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
@@ -148,12 +125,7 @@ export async function getUserSeasonalBadges({
       ? { upper_bound: upperBound as unknown as Bound }
       : {}),
     limit: 1000,
-  };
-
-  const { rows, next_key, more } =
-    (await jungleClient.v1.chain.get_table_rows<Bound>(
-      data,
-    )) as GetTableRowsResult<AchievementType, UInt64 | UInt128>;
+  });
 
   console.debug("Seasonal Badges / Achievements");
   console.debug(rows);

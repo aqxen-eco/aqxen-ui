@@ -1,7 +1,17 @@
 "use server";
 
-import { prisma } from "@/prisma-client";
+import { type Badge, getBadgesService } from "@/services/get-badges-service";
 
-export async function getBadges() {
-  return await prisma.badges.findMany();
+type GetBadges = {
+  rows: Badge[];
+  more: boolean;
+};
+
+export async function getBadges(): Promise<GetBadges> {
+  const { rows, more } = await getBadgesService();
+
+  return {
+    rows,
+    more,
+  };
 }

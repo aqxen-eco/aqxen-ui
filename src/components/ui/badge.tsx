@@ -4,12 +4,12 @@ import { BadgeImage } from "@/components/ui/badge-image";
 // import { useSeasons } from '@/hooks/seasons'
 
 type BadgeProps = {
-  imageSrc?: string;
+  ipfs?: string;
   name: string;
   balance: string;
 };
 
-export function Badge({ imageSrc, name, balance }: BadgeProps) {
+export function Badge({ ipfs, name, balance }: BadgeProps) {
   // const { orgBadges } = useBadges()
   // const { orgSeasonalBadges } = useSeasons()
 
@@ -32,7 +32,7 @@ export function Badge({ imageSrc, name, balance }: BadgeProps) {
 
   return (
     <div className="text-center">
-      <BadgeImage src={imageSrc} className="mx-auto" />
+      <BadgeImage src={ipfs} className="mx-auto" />
       <p className="mt-2 text-body-2 font-medium capitalize text-white">
         {name}
       </p>

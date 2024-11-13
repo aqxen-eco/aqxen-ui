@@ -10,6 +10,8 @@ import {
 } from "@radix-ui/react-tooltip";
 import { useState } from "react";
 
+import { twMerge } from "tailwind-merge";
+
 type TooltipProps = {
   content: string;
   arrowFill?: string;
@@ -20,6 +22,7 @@ export function Tooltip({
   content,
   arrowFill,
   children,
+  className,
   ...restProps
 }: TooltipProps) {
   const [open, setOpen] = useState(false);
@@ -32,7 +35,10 @@ export function Tooltip({
         </Trigger>
         <Portal>
           <Content
-            className="max-w-64 select-none rounded-lg border border-gray-2 bg-gray-1 p-3 text-body-3"
+            className={twMerge(
+              "max-w-64 select-none rounded-lg border border-gray-2 bg-gray-1 p-3 text-body-3",
+              className,
+            )}
             sideOffset={5}
             {...restProps}
           >

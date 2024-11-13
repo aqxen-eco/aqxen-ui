@@ -9,7 +9,7 @@ export const USER_BADGES_CONTRACT = "cumulativeyy";
 export const BADGES_INFO_CONTRACT = "orchyyyyyyyy";
 export const SEASONS_INFO_CONTRACT = "baggyyyyyyyy";
 
-export enum Tables {
+export enum Table {
   ACCOUNTS = "accounts",
   BADGE = "badge",
   AGGREGATES = "aggdetails",

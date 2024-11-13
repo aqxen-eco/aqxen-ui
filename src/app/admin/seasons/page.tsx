@@ -1,7 +1,13 @@
-'use client'
+import { MdKeyboardArrowRight, MdOutlineInfo } from "react-icons/md";
 
-import { MdOutlineInfo, MdKeyboardArrowRight } from "react-icons/md";
-
+import {
+  HeaderAdmin,
+  HeaderAdminMenu,
+  HeaderAdminTitle,
+} from "@/components/header-admin";
+import { BadgeImage } from "@/components/ui/badge-image";
+import { Link } from "@/components/ui/link";
+import { Select, SelectItem } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -11,40 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/components/ui/link";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Select, SelectItem } from "@/components/ui/select";
-import { HeaderAdmin, HeaderAdminMenu, HeaderAdminTitle } from "@/components/header-admin";
+import { getSeasons } from "./functions";
 
-const seasons = [
-  {
-    symbol: "ELE",
-    name: "Election",
-    badges: "Badges",
-    lastCreatedSeries: '2025',
-    lastStartedSeries: '2024',
-    lastEndedSeries: '2023'
-  },
-  {
-    symbol: "WEE",
-    name: "Weekly syncs",
-    badges: "Badges",
-    lastCreatedSeries: 'Sept 4th',
-    lastStartedSeries: 'Sept 3rd',
-    lastEndedSeries: 'Sept 2nd'
-  },
-  {
-    symbol: "COM",
-    name: "Community contribution",
-    badges: "Badges",
-    lastCreatedSeries: '3rd cycle',
-    lastStartedSeries: '2nd cycle',
-    lastEndedSeries: '1st cycle'
-  }
-];
+export default async function SeasonsPage() {
+  const { rows, more } = await getSeasons();
 
-export default function SeasonsPage() {
   return (
     <>
       <HeaderAdmin>
@@ -69,39 +47,58 @@ export default function SeasonsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {seasons.map((season) => (
-              <TableRow key={season.symbol}>
+            {rows.map((season) => (
+              <TableRow key={season.id}>
                 <TableCell className="text-gray-3">{season.symbol}</TableCell>
                 <TableCell>{season.name}</TableCell>
-                <TableCell>{season.badges}</TableCell>
-                <TableCell>{season.lastCreatedSeries}</TableCell>
-                <TableCell>{season.lastStartedSeries}</TableCell>
-                <TableCell>{season.lastEndedSeries}</TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    {season.badges.map((badge) => (
+                      <Tooltip
+                        content={badge.name}
+                        key={badge.id}
+                        className="capitalize"
+                      >
+                        <BadgeImage src={badge.ipfs} size="xs" />
+                      </Tooltip>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>{season.last_created_series[0]?.name}</TableCell>
+                <TableCell>{season.last_started_series[0]?.name}</TableCell>
+                <TableCell>{season.last_ended_series[0]?.name}</TableCell>
                 <TableCell className="text-right">
-                  <Link href={`/admin/seasons/${season.symbol}`} size="md" variant="secondary" square>
+                  <Link
+                    href={`/admin/seasons/${season.id}`}
+                    size="md"
+                    variant="secondary"
+                    square
+                  >
                     <MdKeyboardArrowRight className="size-6" />
                   </Link>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={Object.keys(seasons[0]).length + 1}>
-                <div className="pt-8 flex items-center justify-center gap-2 text-body-2 text-white">
-                  Page
-                  <Select label="Page" placeholder="Page" defaultValue="1">
-                    {["1", "2", "3", "4", "5", "6"].map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                  of 6
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableFooter>
+          {more && (
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={Object.keys(rows[0]).length + 1}>
+                  <div className="pt-8 flex items-center justify-center gap-2 text-body-2 text-white">
+                    Page
+                    <Select label="Page" placeholder="Page" defaultValue="1">
+                      {["1", "2", "3", "4", "5", "6"].map((item) => (
+                        <SelectItem key={item} value={item}>
+                          {item}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                    of 6
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
         </Table>
       </div>
     </>

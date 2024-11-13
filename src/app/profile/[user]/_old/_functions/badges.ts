@@ -1,11 +1,9 @@
-import type { UInt64, UInt128 } from "@wharfkit/antelope";
-
 import {
   BADGES_INFO_CONTRACT,
   I64,
   ORG,
   ORG_SYMBOL,
-  Tables,
+  Table,
   USER_BADGES_CONTRACT,
 } from "@/constants";
 
@@ -17,10 +15,9 @@ import type {
   BadgesFilter,
   Bound,
   OrgBadgeResponse,
-  OrgBadgeType,
 } from "../_models/badges";
 import { BadgeFilterType as BadgeFilterEnum } from "../_models/badges";
-import type { IndexPosition, TableIndexType } from "../_models/types";
+import type { IndexPosition } from "../_models/types";
 
 const KEY_TYPE: Record<BadgeFilterType, string> = {
   [BadgeFilterEnum.DEFAULT]: I64,
@@ -30,29 +27,18 @@ const INDEX_POSITION: Record<BadgeFilterType, IndexPosition> = {
   [BadgeFilterEnum.DEFAULT]: "primary",
 };
 
-interface GetTableRowsResult<T, K = TableIndexType> {
-  rows: T[];
-  more: boolean;
-  next_key: K;
-}
-
 export async function getOrgBadges({
   queryType,
 }: BadgesFilter): Promise<OrgBadgeResponse> {
-  const data = {
+  const { rows, next_key, more } = await jungleClient.v1.chain.get_table_rows({
     code: BADGES_INFO_CONTRACT,
     scope: ORG,
-    table: Tables.BADGE,
+    table: Table.BADGE,
     json: true,
     ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
     ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
     limit: 1000,
-  };
-
-  const { rows, next_key, more } =
-    (await jungleClient.v1.chain.get_table_rows<Bound>(
-      data,
-    )) as GetTableRowsResult<OrgBadgeType, UInt64 | UInt128>;
+  });
 
   console.debug("Org Badges");
   console.debug(rows);
@@ -70,10 +56,10 @@ export async function getUserBadges({
   lowerBound,
   upperBound,
 }: BadgesFilter): Promise<BadgeResponse> {
-  const data = {
+  const { rows, next_key, more } = await jungleClient.v1.chain.get_table_rows({
     code: USER_BADGES_CONTRACT,
     scope: scope,
-    table: Tables.ACCOUNTS,
+    table: Table.ACCOUNTS,
     json: true,
     ...(queryType != null ? { key_type: KEY_TYPE[queryType] } : {}),
     ...(queryType != null ? { index_position: INDEX_POSITION[queryType] } : {}),
@@ -84,12 +70,7 @@ export async function getUserBadges({
       ? { upper_bound: upperBound as unknown as Bound }
       : {}),
     limit: 1000,
-  };
-
-  const { rows, next_key, more } =
-    (await jungleClient.v1.chain.get_table_rows<Bound>(
-      data,
-    )) as GetTableRowsResult<BadgeType, UInt64 | UInt128>;
+  });
 
   console.debug("User Lifetime Badges");
   console.debug(rows);
