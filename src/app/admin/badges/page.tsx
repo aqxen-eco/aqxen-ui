@@ -8,13 +8,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { HeaderAdmin, HeaderAdminMenu, HeaderAdminTitle } from "@/components/header-admin";
+import {
+  HeaderAdmin,
+  HeaderAdminMenu,
+  HeaderAdminTitle,
+} from "@/components/header-admin";
 
+import { BadgeImage } from "@/components/ui/badge-image";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Select, SelectItem } from "@/components/ui/select";
 import { getBadges } from "./functions";
-import { BadgeImage } from "@/components/ui/badge-image";
 
 export default async function BadgesPage() {
   const { rows, more } = await getBadges();
@@ -29,7 +33,7 @@ export default async function BadgesPage() {
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
-    
+
       <div className="mx-auto max-w-container-lg pb-8 px-4 min-h-[calc(100vh-24rem)]">
         {rows.length > 0 && (
           <Table>
@@ -37,7 +41,9 @@ export default async function BadgesPage() {
               <TableRow>
                 <TableHead className="w-10">Sym</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead className="w-40 text-center">Rarity counts</TableHead>
+                <TableHead className="w-40 text-center">
+                  Rarity counts
+                </TableHead>
                 <TableHead className="w-28" />
               </TableRow>
             </TableHeader>
@@ -48,14 +54,22 @@ export default async function BadgesPage() {
                   <TableCell>
                     <div className="inline-flex items-center gap-2">
                       <BadgeImage src={row.ipfs} size="xs" />
-                      <span className="text-body-2 font-sans font-medium text-white text-nowrap capitalize">{row.name}</span>
+                      <span className="text-body-2 font-sans font-medium text-white text-nowrap capitalize">
+                        {row.name}
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center">{row.rarity_counts}</TableCell>
+                  <TableCell className="text-center">
+                    {row.rarity_counts}
+                  </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="secondary" size="md">
+                    <Link
+                      href={`/admin/badges/${row.id}/send-badge`}
+                      variant="secondary"
+                      size="md"
+                    >
                       Send
-                    </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}

@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Tag } from "@/components/ui/tag";
 import { Tooltip } from "@/components/ui/tooltip";
-import { MdOutlineInfo } from "react-icons/md";
+import { MdOutlineAdd, MdOutlineInfo } from "react-icons/md";
 
+import { BadgeImage } from "@/components/ui/badge-image";
 import {
   Table,
   TableBody,
@@ -98,7 +99,9 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
                     {seasonBadge.symbol}
                   </TableCell>
                   <TableCell>{seasonBadge.name}</TableCell>
-                  <TableCell>{seasonBadge.rarityCounts}</TableCell>
+                  <TableCell className="text-center">
+                    {seasonBadge.rarityCounts}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -141,7 +144,23 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
                     {serie.id}
                   </TableCell>
                   <TableCell>{serie.name}</TableCell>
-                  <TableCell>Badges</TableCell>
+                  <TableCell>
+                    <div className="flex gap-4 items-center">
+                      <Tooltip content="Lorem" className="capitalize">
+                        <BadgeImage src="" size="xs" />
+                      </Tooltip>
+                      <Tooltip content="Lorem" className="capitalize">
+                        <BadgeImage src="" size="xs" />
+                      </Tooltip>
+                      {serie.status !== "end" && (
+                        <Tooltip content="Add badge">
+                          <Button variant="secondary" size="md" square>
+                            <MdOutlineAdd className="size-6" />
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     {serie.status === "init" ? (
                       <Tag variant="yellow">Paused</Tag>

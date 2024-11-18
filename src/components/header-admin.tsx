@@ -1,9 +1,9 @@
-import { Link } from "@/components/ui/link";
-import { MdKeyboardArrowLeft } from "react-icons/md";
-import { Tooltip } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { MdOutlineInfo } from "react-icons/md";
+import { Link } from "@/components/ui/link";
+import { Tooltip } from "@/components/ui/tooltip";
 import type { LinkProps } from "next/link";
+import { MdKeyboardArrowLeft } from "react-icons/md";
+import { MdOutlineInfo } from "react-icons/md";
 import { twMerge } from "tailwind-merge";
 
 const navLinks = [
@@ -30,19 +30,15 @@ const navLinks = [
 ] as const;
 
 type HeaderAdminProps = {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 };
 
 export function HeaderAdmin({ children }: HeaderAdminProps) {
-  return (
-    <div className="desktop:pt-4 mobile:pt-2">
-      {children}
-    </div>
-  );
+  return <div className="desktop:pt-4 mobile:pt-2">{children}</div>;
 }
 
 type HeaderAdminMenuProps = {
-  activeHref?: typeof navLinks[number]['href']
+  activeHref?: (typeof navLinks)[number]["href"];
 };
 
 export function HeaderAdminMenu({ activeHref }: HeaderAdminMenuProps) {
@@ -63,14 +59,14 @@ export function HeaderAdminMenu({ activeHref }: HeaderAdminMenuProps) {
         </ul>
       </nav>
     </div>
-  )
+  );
 }
 
 type HeaderAdminBackProps = {
-  children: React.ReactNode
+  children: React.ReactNode;
 } & LinkProps;
 
-export function HeaderAdminBack({ children, ...props}: HeaderAdminBackProps) {
+export function HeaderAdminBack({ children, ...props }: HeaderAdminBackProps) {
   return (
     <div className="max-w-container-lg desktop:px-4 mx-auto">
       <nav className="pb-2 border-b border-gray-2 overflow-x-auto">
@@ -80,20 +76,25 @@ export function HeaderAdminBack({ children, ...props}: HeaderAdminBackProps) {
         </Link>
       </nav>
     </div>
-  )
+  );
 }
 
 type HeaderAdminTitleProps = {
-  title: string | React.ReactNode
-  tooltip?: string
-  className?: string
-  children?: React.ReactNode
-}
+  title: string | React.ReactNode;
+  tooltip?: string;
+  className?: string;
+  children?: React.ReactNode;
+};
 
-export function HeaderAdminTitle({ title, tooltip, className, children }: HeaderAdminTitleProps) {
+export function HeaderAdminTitle({
+  title,
+  tooltip,
+  className,
+  children,
+}: HeaderAdminTitleProps) {
   return (
     <div className={twMerge("max-w-container-lg px-4 mx-auto py-8", className)}>
-      <header className="flex items-center justify-between">
+      <header className="flex flex-wrap gap-4 items-center justify-between">
         <div className="flex-1 flex items-center gap-1">
           <h1 className="text-title-1 text-white">{title}</h1>
           {tooltip && (
@@ -104,12 +105,8 @@ export function HeaderAdminTitle({ title, tooltip, className, children }: Header
             </Tooltip>
           )}
         </div>
-        {children && (
-          <div className="flex-none">
-            {children}
-          </div>
-        )}
+        {children && <div className="flex-none flex gap-2">{children}</div>}
       </header>
     </div>
-  )
+  );
 }

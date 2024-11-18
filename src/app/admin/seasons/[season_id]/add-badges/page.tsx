@@ -42,7 +42,7 @@ export default function AddBadgesPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminBack href={`/admin/seasons/${params.season_id}`}>
-          {params.season_id}
+          {decodeURIComponent(params.season_id as string)}
         </HeaderAdminBack>
         <HeaderAdminTitle
           title={
