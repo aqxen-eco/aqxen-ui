@@ -8,7 +8,7 @@ import {
   Root,
   Trigger,
 } from "@radix-ui/react-dropdown-menu";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 
