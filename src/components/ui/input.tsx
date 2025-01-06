@@ -1,15 +1,12 @@
-import { forwardRef, useId } from "react";
+import { useId } from "react";
 import { MdErrorOutline } from "react-icons/md";
 
-type InputComponentProps = {
+type InputProps = {
   label?: string;
   error?: string;
 } & React.ComponentProps<"input">;
 
-function InputComponent(
-  { label, error, disabled, ...restProps }: InputComponentProps,
-  forwardedRef: React.ForwardedRef<HTMLInputElement>,
-) {
+export function Input({ label, error, disabled, ref, ...restProps }: InputProps) {
   const id = useId();
 
   return (
@@ -24,7 +21,7 @@ function InputComponent(
       )}
       <div className="border-b border-gray-3 focus-within:border-white flex gap-1 items-center group-data-[error=true]/input:border-red-600">
         <input
-          ref={forwardedRef}
+          ref={ref}
           id={id}
           className="flex-1 text-body-2 placeholder-gray-3 text-white pt-2 pb-[calc(1rem-1px)] bg-transparent focus:outline-0"
           disabled={disabled}
@@ -40,5 +37,3 @@ function InputComponent(
     </div>
   );
 }
-
-export const Input = forwardRef(InputComponent);

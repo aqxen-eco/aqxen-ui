@@ -14,9 +14,9 @@ import { getUserBadges } from "./functions";
 import { SeasonalBadgesSection } from "./seasonal-badges-section";
 
 type ProfilePageProps = {
-  params: {
+  params: Promise<{
     user: string;
-  };
+  }>;
 };
 
 export default async function ProfilePage({ params }: ProfilePageProps) {

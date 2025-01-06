@@ -41,9 +41,9 @@ const seasonBadges = [
 ];
 
 type SeasonPageProps = {
-  params: {
+  params: Promise<{
     season_id: string;
-  };
+  }>;
 };
 
 export default async function SeasonPage({ params }: SeasonPageProps) {

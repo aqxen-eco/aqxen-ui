@@ -1,19 +1,16 @@
-import { forwardRef, useId } from "react";
+import { useId } from "react";
 import {
   MdErrorOutline,
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
 
-type InputComponentProps = {
+type CheckboxProps = {
   label: string;
   error?: string;
 } & React.ComponentProps<"input">;
 
-function CheckboxComponent(
-  { label, error, ...restProps }: InputComponentProps,
-  forwardedRef: React.ForwardedRef<HTMLInputElement>,
-) {
+export function Checkbox({ label, error, ref, ...restProps }: CheckboxProps) {
   const id = useId();
 
   return (
@@ -27,7 +24,7 @@ function CheckboxComponent(
         </label>
         <div className="relative pr-2">
           <input
-            ref={forwardedRef}
+            ref={ref}
             type="checkbox"
             id={id}
             className="appearance-none cursor-pointer absolute size-full z-10 peer"
@@ -46,5 +43,3 @@ function CheckboxComponent(
     </div>
   );
 }
-
-export const Checkbox = forwardRef(CheckboxComponent);

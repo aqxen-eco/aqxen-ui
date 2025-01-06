@@ -1,5 +1,3 @@
-import { forwardRef } from "react";
-
 import { type VariantProps, tv } from "tailwind-variants";
 
 const tag = tv({
@@ -19,15 +17,12 @@ const tag = tv({
   },
 });
 
-type TagComponentProps = VariantProps<typeof tag> & React.ComponentProps<'span'>
+type TagProps = VariantProps<typeof tag> & React.ComponentProps<'span'>
 
-function TagComponent(
-  { variant, className, children, ...props }: TagComponentProps, 
-  forwardedRef: React.ForwardedRef<HTMLDivElement>
-) {
+export function Tag({ variant, className, children, ref, ...props }: TagProps) {
   return (
     <span 
-      ref={forwardedRef} 
+      ref={ref} 
       className={tag({ variant, class: className })} 
       {...props}
     >
@@ -35,5 +30,3 @@ function TagComponent(
     </span>
   )
 }
-
-export const Tag = forwardRef(TagComponent)

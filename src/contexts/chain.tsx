@@ -8,9 +8,9 @@ import WebRenderer from "@wharfkit/web-renderer";
 import {
   createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
+  use,
 } from "react";
 
 type ChainContext = {
@@ -83,7 +83,7 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
   }, [restoreSession]);
 
   return (
-    <ChainContext.Provider
+    <ChainContext
       value={{
         login,
         logout,
@@ -92,12 +92,12 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-    </ChainContext.Provider>
+    </ChainContext>
   );
 }
 
 export function useChain() {
-  const { login, logout, isAuthenticated, session } = useContext(ChainContext);
+  const { login, logout, isAuthenticated, session } = use(ChainContext);
 
   return {
     login,
