@@ -1,7 +1,7 @@
 "use server";
 
-import { type Badge, getBadgesService } from "@/services/get-badges-service";
-import { type Season, getSeasonsService } from "@/services/get-seasons-service";
+import { listBadge, type Badge } from '@/api/chain/badge'
+import { listSeason, type Season } from '@/api/chain/season'
 
 type GetUserBadgesProps = {
   user: string;
@@ -21,11 +21,11 @@ type GetUserBadges = {
 export async function getUserBadges({
   user,
 }: GetUserBadgesProps): Promise<GetUserBadges> {
-  const { rows: userBadges, more: userBadgesMore } = await getBadgesService({
+  const { rows: userBadges, more: userBadgesMore } = await listBadge({
     scope: user,
   });
 
-  const { rows, more: userSeasonsMore } = await getSeasonsService({
+  const { rows, more: userSeasonsMore } = await listSeason({
     scope: user,
   });
 

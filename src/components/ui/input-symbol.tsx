@@ -1,6 +1,6 @@
 "use client";
 
-import { OTPInput, REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import { OTPInput, REGEXP_ONLY_CHARS } from "input-otp";
 import type { OTPInputProps } from "input-otp";
 import { forwardRef, useId } from "react";
 import { MdErrorOutline } from "react-icons/md";
@@ -36,7 +36,7 @@ forwardedRef: React.ForwardedRef<React.ElementRef<"input">>
           id={id}
           textAlign="center"
           inputMode="text"
-          pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+          pattern={REGEXP_ONLY_CHARS}
           containerClassName="flex gap-2 items-center w-full"
           style={{ width: "100%" }}
           render={({ slots }) => (

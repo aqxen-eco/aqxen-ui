@@ -1,28 +1,15 @@
 import { ORG, ORG_SYMBOL, SEASONS_INFO_CONTRACT, Table } from "@/constants";
-import { jungleClient } from "@/jungle-client";
+import { jungleClient } from "@/api/chain/jungle-client";
 
-export type Season = {
-  id: string;
-  symbol: string;
-  name: string;
-  badges: string[];
-  last_created_series: number[];
-  last_started_series: number[];
-  last_ended_series: number[];
-};
+import type { ListSeasonResult } from '@/api/model/season'
 
 type GetSeasonsServiceProps = {
   scope?: string;
 };
 
-type GetSeasonsService = {
-  rows: Season[];
-  more: boolean;
-};
-
-export async function getSeasonsService(
+export async function listSeason(
   props?: GetSeasonsServiceProps,
-): Promise<GetSeasonsService> {
+): Promise<ListSeasonResult> {
   let { rows, more } = await jungleClient.v1.chain.get_table_rows({
     code: SEASONS_INFO_CONTRACT,
     scope: props?.scope ?? ORG,

@@ -23,7 +23,6 @@ type ChainContext = {
 const ChainContext = createContext({} as ChainContext);
 
 const appName = "reputationsystem";
-const localStorageSessionKey = `wharf-${appName}-session`;
 
 const sessionKit = new SessionKit({
   appName,
@@ -31,6 +30,8 @@ const sessionKit = new SessionKit({
   ui: new WebRenderer(),
   walletPlugins: [new WalletPluginAnchor(), new WalletPluginCloudWallet()],
 });
+
+const localStorageSessionKey = `wharf-${sessionKit.appName}-session`;
 
 export function ChainProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session>();

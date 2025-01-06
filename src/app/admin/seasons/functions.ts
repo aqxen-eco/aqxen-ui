@@ -1,10 +1,12 @@
 "use server";
 
-import { type Badge, getBadgesService } from "@/services/get-badges-service";
-import { getSeasonsService } from "@/services/get-seasons-service";
-import { type Series, getSeriesService } from "@/services/get-series-service";
+import { GetTableRowsResult } from '@/api/model'
 
-type Row = {
+import { listBadge, type Badge } from '@/api/chain/badge'
+import { listSeries, type Series } from '@/api/chain/series'
+import { listSeason } from '@/api/chain/season'
+
+type Season = {
   id: string;
   symbol: string;
   name: string;
@@ -14,19 +16,14 @@ type Row = {
   last_ended_series: Series[];
 };
 
-type GetSeasons = {
-  rows: Row[];
-  more: boolean;
-};
-
-export async function getSeasons(): Promise<GetSeasons> {
+export async function getSeasons(): Promise<GetTableRowsResult<Season>> {
   const [seasons, badges] = await Promise.all([
-    getSeasonsService(),
-    getBadgesService(),
+    listSeason(),
+    listBadge(),
   ]);
 
   const seriesPerSeason = await Promise.all(
-    seasons.rows.map((season) => getSeriesService({ season_id: season.id })),
+    seasons.rows.map((season) => listSeries({ season_id: season.id })),
   );
 
   const rows = seasons.rows.map((season, seasonIndex) => ({

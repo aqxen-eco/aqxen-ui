@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -33,29 +32,31 @@ export function AppBar() {
               <img src="/img/logo.svg" alt="" />
               UpScale
             </NextLink>
-            <Link href="/admin/organization" variant={pathname.includes('/admin') ? 'link' : 'default'}>Admin</Link>
             {isAuthenticated ? (
-              <DropdownRoot
-                customTrigger={
-                  <button
-                    type="button"
-                    className="group/dropdown-button focus:outline-none"
-                  >
-                    <Avatar
-                      color="red"
-                      className="group-data-[state=open]/dropdown-button:border-white"
+              <>
+                <Link href="/admin/organization" variant={pathname.includes('/admin') ? 'link' : 'default'}>Admin</Link>
+                <DropdownRoot
+                  customTrigger={
+                    <button
+                      type="button"
+                      className="group/dropdown-button focus:outline-none"
                     >
-                      {actor ? actor.slice(0, 2) : "un"}
-                    </Avatar>
-                  </button>
-                }
-                align="end"
-              >
-                <DropdownItem asChild>
-                  <NextLink href={`/profile/${actor}`}>Profile</NextLink>
-                </DropdownItem>
-                <DropdownItem onClick={logoutAndGoToHome}>Log out</DropdownItem>
-              </DropdownRoot>
+                      <Avatar
+                        color="red"
+                        className="group-data-[state=open]/dropdown-button:border-white"
+                      >
+                        {actor ? actor.slice(0, 2) : "un"}
+                      </Avatar>
+                    </button>
+                  }
+                  align="end"
+                >
+                  <DropdownItem asChild>
+                    <NextLink href={`/profile/${actor}`}>Profile</NextLink>
+                  </DropdownItem>
+                  <DropdownItem onClick={logoutAndGoToHome}>Log out</DropdownItem>
+                </DropdownRoot>
+              </>
             ) : (
               <Button onClick={login} variant="primary">
                 Log in

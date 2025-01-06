@@ -1,17 +1,13 @@
 "use server";
 
-import { type Badge, getBadgesService } from "@/services/get-badges-service";
+import { listBadge, type ListBadgeResult } from '@/api/chain/badge'
 
-type GetBadges = {
-  rows: Badge[];
-  more: boolean;
-};
-
-export async function getBadges(): Promise<GetBadges> {
-  const { rows, more } = await getBadgesService();
+export async function getBadges(): Promise<ListBadgeResult> {
+  const { rows, more, next_key } = await listBadge();
 
   return {
     rows,
     more,
+    next_key
   };
 }

@@ -18,7 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getSeriesService } from "@/services/get-series-service";
+
+import { listSeries } from '@/api/chain/series'
+
 
 const seasonBadges = [
   {
@@ -47,7 +49,7 @@ type SeasonPageProps = {
 export default async function SeasonPage({ params }: SeasonPageProps) {
   const { season_id } = await params;
 
-  const { rows: series, more } = await getSeriesService({
+  const { rows: series, more } = await listSeries({
     season_id: decodeURIComponent(season_id),
   });
 

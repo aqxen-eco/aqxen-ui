@@ -1,27 +1,15 @@
 import { SEASONS_INFO_CONTRACT, Table } from "@/constants";
-import { jungleClient } from "@/jungle-client";
+import { jungleClient } from "@/api/chain/jungle-client";
 
-export type Series = {
-  id: number;
-  status: "end" | "active" | "init";
-  name: string;
-  init_time: string;
-  active_time: string;
-  end_time: string;
-};
-
-export type GetSeriesService = {
-  rows: Series[];
-  more: boolean;
-};
+import type { ListSeriesResult } from '@/api/model/series'
 
 type GetSeriesServiceProps = {
   season_id: string;
 };
 
-export async function getSeriesService(
+export async function listSeries(
   props: GetSeriesServiceProps,
-): Promise<GetSeriesService> {
+): Promise<ListSeriesResult> {
   let { rows, more } = await jungleClient.v1.chain.get_table_rows({
     code: SEASONS_INFO_CONTRACT,
     scope: props.season_id.split(",")[1],
