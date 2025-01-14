@@ -14,6 +14,7 @@ import { InputSymbol } from "@/components/ui/input-symbol";
 import { useChain } from "@/contexts/chain";
 import { IPFS_IMAGE_SOURCE } from "@/constants";
 import { createBadge } from "@/api/chain/badge";
+import { useOrganization } from "@/contexts/organization";
 
 const newBadgeSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -27,6 +28,7 @@ const newBadgeSchema = z.object({
 type NewBadgeSchema = z.infer<typeof newBadgeSchema>;
 
 export default function NewBadgePage() {
+  const { symbol: organizationSymbol } = useOrganization()
   const { session } = useChain();
 
   const {
@@ -51,15 +53,19 @@ export default function NewBadgePage() {
     lifetimeAggregate,
     lifetimeStats,
   }: NewBadgeSchema) {
-    await createBadge({
-      session: session!,
-      symbol,
-      ipfs: image,
-      name,
-      lifetime_aggregate: lifetimeAggregate,
-      lifetime_stats: lifetimeStats,
-      memo: description
-    })
+    try {
+      await createBadge({
+        session: session!,
+        symbol: organizationSymbol + symbol,
+        ipfs: image,
+        name,
+        lifetime_aggregate: lifetimeAggregate,
+        lifetime_stats: lifetimeStats,
+        memo: description
+      })
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (

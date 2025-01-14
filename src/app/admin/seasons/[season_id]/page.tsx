@@ -1,3 +1,5 @@
+"use client"
+
 import {
   HeaderAdmin,
   HeaderAdminBack,
@@ -19,49 +21,55 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { useParams } from "next/navigation";
+import { useQueries } from "@tanstack/react-query";
+import { useOrganization } from "@/contexts/organization";
+
+import { listSeason } from "@/api/chain/season";
 import { listSeries } from '@/api/chain/series'
+import { listBadge } from '@/api/chain/badge'
 
+export default function SeasonPage() {
+  const { name, symbol } = useOrganization();
+  const { season_id } = useParams();
+  const seasonId = decodeURIComponent(season_id as string).split(",")[1];
 
-const seasonBadges = [
-  {
-    symbol: "CHA",
-    name: "Charity",
-    rarityCounts: "17",
-  },
-  {
-    symbol: "TRA",
-    name: "Transparency",
-    rarityCounts: "22",
-  },
-  {
-    symbol: "ELE",
-    name: "Election",
-    rarityCounts: "1",
-  },
-];
+  const [seasonQuery, badgesQuery, seriesQuery] = useQueries({ 
+    queries: [
+      {
+        queryKey: ['seasons', seasonId, name, symbol],
+        queryFn: async () => await listSeason({ 
+          scope: name, 
+          lower_bound: seasonId, 
+          upper_bound: seasonId, 
+          organization_symbol: symbol
+        }),
+      },
+      {
+        queryKey: ['badges', name, symbol],
+        queryFn: async () => await listBadge({ 
+          scope: name, 
+          organization_symbol: symbol
+        }),
+      },
+      {
+        queryKey: ['series', seasonId], 
+        queryFn: async () => await listSeries({
+          scope: seasonId,
+        }),
+      }
+    ]
+  })
 
-type SeasonPageProps = {
-  params: Promise<{
-    season_id: string;
-  }>;
-};
-
-export default async function SeasonPage({ params }: SeasonPageProps) {
-  const { season_id } = await params;
-
-  const { rows: series, more } = await listSeries({
-    season_id: decodeURIComponent(season_id),
-  });
-
-  if (!season_id) {
-    return null;
+  if (seasonQuery.isPending || badgesQuery.isPending || seriesQuery.isPending) {
+    return null
   }
 
   return (
     <>
       <HeaderAdmin>
         <HeaderAdminBack href="/admin/seasons">Seasons</HeaderAdminBack>
-        <HeaderAdminTitle title="Election" />
+        <HeaderAdminTitle title={seasonQuery?.data?.rows?.[0]?.name ?? ''} />
       </HeaderAdmin>
       <div className="mx-auto max-w-container-lg by-8 px-4 space-y-8 pb-8">
         <section className="space-y-4">
@@ -84,30 +92,40 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
               </Link>
             </div>
           </header>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10">Sym</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="w-32 text-center">
-                  Rarity counts
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {seasonBadges.map((seasonBadge) => (
-                <TableRow key={seasonBadge.symbol}>
-                  <TableCell className="text-gray-3">
-                    {seasonBadge.symbol}
-                  </TableCell>
-                  <TableCell>{seasonBadge.name}</TableCell>
-                  <TableCell className="text-center">
-                    {seasonBadge.rarityCounts}
-                  </TableCell>
+          {(badgesQuery.isSuccess || (badgesQuery.data && badgesQuery.data.rows.length > 0)) && (  
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10">Sym</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="w-32 text-center">
+                    Rarity counts
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {badgesQuery.data.rows.map((badge) => (
+                  seasonQuery?.data?.rows?.[0]?.badges.includes(badge.id) && (
+                  <TableRow key={badge.symbol}>
+                    <TableCell className="text-gray-3">
+                      {badge.symbol}
+                    </TableCell>
+                    <TableCell>
+                      <div className="inline-flex items-center gap-2">
+                        <BadgeImage src={badge.ipfs} size="xs" />
+                        <span className="text-body-2 font-sans font-medium text-white text-nowrap capitalize">
+                          {badge.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {badge.rarity_counts}
+                    </TableCell>
+                  </TableRow>
+                )))}
+              </TableBody>
+            </Table>
+          )}
         </section>
         <section className="space-y-4">
           <header className="flex items-center">
@@ -129,82 +147,84 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
               </Link>
             </div>
           </header>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10 text-center">ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Badges</TableHead>
-                <TableHead className="w-40">Status</TableHead>
-                <TableHead className="w-40" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {series.map((serie) => (
-                <TableRow key={serie.id}>
-                  <TableCell className="text-gray-3 text-center">
-                    {serie.id}
-                  </TableCell>
-                  <TableCell>{serie.name}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-4 items-center">
-                      <Tooltip content="Lorem" className="capitalize">
-                        <BadgeImage src="" size="xs" />
-                      </Tooltip>
-                      <Tooltip content="Lorem" className="capitalize">
-                        <BadgeImage src="" size="xs" />
-                      </Tooltip>
-                      {serie.status !== "end" && (
-                        <Tooltip content="Add badge">
-                          <Button variant="secondary" size="md" square>
-                            <MdOutlineAdd className="size-6" />
-                          </Button>
-                        </Tooltip>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {serie.status === "init" ? (
-                      <Tag variant="yellow">Paused</Tag>
-                    ) : serie.status === "end" ? (
-                      <Tag variant="red">Ended</Tag>
-                    ) : serie.status === "active" ? (
-                      <Tag variant="green">Started</Tag>
-                    ) : (
-                      <Tag variant="blue">Created</Tag>
-                    )}
-                  </TableCell>
-                  <TableCell className="flex gap-2 justify-end">
-                    {serie.status === "init" ? (
-                      <>
-                        <Button variant="secondary" size="md">
-                          Resume
-                        </Button>
-                        <Button variant="secondary" size="md">
-                          End
-                        </Button>
-                      </>
-                    ) : serie.status === "end" ? (
-                      <></>
-                    ) : serie.status === "active" ? (
-                      <>
-                        <Button variant="secondary" size="md">
-                          Pause
-                        </Button>
-                        <Button variant="secondary" size="md">
-                          End
-                        </Button>
-                      </>
-                    ) : (
-                      <Button variant="secondary" size="md">
-                        Start
-                      </Button>
-                    )}
-                  </TableCell>
+          {(seriesQuery.isSuccess || (seriesQuery.data && seriesQuery.data.rows.length > 0)) && (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10 text-center">ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Badges</TableHead>
+                  <TableHead className="w-40">Status</TableHead>
+                  <TableHead className="w-40" />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {seriesQuery.data.rows.map((serie) => (
+                  <TableRow key={serie.id}>
+                    <TableCell className="text-gray-3 text-center">
+                      {serie.id}
+                    </TableCell>
+                    <TableCell>{serie.name}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-4 items-center">
+                        <Tooltip content="Lorem" className="capitalize">
+                          <BadgeImage src="" size="xs" />
+                        </Tooltip>
+                        <Tooltip content="Lorem" className="capitalize">
+                          <BadgeImage src="" size="xs" />
+                        </Tooltip>
+                        {serie.status !== "end" && (
+                          <Tooltip content="Add badge">
+                            <Button variant="secondary" size="md" square>
+                              <MdOutlineAdd className="size-6" />
+                            </Button>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {serie.status === "init" ? (
+                        <Tag variant="yellow">Paused</Tag>
+                      ) : serie.status === "end" ? (
+                        <Tag variant="red">Ended</Tag>
+                      ) : serie.status === "active" ? (
+                        <Tag variant="green">Started</Tag>
+                      ) : (
+                        <Tag variant="blue">Created</Tag>
+                      )}
+                    </TableCell>
+                    <TableCell className="flex gap-2 justify-end">
+                      {serie.status === "init" ? (
+                        <>
+                          <Button variant="secondary" size="md">
+                            Resume
+                          </Button>
+                          <Button variant="secondary" size="md">
+                            End
+                          </Button>
+                        </>
+                      ) : serie.status === "end" ? (
+                        <></>
+                      ) : serie.status === "active" ? (
+                        <>
+                          <Button variant="secondary" size="md">
+                            Pause
+                          </Button>
+                          <Button variant="secondary" size="md">
+                            End
+                          </Button>
+                        </>
+                      ) : (
+                        <Button variant="secondary" size="md">
+                          Start
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </section>
       </div>
     </>

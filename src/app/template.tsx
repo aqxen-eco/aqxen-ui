@@ -1,4 +1,6 @@
 import { ChainProvider } from "@/contexts/chain";
+import { OrganizationProvider } from "@/contexts/organization";
+import { QueryProvider } from "@/contexts/query";
 
 import { AppBar } from "@/components/app-bar";
 import { Footer } from "@/components/footer";
@@ -9,10 +11,14 @@ type HomeTemplateProps = {
 
 export default function HomeTemplate({ children }: HomeTemplateProps) {
   return (
-    <ChainProvider>
-      <AppBar />
-      {children}
-      <Footer />
-    </ChainProvider>
+    <QueryProvider>
+      <ChainProvider>
+        <OrganizationProvider>
+          <AppBar />
+          {children}
+          <Footer />
+        </OrganizationProvider>
+      </ChainProvider>
+    </QueryProvider>
   );
 }

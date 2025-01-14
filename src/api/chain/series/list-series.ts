@@ -2,18 +2,21 @@ import { SEASONS_INFO_CONTRACT, Table } from "@/constants";
 import { jungleClient } from "@/api/chain/jungle-client";
 
 import type { ListSeriesResult } from '@/api/model/series'
+import { Name } from '@wharfkit/antelope';
 
-type GetSeriesServiceProps = {
-  season_id: string;
+type ListSeriesProps = {
+  scope?: string
+  lower_bound?: string
+  upper_bound?: string
 };
 
-export async function listSeries(
-  props: GetSeriesServiceProps,
-): Promise<ListSeriesResult> {
+export async function listSeries({ scope, lower_bound, upper_bound }: ListSeriesProps): Promise<ListSeriesResult> {
   let { rows, more } = await jungleClient.v1.chain.get_table_rows({
     code: SEASONS_INFO_CONTRACT,
-    scope: props.season_id.split(",")[1],
+    scope: scope,
     table: Table.SEQUENCES,
+    lower_bound: lower_bound ? Name.from(lower_bound) : undefined,
+    upper_bound: upper_bound ? Name.from(upper_bound) : undefined,
     json: true,
     limit: 1000,
   });

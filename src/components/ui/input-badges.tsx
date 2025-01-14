@@ -3,26 +3,31 @@ import {
   ComboboxEmpty,
   ComboboxItem,
 } from "@/components/ui/combobox";
-import { useEffect, useState } from "react";
 
 import { BadgeImage } from "@/components/ui/badge-image";
 import { MdClose } from "react-icons/md";
 import { Button } from "./button";
+import { useOrganization } from "@/contexts/organization";
+import { useQuery } from "@tanstack/react-query";
+import { listBadge } from "@/api/chain/badge";
 
 type InputBadgesProps = {
+  label?: string;
   value?: string[];
-  onChange?: (value: string[]) => void;
+  onChange: (value: string[]) => void;
   error?: string;
 };
 
-export function InputBadges({ value = [], onChange, error }: InputBadgesProps) {
-  const [badges, setBadges] = useState<string[]>(value);
+export function InputBadges({ label = 'Badges', value = [], onChange, error }: InputBadgesProps) {
+  const { name, symbol } = useOrganization()
 
-  useEffect(() => {
-    if (onChange) {
-      onChange(badges);
-    }
-  }, [badges, onChange]);
+  const badgesQuery = useQuery({ 
+    queryKey: ['badges', name, symbol], 
+    queryFn: async () => await listBadge({ 
+      scope: name, 
+      organization_symbol: symbol
+    }),
+  })
 
   return (
     <div className="group/input space-y-2" data-error={!!error}>
@@ -30,71 +35,84 @@ export function InputBadges({ value = [], onChange, error }: InputBadgesProps) {
         id="search"
         className="text-body-2 font-medium text-white block cursor-pointer group-data-[error=true]/input:text-red-600"
       >
-        Badges
+        {label}
       </label>
 
-      {badges.length > 0 && (
-        <ul className="flex flex-wrap gap-2 items-start justify-start">
-          {badges.map((item) => (
-            <li key={item}>
-              <div className="inline-flex items-center border border-gray-2 bg-gray-1 pl-2 rounded-full h-10">
-                <BadgeImage src="/img/badges/badge_0.png" size="xs" />
-                <span className="text-body-2 font-sans font-medium text-white ml-1 text-nowrap">
-                  {item}
-                </span>
-                <Button
-                  size="md"
-                  variant="link"
-                  square
-                  onClick={() =>
-                    setBadges((state) => state.filter((i) => i !== item))
-                  }
-                >
-                  <MdClose className="size-6" />
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      {badgesQuery.isSuccess && (
+        <>
+          {value.length > 0 && (
+            <ul className="flex flex-wrap gap-2 items-start justify-start">
+              {value.map((id) => {
+                const badge = badgesQuery?.data?.rows.find(b => b.id === id)
 
-      <Combobox title="Search badges">
-        <ComboboxEmpty />
+                if (!badge) {
+                  return null
+                }
 
-        {[
-          "Transparency",
-          "Responsibility",
-          "Participation",
-          "Charity",
-          "Reliability",
-          "Apple",
-          "Orange",
-          "Pear",
-          "Blueberry",
-          "Banana",
-        ].map((fruit) => (
-          <ComboboxItem
-            key={fruit}
-            className="relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-gray-3 data-[selected=true]:text-white data-[disabled=true]:opacity-50"
-            value={fruit}
-            onSelect={(currentValue) => {
-              setBadges((state) =>
-                state.includes(currentValue)
-                  ? state.filter((i) => i !== currentValue)
-                  : [...state, currentValue],
-              );
+                return (
+                  <li key={badge.id}>
+                    <div className="inline-flex items-center border border-gray-2 bg-gray-1 pl-2 rounded-full h-10">
+                      <BadgeImage src={badge.ipfs} size="xs" />
+                      <span className="text-body-2 font-sans font-medium text-white ml-1 text-nowrap">
+                        {badge.name}
+                      </span>
+                      <Button
+                        size="md"
+                        variant="link"
+                        square
+                        onClick={() =>{
+                          const newValue = value.filter((i) => i !== id)
+                          onChange(newValue)
+                        }}
+                      >
+                        <MdClose className="size-6" />
+                      </Button>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+
+          <Combobox 
+            title="Search badges" 
+            filter={(value, search) => {
+              const badge = badgesQuery?.data?.rows.find(b => b.id === value)
+              if (badge?.name && badge.name.includes(search)) return 1
+              return 0
             }}
-            checked={badges.includes(fruit)}
           >
-            {fruit}
-          </ComboboxItem>
-        ))}
-      </Combobox>
+            <ComboboxEmpty />
 
-      {error && (
-        <p className="mt-2 text-body-3 group-data-[error=true]/input:text-red-600">
-          {error}
-        </p>
+            {badgesQuery?.data?.rows.map((badge) => (
+              <ComboboxItem
+                key={badge.id}
+                className="relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-gray-3 data-[selected=true]:text-white data-[disabled=true]:opacity-50"
+                value={badge.id}
+                onSelect={(currentValue) => {
+                  const newValue = value.includes(currentValue)
+                    ? value.filter((i) => i !== currentValue)
+                    : [...value, currentValue]  
+                  onChange(newValue)
+                }}
+                checked={value.includes(badge.id)}
+              >
+                <div className="inline-flex items-center gap-2">
+                  <BadgeImage src={badge.ipfs} size="xs" />
+                  <span className="text-body-2 font-sans font-medium text-white text-nowrap capitalize">
+                    {badge.name}
+                  </span>
+                </div>
+              </ComboboxItem>
+            ))}
+          </Combobox>
+
+          {error && (
+            <p className="mt-2 text-body-3 group-data-[error=true]/input:text-red-600">
+              {error}
+            </p>
+          )}
+        </>
       )}
     </div>
   );

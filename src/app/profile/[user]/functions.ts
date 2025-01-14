@@ -22,11 +22,11 @@ export async function getUserBadges({
   user,
 }: GetUserBadgesProps): Promise<GetUserBadges> {
   const { rows: userBadges, more: userBadgesMore } = await listBadge({
-    scope: user,
+    scope: user
   });
 
   const { rows, more: userSeasonsMore } = await listSeason({
-    scope: user,
+    scope: user
   });
 
   const userSeasons = rows.map((row) => ({

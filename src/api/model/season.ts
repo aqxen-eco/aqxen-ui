@@ -1,4 +1,4 @@
-import { GetTableRowsResult } from "./index";
+import { Session, GetTableRowsResult } from "./index";
 
 export type Season = {
   id: string;
@@ -11,3 +11,11 @@ export type Season = {
 };
 
 export type ListSeasonResult = GetTableRowsResult<Season>
+
+export type CreateSeasonProps = {
+  session: Session
+  symbol: string
+  description: string
+  badge_symbols: string[]
+  stats_badge_symbols: string[]
+}

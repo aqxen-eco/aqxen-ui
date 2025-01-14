@@ -17,7 +17,7 @@ export async function createBadge({
     data: {
       authorized: session.actor.toString(),
       permission: session.permission.toString(),
-      badge_symbol: `0,ALEX${symbol.toUpperCase()}`,
+      badge_symbol: `0,${symbol.toUpperCase()}`,
       offchain_lookup_data: `{"img":"${ipfs}"}`,
       onchain_lookup_data: `{"name":"${name}"}`,
       lifetime_aggregate,

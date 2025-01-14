@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 type ComboboxProps = {
   title: string,
   children?: React.ReactNode
-}
+} & React.ComponentPropsWithoutRef<typeof Command>
 
-export function Combobox({ title, children }: ComboboxProps) {
+export function Combobox({ title, children, ...props }: ComboboxProps) {
   return (
     <Popover.Root>
       <div className="border-b border-gray-3 focus-within:border-white flex gap-1 items-center group-data-[error=true]/input:border-red-600">
@@ -21,7 +21,7 @@ export function Combobox({ title, children }: ComboboxProps) {
       </div>
       <Popover.Portal>
         <Popover.Content sideOffset={-47} alignOffset={-16} className="w-[var(--radix-popover-trigger-width)]">
-          <Command>
+          <Command {...props}>
             <div className="flex gap-2 items-center bg-gray-1 mobile:bg-black">
               <Command.Input 
                 className="flex-1 w-full text-body-2 placeholder-gray-3 bg-transparent text-white pt-2 pb-[calc(1rem-1px)] focus:outline-0 focus:outline-none" 

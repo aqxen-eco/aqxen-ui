@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Box } from "@/components/ui/box";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createOrganization } from "./actions";
-import { getOrganization } from "./functions";
+import { useOrganization } from "@/contexts/organization";
 
 const organizationSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -19,24 +18,17 @@ const organizationSchema = z.object({
 type OrganizationSchema = z.infer<typeof organizationSchema>;
 
 export default function OrganizationPage() {
+  const { name, symbol } = useOrganization();
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting, isLoading },
   } = useForm<OrganizationSchema>({
     resolver: zodResolver(organizationSchema),
-    defaultValues: async () => {
-      const response = await getOrganization()
-      return {
-        name: response?.name ?? '',
-        logo: response?.logo ?? ''
-      }
-    }
   });
 
-  async function onSubmit({ name, logo }: OrganizationSchema) {
-    await createOrganization({ name, logo });
-  }
+  async function onSubmit({ name, logo }: OrganizationSchema) {}
 
   return (
     <Box className="p-0 mobile:rounded-none mobile:border-0 mobile:bg-black desktop:grid desktop:grid-cols-6 mobile:space-y-8">
@@ -62,7 +54,7 @@ export default function OrganizationPage() {
       </form>
       <div className="desktop:col-span-2 p-8 mobile:p-4 space-y-4 border-l mobile:border border-gray-2 mobile:rounded-2xl mobile:bg-gray-1">
         <h2 className="text-title-2 text-white">Organization preview</h2>
-        <Badge name="Organization Name" balance="ORGN" />
+        <Badge name={name} balance={symbol.toUpperCase()} />
         <hr className="border-t border-gray-2" />
         <div className="flex justify-between py-2">
           <p className="text-body-2 text-white">Active users</p>

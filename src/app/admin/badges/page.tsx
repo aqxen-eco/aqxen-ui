@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Table,
   TableBody,
@@ -15,13 +17,19 @@ import {
 } from "@/components/header-admin";
 
 import { BadgeImage } from "@/components/ui/badge-image";
-import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Select, SelectItem } from "@/components/ui/select";
-import { getBadges } from "./functions";
+import { useOrganization } from "@/contexts/organization";
+import { useQuery } from "@tanstack/react-query";
+import { listBadge } from "@/api/chain/badge";
 
-export default async function BadgesPage() {
-  const { rows, more } = await getBadges();
+export default function BadgesPage() {
+  const { name, symbol } = useOrganization()
+
+  const query = useQuery({ 
+    queryKey: ['badges', name, symbol], 
+    queryFn: async () => await listBadge({ scope: name, organization_symbol: symbol }),
+  })
 
   return (
     <>
@@ -33,9 +41,8 @@ export default async function BadgesPage() {
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
-
       <div className="mx-auto max-w-container-lg pb-8 px-4 min-h-[calc(100vh-24rem)]">
-        {rows.length > 0 && (
+        {(query.isSuccess || (query.data && query.data.rows.length > 0)) && (
           <Table>
             <TableHeader>
               <TableRow>
@@ -48,7 +55,7 @@ export default async function BadgesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((row) => (
+              {query.data.rows.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell className="text-gray-3">{row.symbol}</TableCell>
                   <TableCell>
@@ -74,10 +81,10 @@ export default async function BadgesPage() {
                 </TableRow>
               ))}
             </TableBody>
-            {more && (
+            {query.data?.more && (
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={Object.keys(rows[0]).length + 1}>
+                  <TableCell colSpan={Object.keys(query.data.rows[0]).length + 1}>
                     <div className="pt-8 flex items-center justify-center gap-2 text-body-2 text-white">
                       Page
                       <Select label="Page" placeholder="Page" defaultValue="1">

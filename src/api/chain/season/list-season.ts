@@ -1,26 +1,30 @@
-import { ORG, ORG_SYMBOL, SEASONS_INFO_CONTRACT, Table } from "@/constants";
+import { SEASONS_INFO_CONTRACT, Table } from "@/constants";
 import { jungleClient } from "@/api/chain/jungle-client";
 
 import type { ListSeasonResult } from '@/api/model/season'
+import { Name } from '@wharfkit/antelope';
 
-type GetSeasonsServiceProps = {
-  scope?: string;
+type ListSeasonProps = {
+  scope?: string
+  lower_bound?: string
+  upper_bound?: string
+  organization_symbol?: string;
 };
 
-export async function listSeason(
-  props?: GetSeasonsServiceProps,
-): Promise<ListSeasonResult> {
+export async function listSeason({ scope, lower_bound, upper_bound, organization_symbol }: ListSeasonProps): Promise<ListSeasonResult> {
   let { rows, more } = await jungleClient.v1.chain.get_table_rows({
     code: SEASONS_INFO_CONTRACT,
-    scope: props?.scope ?? ORG,
+    scope: scope,
     table: Table.AGGREGATES,
+    lower_bound: lower_bound ? Name.from(lower_bound) : undefined,
+    upper_bound: upper_bound ? Name.from(upper_bound) : undefined,
     json: true,
     limit: 1000,
   });
 
   rows = rows.map((row) => ({
     id: row.agg_symbol,
-    symbol: row.agg_symbol.split(",")[1].replace(ORG_SYMBOL, ""),
+    symbol: row.agg_symbol.split(",")[1].replace(organization_symbol?.toUpperCase(), ""),
     name: row.agg_description,
     badges: row.init_badge_symbols,
     last_created_series: row.init_seq_ids,
