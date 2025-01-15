@@ -15,6 +15,18 @@ export type Subscription = {
 
 export type ListSubscriptionResult = GetTableRowsResult<Subscription>
 
+export type OrganizationSubscription = {
+  actions_used: number
+  expiry_duration_in_secs: number
+  expiry_time: string
+  package: string
+  seq_id: number
+  status: string
+  total_actions_bought: number
+}
+
+export type ListOrganizationSubscriptionResult = GetTableRowsResult<OrganizationSubscription>
+
 export type BuySubscriptionProps = {
   session: Session
   quantity: string

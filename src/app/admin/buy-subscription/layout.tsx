@@ -1,22 +1,24 @@
 import {
   HeaderAdmin,
-  HeaderAdminMenu,
+  HeaderAdminBack,
   HeaderAdminTitle,
 } from "@/components/header-admin";
 
-type BuySubscriptionLayoutProps = {
+type BuySubscriptionProps = {
   children: React.ReactNode;
 };
 
-export default async function BuySubscriptionLayout({
+export default async function BuySubscription({
   children,
-}: BuySubscriptionLayoutProps) {
+}: BuySubscriptionProps) {
   return (
     <>
       <HeaderAdmin>
-        <HeaderAdminMenu activeHref="/admin/subscription" />
-        <HeaderAdminTitle
-          title="Subscription"
+        <HeaderAdminBack href="/admin/subscription">
+          Subscription
+        </HeaderAdminBack>
+        <HeaderAdminTitle 
+          title="Buy Subscription" 
           tooltip="Lorem ipsum dolor sit amed"
         />
       </HeaderAdmin>
