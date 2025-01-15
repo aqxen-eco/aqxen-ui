@@ -1,6 +1,6 @@
 'use client'
 
-import { OTPInput, type OTPInputProps,REGEXP_ONLY_CHARS } from 'input-otp'
+import { OTPInput, type OTPInputProps, REGEXP_ONLY_CHARS } from 'input-otp'
 import { useId } from 'react'
 import { MdErrorOutline } from 'react-icons/md'
 

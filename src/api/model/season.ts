@@ -1,4 +1,4 @@
-import { GetTableRowsResult,Session } from './index'
+import { GetTableRowsResult, Session } from './index'
 
 export type Season = {
   id: string

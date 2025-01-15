@@ -1,6 +1,6 @@
 'use server'
 
-import { type Badge,listBadge } from '@/api/chain/badge'
+import { type Badge, listBadge } from '@/api/chain/badge'
 import { listSeason, type Season } from '@/api/chain/season'
 
 type GetUserBadgesProps = {

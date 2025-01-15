@@ -3,8 +3,8 @@ import { tv, type VariantProps } from 'tailwind-variants'
 
 const badgeImage = tv({
   slots: {
-    root: 'flex items-center justify-center ',
-    image: 'block object-cover rounded-full',
+    root: 'flex items-center justify-center',
+    image: 'block rounded-full object-cover',
   },
   variants: {
     size: {

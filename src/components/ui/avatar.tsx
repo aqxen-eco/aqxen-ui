@@ -1,4 +1,4 @@
-import { tv,type VariantProps } from 'tailwind-variants'
+import { tv, type VariantProps } from 'tailwind-variants'
 
 export const avatar = tv({
   base: 'flex items-center justify-center rounded-full border border-black/20 font-medium uppercase text-white',

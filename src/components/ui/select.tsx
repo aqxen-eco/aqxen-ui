@@ -6,7 +6,7 @@ import {
 } from 'react-icons/md'
 import { twMerge } from 'tailwind-merge'
 
-import { button,type ButtonVariants } from '@/components/ui/button'
+import { button, type ButtonVariants } from '@/components/ui/button'
 
 type SelectProps = {
   label: string

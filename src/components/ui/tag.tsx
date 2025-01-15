@@ -1,7 +1,7 @@
-import { tv,type VariantProps } from 'tailwind-variants'
+import { tv, type VariantProps } from 'tailwind-variants'
 
 const tag = tv({
-  base: 'inline-block px-2 py-1 rounded-full font-sans font-medium uppercase text-xs text-black',
+  base: 'inline-block rounded-full px-2 py-1 font-sans text-xs font-medium uppercase text-black',
   variants: {
     variant: {
       red: 'bg-badge-red',

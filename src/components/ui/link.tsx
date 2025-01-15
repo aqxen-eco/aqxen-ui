@@ -1,6 +1,6 @@
 import NextLink, { type LinkProps as NextLinkProps } from 'next/link'
 
-import { button,type ButtonVariants } from '@/components/ui/button'
+import { button, type ButtonVariants } from '@/components/ui/button'
 
 type LinkProps = {
   className?: string

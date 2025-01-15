@@ -10,5 +10,6 @@
   "arrowParens": "always",
   "bracketSameLine": false,
   "endOfLine": "lf",
+  "tailwindFunctions": ["tv"],
   "plugins": ["prettier-plugin-tailwindcss"]
 }
