@@ -1,3 +1,4 @@
+import { jungleClient } from '@/api/chain/jungle-client'
 import {
   BADGES_INFO_CONTRACT,
   I64,
@@ -6,7 +7,6 @@ import {
   Table,
   USER_BADGES_CONTRACT,
 } from '@/constants'
-import { jungleClient } from '@/jungle-client'
 
 import type {
   BadgeFilterType,

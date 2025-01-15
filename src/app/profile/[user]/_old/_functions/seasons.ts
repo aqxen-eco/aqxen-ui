@@ -1,5 +1,5 @@
+import { jungleClient } from '@/api/chain/jungle-client'
 import { I64, ORG, SEASONS_INFO_CONTRACT, Table } from '@/constants'
-import { jungleClient } from '@/jungle-client'
 
 import type { BadgesFilter } from '../_models/badges'
 import type {

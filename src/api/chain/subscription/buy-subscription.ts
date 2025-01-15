@@ -1,5 +1,5 @@
+import { execute } from '@/api/chain/execute-action'
 import { BuySubscriptionProps } from '@/api/model/subscription'
-import { execute } from '@/chain-action'
 export async function buySubscription({
   session,
   quantity,
