@@ -1,5 +1,5 @@
-import { execute } from "@/api/chain/execute-action";
-import { CreateSeasonProps } from "@/api/model/season";
+import { execute } from '@/api/chain/execute-action'
+import { CreateSeasonProps } from '@/api/model/season'
 
 export async function createSeason({
   session,
@@ -8,18 +8,20 @@ export async function createSeason({
   badge_symbols,
   stats_badge_symbols,
 }: CreateSeasonProps) {
-  await execute(session, [{
-    account: "bamanageryyy",
-    name: "initagg",
-    authorization: [session.permissionLevel],
-    data: {
-      actor: session.actor.toString(),
-      authorized: session.actor.toString(),
-      permission: session.permission.toString(),
-      agg_symbol: `0,${symbol.toUpperCase()}`,
-      agg_description: description,
-      badge_symbols,
-      stats_badge_symbols,
+  await execute(session, [
+    {
+      account: 'bamanageryyy',
+      name: 'initagg',
+      authorization: [session.permissionLevel],
+      data: {
+        actor: session.actor.toString(),
+        authorized: session.actor.toString(),
+        permission: session.permission.toString(),
+        agg_symbol: `0,${symbol.toUpperCase()}`,
+        agg_description: description,
+        badge_symbols,
+        stats_badge_symbols,
+      },
     },
-  }])
+  ])
 }

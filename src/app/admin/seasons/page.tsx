@@ -1,15 +1,19 @@
-"use client"
+'use client'
 
-import { MdKeyboardArrowRight, MdOutlineInfo } from "react-icons/md";
+import { useQueries } from '@tanstack/react-query'
+import { MdKeyboardArrowRight } from 'react-icons/md'
 
+import { listBadge } from '@/api/chain/badge'
+import { listSeason } from '@/api/chain/season'
+import { listSeries } from '@/api/chain/series'
 import {
   HeaderAdmin,
   HeaderAdminMenu,
   HeaderAdminTitle,
-} from "@/components/header-admin";
-import { BadgeImage } from "@/components/ui/badge-image";
-import { Link } from "@/components/ui/link";
-import { Select, SelectItem } from "@/components/ui/select";
+} from '@/components/header-admin'
+import { BadgeImage } from '@/components/ui/badge-image'
+import { Link } from '@/components/ui/link'
+import { Select, SelectItem } from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -18,47 +22,46 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Tooltip } from "@/components/ui/tooltip";
-import { useOrganization } from "@/contexts/organization";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { listSeason } from "@/api/chain/season";
-import { listBadge } from "@/api/chain/badge";
-import { listSeries } from "@/api/chain/series";
-
+} from '@/components/ui/table'
+import { Tooltip } from '@/components/ui/tooltip'
+import { useOrganization } from '@/contexts/organization'
 
 export default function SeasonsPage() {
   const { name, symbol } = useOrganization()
 
-  const [seasonsQuery, badgesQuery] = useQueries({ 
+  const [seasonsQuery, badgesQuery] = useQueries({
     queries: [
       {
-        queryKey: ['seasons', name, symbol], 
-        queryFn: async () => await listSeason({ 
-          scope: name, 
-          organization_symbol: symbol 
-        }),
+        queryKey: ['seasons', name, symbol],
+        queryFn: async () =>
+          await listSeason({
+            scope: name,
+            organization_symbol: symbol,
+          }),
       },
       {
-        queryKey: ['badges', name, symbol], 
-        queryFn: async () => await listBadge({ 
-          scope: name, 
-          organization_symbol: symbol 
-        }),
-      }
-    ]
+        queryKey: ['badges', name, symbol],
+        queryFn: async () =>
+          await listBadge({
+            scope: name,
+            organization_symbol: symbol,
+          }),
+      },
+    ],
   })
 
   const seriesQueries = useQueries({
-    queries: seasonsQuery.data?.rows.map((season) => {
-      const seasonId = season.id.split(",")[1];
-      return {
-        queryKey: ['series', seasonId], 
-        queryFn: async () => await listSeries({ 
-          scope: seasonId 
-        }),
-      }
-    }) ?? []
+    queries:
+      seasonsQuery.data?.rows.map((season) => {
+        const seasonId = season.id.split(',')[1]
+        return {
+          queryKey: ['series', seasonId],
+          queryFn: async () =>
+            await listSeries({
+              scope: seasonId,
+            }),
+        }
+      }) ?? [],
   })
 
   return (
@@ -71,8 +74,9 @@ export default function SeasonsPage() {
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
-      <div className="mx-auto max-w-container-lg pb-8 px-4 min-h-[calc(100vh-24rem)]">
-        {(seasonsQuery.isSuccess || (seasonsQuery.data && seasonsQuery.data.rows.length > 0)) && (
+      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
+        {(seasonsQuery.isSuccess ||
+          (seasonsQuery.data && seasonsQuery.data.rows.length > 0)) && (
           <Table>
             <TableHeader>
               <TableRow>
@@ -92,31 +96,40 @@ export default function SeasonsPage() {
                   <TableCell>{season.name}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      {badgesQuery?.data?.rows.map((badge) => season.badges.includes(badge.id) && (
-                        <Tooltip
-                          content={badge.name}
-                          key={badge.id}
-                          className="capitalize"
-                        >
-                          <BadgeImage src={badge.ipfs} size="xs" />
-                        </Tooltip>
-                      ))}
+                      {badgesQuery?.data?.rows.map(
+                        (badge) =>
+                          season.badges.includes(badge.id) && (
+                            <Tooltip
+                              content={badge.name}
+                              key={badge.id}
+                              className="capitalize"
+                            >
+                              <BadgeImage src={badge.ipfs} size="xs" />
+                            </Tooltip>
+                          )
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    {seriesQueries?.[seasonIndex]?.data?.rows.map((serie) => (
-                      season.last_created_series.at(-1) === serie.id && serie.name
-                    ))}
+                    {seriesQueries?.[seasonIndex]?.data?.rows.map(
+                      (serie) =>
+                        season.last_created_series.at(-1) === serie.id &&
+                        serie.name
+                    )}
                   </TableCell>
                   <TableCell>
-                    {seriesQueries?.[seasonIndex]?.data?.rows.map((serie) => (
-                      season.last_started_series.at(-1) === serie.id && serie.name
-                    ))}
+                    {seriesQueries?.[seasonIndex]?.data?.rows.map(
+                      (serie) =>
+                        season.last_started_series.at(-1) === serie.id &&
+                        serie.name
+                    )}
                   </TableCell>
                   <TableCell>
-                    {seriesQueries?.[seasonIndex]?.data?.rows.map((serie) => (
-                      season.last_ended_series.at(-1) === serie.id && serie.name
-                    ))}
+                    {seriesQueries?.[seasonIndex]?.data?.rows.map(
+                      (serie) =>
+                        season.last_ended_series.at(-1) === serie.id &&
+                        serie.name
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     <Link
@@ -134,11 +147,13 @@ export default function SeasonsPage() {
             {seasonsQuery.data.more && (
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={Object.keys(seasonsQuery.data.rows[0]).length + 1}>
-                    <div className="pt-8 flex items-center justify-center gap-2 text-body-2 text-white">
+                  <TableCell
+                    colSpan={Object.keys(seasonsQuery.data.rows[0]).length + 1}
+                  >
+                    <div className="flex items-center justify-center gap-2 pt-8 text-body-2 text-white">
                       Page
                       <Select label="Page" placeholder="Page" defaultValue="1">
-                        {["1", "2", "3", "4", "5", "6"].map((item) => (
+                        {['1', '2', '3', '4', '5', '6'].map((item) => (
                           <SelectItem key={item} value={item}>
                             {item}
                           </SelectItem>
@@ -154,5 +169,5 @@ export default function SeasonsPage() {
         )}
       </div>
     </>
-  );
+  )
 }

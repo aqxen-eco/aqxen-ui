@@ -1,9 +1,5 @@
-"use client"
+'use client'
 
 export default function NewBadgeAutomationPage() {
-  return (
-    <div>
-      NewBadgeAutomationPage
-    </div>
-  )
+  return <div>NewBadgeAutomationPage</div>
 }

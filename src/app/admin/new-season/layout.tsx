@@ -2,24 +2,15 @@ import {
   HeaderAdmin,
   HeaderAdminBack,
   HeaderAdminTitle,
-} from "@/components/header-admin";
+} from '@/components/header-admin'
 
 type NewBadgeLayoutProps = {
-  children: React.ReactNode;
-};
+  children: React.ReactNode
+}
 
 export default async function NewBadgeLayout({
   children,
 }: NewBadgeLayoutProps) {
-  const defaultValues = {
-    name: "",
-    symbol: "ASD",
-    image: "",
-    description: "",
-    lifetimeAggregate: true,
-    lifetimeStats: true,
-  };
-
   return (
     <>
       <HeaderAdmin>
@@ -30,9 +21,9 @@ export default async function NewBadgeLayout({
           className="max-w-container-md"
         />
       </HeaderAdmin>
-      <div className="mx-auto max-w-container-md px-4 space-y-8 min-h-[calc(100vh-24rem)] pb-8">
+      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md space-y-8 px-4 pb-8">
         {children}
       </div>
     </>
-  );
+  )
 }

@@ -1,13 +1,13 @@
-import { BadgeImage } from "@/components/ui/badge-image";
+import { BadgeImage } from '@/components/ui/badge-image'
 // import { IPFS_IMAGE_SOURCE } from '@/constants'
 // import { useBadges } from '@/hooks/badges'
 // import { useSeasons } from '@/hooks/seasons'
 
 type BadgeProps = {
-  ipfs?: string;
-  name: string;
-  balance: string;
-};
+  ipfs?: string
+  name: string
+  balance: string
+}
 
 export function Badge({ ipfs, name, balance }: BadgeProps) {
   // const { orgBadges } = useBadges()
@@ -39,5 +39,5 @@ export function Badge({ ipfs, name, balance }: BadgeProps) {
       {/* <p className="font-medium text-white">{symbol}</p> */}
       <p className="text-body-2 text-gray-3">{balance}</p>
     </div>
-  );
+  )
 }

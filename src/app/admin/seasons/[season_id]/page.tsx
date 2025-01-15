@@ -1,17 +1,20 @@
-"use client"
+'use client'
 
+import { useQueries } from '@tanstack/react-query'
+import { useParams } from 'next/navigation'
+import { MdOutlineAdd, MdOutlineInfo } from 'react-icons/md'
+
+import { listBadge } from '@/api/chain/badge'
+import { listSeason } from '@/api/chain/season'
+import { listSeries } from '@/api/chain/series'
 import {
   HeaderAdmin,
   HeaderAdminBack,
   HeaderAdminTitle,
-} from "@/components/header-admin";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/components/ui/link";
-import { Tag } from "@/components/ui/tag";
-import { Tooltip } from "@/components/ui/tooltip";
-import { MdOutlineAdd, MdOutlineInfo } from "react-icons/md";
-
-import { BadgeImage } from "@/components/ui/badge-image";
+} from '@/components/header-admin'
+import { BadgeImage } from '@/components/ui/badge-image'
+import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
 import {
   Table,
   TableBody,
@@ -19,46 +22,44 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-
-import { useParams } from "next/navigation";
-import { useQueries } from "@tanstack/react-query";
-import { useOrganization } from "@/contexts/organization";
-
-import { listSeason } from "@/api/chain/season";
-import { listSeries } from '@/api/chain/series'
-import { listBadge } from '@/api/chain/badge'
+} from '@/components/ui/table'
+import { Tag } from '@/components/ui/tag'
+import { Tooltip } from '@/components/ui/tooltip'
+import { useOrganization } from '@/contexts/organization'
 
 export default function SeasonPage() {
-  const { name, symbol } = useOrganization();
-  const { season_id } = useParams();
-  const seasonId = decodeURIComponent(season_id as string).split(",")[1];
+  const { name, symbol } = useOrganization()
+  const { season_id } = useParams()
+  const seasonId = decodeURIComponent(season_id as string).split(',')[1]
 
-  const [seasonQuery, badgesQuery, seriesQuery] = useQueries({ 
+  const [seasonQuery, badgesQuery, seriesQuery] = useQueries({
     queries: [
       {
         queryKey: ['seasons', seasonId, name, symbol],
-        queryFn: async () => await listSeason({ 
-          scope: name, 
-          lower_bound: seasonId, 
-          upper_bound: seasonId, 
-          organization_symbol: symbol
-        }),
+        queryFn: async () =>
+          await listSeason({
+            scope: name,
+            lower_bound: seasonId,
+            upper_bound: seasonId,
+            organization_symbol: symbol,
+          }),
       },
       {
         queryKey: ['badges', name, symbol],
-        queryFn: async () => await listBadge({ 
-          scope: name, 
-          organization_symbol: symbol
-        }),
+        queryFn: async () =>
+          await listBadge({
+            scope: name,
+            organization_symbol: symbol,
+          }),
       },
       {
-        queryKey: ['series', seasonId], 
-        queryFn: async () => await listSeries({
-          scope: seasonId,
-        }),
-      }
-    ]
+        queryKey: ['series', seasonId],
+        queryFn: async () =>
+          await listSeries({
+            scope: seasonId,
+          }),
+      },
+    ],
   })
 
   if (seasonQuery.isPending || badgesQuery.isPending || seriesQuery.isPending) {
@@ -71,10 +72,10 @@ export default function SeasonPage() {
         <HeaderAdminBack href="/admin/seasons">Seasons</HeaderAdminBack>
         <HeaderAdminTitle title={seasonQuery?.data?.rows?.[0]?.name ?? ''} />
       </HeaderAdmin>
-      <div className="mx-auto max-w-container-lg by-8 px-4 space-y-8 pb-8">
+      <div className="by-8 mx-auto max-w-container-lg space-y-8 px-4 pb-8">
         <section className="space-y-4">
           <header className="flex items-center">
-            <div className="flex-1 flex items-center gap-1">
+            <div className="flex flex-1 items-center gap-1">
               <h2 className="text-title-2 text-white">Badges</h2>
               <Tooltip content="Lorem ipsum dolor sit amed">
                 <Button variant="link" size="md" square>
@@ -92,7 +93,8 @@ export default function SeasonPage() {
               </Link>
             </div>
           </header>
-          {(badgesQuery.isSuccess || (badgesQuery.data && badgesQuery.data.rows.length > 0)) && (  
+          {(badgesQuery.isSuccess ||
+            (badgesQuery.data && badgesQuery.data.rows.length > 0)) && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -104,32 +106,34 @@ export default function SeasonPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {badgesQuery.data.rows.map((badge) => (
-                  seasonQuery?.data?.rows?.[0]?.badges.includes(badge.id) && (
-                  <TableRow key={badge.symbol}>
-                    <TableCell className="text-gray-3">
-                      {badge.symbol}
-                    </TableCell>
-                    <TableCell>
-                      <div className="inline-flex items-center gap-2">
-                        <BadgeImage src={badge.ipfs} size="xs" />
-                        <span className="text-body-2 font-sans font-medium text-white text-nowrap capitalize">
-                          {badge.name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {badge.rarity_counts}
-                    </TableCell>
-                  </TableRow>
-                )))}
+                {badgesQuery.data.rows.map(
+                  (badge) =>
+                    seasonQuery?.data?.rows?.[0]?.badges.includes(badge.id) && (
+                      <TableRow key={badge.symbol}>
+                        <TableCell className="text-gray-3">
+                          {badge.symbol}
+                        </TableCell>
+                        <TableCell>
+                          <div className="inline-flex items-center gap-2">
+                            <BadgeImage src={badge.ipfs} size="xs" />
+                            <span className="text-nowrap font-sans text-body-2 font-medium capitalize text-white">
+                              {badge.name}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {badge.rarity_counts}
+                        </TableCell>
+                      </TableRow>
+                    )
+                )}
               </TableBody>
             </Table>
           )}
         </section>
         <section className="space-y-4">
           <header className="flex items-center">
-            <div className="flex-1 flex items-center gap-1">
+            <div className="flex flex-1 items-center gap-1">
               <h2 className="text-title-2 text-white">Series</h2>
               <Tooltip content="Lorem ipsum dolor sit amed">
                 <Button variant="link" size="md" square>
@@ -147,7 +151,8 @@ export default function SeasonPage() {
               </Link>
             </div>
           </header>
-          {(seriesQuery.isSuccess || (seriesQuery.data && seriesQuery.data.rows.length > 0)) && (
+          {(seriesQuery.isSuccess ||
+            (seriesQuery.data && seriesQuery.data.rows.length > 0)) && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -161,19 +166,19 @@ export default function SeasonPage() {
               <TableBody>
                 {seriesQuery.data.rows.map((serie) => (
                   <TableRow key={serie.id}>
-                    <TableCell className="text-gray-3 text-center">
+                    <TableCell className="text-center text-gray-3">
                       {serie.id}
                     </TableCell>
                     <TableCell>{serie.name}</TableCell>
                     <TableCell>
-                      <div className="flex gap-4 items-center">
+                      <div className="flex items-center gap-4">
                         <Tooltip content="Lorem" className="capitalize">
                           <BadgeImage src="" size="xs" />
                         </Tooltip>
                         <Tooltip content="Lorem" className="capitalize">
                           <BadgeImage src="" size="xs" />
                         </Tooltip>
-                        {serie.status !== "end" && (
+                        {serie.status !== 'end' && (
                           <Tooltip content="Add badge">
                             <Button variant="secondary" size="md" square>
                               <MdOutlineAdd className="size-6" />
@@ -183,18 +188,18 @@ export default function SeasonPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {serie.status === "init" ? (
+                      {serie.status === 'init' ? (
                         <Tag variant="yellow">Paused</Tag>
-                      ) : serie.status === "end" ? (
+                      ) : serie.status === 'end' ? (
                         <Tag variant="red">Ended</Tag>
-                      ) : serie.status === "active" ? (
+                      ) : serie.status === 'active' ? (
                         <Tag variant="green">Started</Tag>
                       ) : (
                         <Tag variant="blue">Created</Tag>
                       )}
                     </TableCell>
-                    <TableCell className="flex gap-2 justify-end">
-                      {serie.status === "init" ? (
+                    <TableCell className="flex justify-end gap-2">
+                      {serie.status === 'init' ? (
                         <>
                           <Button variant="secondary" size="md">
                             Resume
@@ -203,9 +208,9 @@ export default function SeasonPage() {
                             End
                           </Button>
                         </>
-                      ) : serie.status === "end" ? (
+                      ) : serie.status === 'end' ? (
                         <></>
-                      ) : serie.status === "active" ? (
+                      ) : serie.status === 'active' ? (
                         <>
                           <Button variant="secondary" size="md">
                             Pause
@@ -228,5 +233,5 @@ export default function SeasonPage() {
         </section>
       </div>
     </>
-  );
+  )
 }

@@ -1,13 +1,13 @@
-import { Session, GetTableRowsResult } from "./index";
+import { GetTableRowsResult,Session } from './index'
 
 export type Badge = {
-  id: string;
-  symbol: string;
-  ipfs: string;
-  name: string;
-  notify_accounts: string[];
-  rarity_counts: string;
-};
+  id: string
+  symbol: string
+  ipfs: string
+  name: string
+  notify_accounts: string[]
+  rarity_counts: string
+}
 
 export type ListBadgeResult = GetTableRowsResult<Badge>
 

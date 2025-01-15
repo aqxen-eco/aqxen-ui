@@ -1,8 +1,8 @@
-import NextLink from "next/link";
+import NextLink from 'next/link'
 
 export function Footer() {
-  const today = new Date();
-  const year = today.getFullYear();
+  const today = new Date()
+  const year = today.getFullYear()
 
   return (
     <footer className="mx-auto max-w-container-lg desktop:px-4">
@@ -24,5 +24,5 @@ export function Footer() {
         </a>
       </div>
     </footer>
-  );
+  )
 }

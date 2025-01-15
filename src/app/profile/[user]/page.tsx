@@ -1,33 +1,33 @@
-import { MdOutlineModeEdit } from "react-icons/md";
+import { MdOutlineModeEdit } from 'react-icons/md'
 
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Avatar } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import {
   BadgeSwiper,
   BadgeSwiperSlide,
   BadgeSwiperWrapper,
-} from "@/components/ui/badge-swiper";
-import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/badge-swiper'
+import { Box } from '@/components/ui/box'
+import { Button } from '@/components/ui/button'
 
-import { getUserBadges } from "./functions";
-import { SeasonalBadgesSection } from "./seasonal-badges-section";
+import { getUserBadges } from './functions'
+import { SeasonalBadgesSection } from './seasonal-badges-section'
 
 type ProfilePageProps = {
   params: Promise<{
-    user: string;
-  }>;
-};
+    user: string
+  }>
+}
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
-  const { user } = await params;
+  const { user } = await params
 
   const { badges, seasons } = await getUserBadges({
     user,
-  });
+  })
 
   if (!user) {
-    return null;
+    return null
   }
 
   return (
@@ -55,7 +55,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <section className="py-8">
             <header className="mb-4 px-8 mobile:px-4">
               <h3 className="text-title-2 text-white">
-                Lifetime Badges{" "}
+                Lifetime Badges{' '}
                 <span className="text-gray-3">({badges.length})</span>
               </h3>
             </header>
@@ -74,5 +74,5 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <SeasonalBadgesSection seasons={seasons} />
       </Box>
     </div>
-  );
+  )
 }

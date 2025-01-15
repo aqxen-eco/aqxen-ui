@@ -1,24 +1,24 @@
-"use client";
+'use client'
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import z from "zod";
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import z from 'zod'
 
-import { Badge } from "@/components/ui/badge";
-import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useOrganization } from "@/contexts/organization";
+import { Badge } from '@/components/ui/badge'
+import { Box } from '@/components/ui/box'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useOrganization } from '@/contexts/organization'
 
 const organizationSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  logo: z.string().min(1, "Logo is required"),
-});
+  name: z.string().min(1, 'Name is required'),
+  logo: z.string().min(1, 'Logo is required'),
+})
 
-type OrganizationSchema = z.infer<typeof organizationSchema>;
+type OrganizationSchema = z.infer<typeof organizationSchema>
 
 export default function OrganizationPage() {
-  const { name, symbol } = useOrganization();
+  const { name, symbol } = useOrganization()
 
   const {
     register,
@@ -26,33 +26,38 @@ export default function OrganizationPage() {
     formState: { errors, isSubmitting, isLoading },
   } = useForm<OrganizationSchema>({
     resolver: zodResolver(organizationSchema),
-  });
+  })
 
   async function onSubmit({ name, logo }: OrganizationSchema) {}
 
   return (
-    <Box className="p-0 mobile:rounded-none mobile:border-0 mobile:bg-black desktop:grid desktop:grid-cols-6 mobile:space-y-8">
+    <Box className="p-0 mobile:space-y-8 mobile:rounded-none mobile:border-0 mobile:bg-black desktop:grid desktop:grid-cols-6">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8 desktop:col-span-4 p-8 mobile:p-0"
+        className="space-y-8 p-8 mobile:p-0 desktop:col-span-4"
       >
         <Input
-          {...register("name")}
+          {...register('name')}
           label="Name"
-          error={errors["name"]?.message}
+          error={errors['name']?.message}
           disabled={isLoading}
         />
         <Input
-          {...register("logo")}
+          {...register('logo')}
           label="Logo IPFS Image hash"
-          error={errors["logo"]?.message}
+          error={errors['logo']?.message}
           disabled={isLoading}
         />
-        <Button type="submit" variant="primary" size="lg" disabled={isSubmitting || isLoading}>
-          {isSubmitting ? "Saving..." : "Save"}
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          disabled={isSubmitting || isLoading}
+        >
+          {isSubmitting ? 'Saving...' : 'Save'}
         </Button>
       </form>
-      <div className="desktop:col-span-2 p-8 mobile:p-4 space-y-4 border-l mobile:border border-gray-2 mobile:rounded-2xl mobile:bg-gray-1">
+      <div className="space-y-4 border-l border-gray-2 p-8 mobile:rounded-2xl mobile:border mobile:bg-gray-1 mobile:p-4 desktop:col-span-2">
         <h2 className="text-title-2 text-white">Organization preview</h2>
         <Badge name={name} balance={symbol.toUpperCase()} />
         <hr className="border-t border-gray-2" />
@@ -62,5 +67,5 @@ export default function OrganizationPage() {
         </div>
       </div>
     </Box>
-  );
+  )
 }

@@ -1,23 +1,23 @@
-"use client";
+'use client'
 
-import NextLink from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import NextLink from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 
-import { Avatar } from "@/components/ui/avatar";
-import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
-import { DropdownItem, DropdownRoot } from "@/components/ui/dropdown";
-import { Link } from "@/components/ui/link";
-import { useChain } from "@/contexts/chain";
+import { Avatar } from '@/components/ui/avatar'
+import { Box } from '@/components/ui/box'
+import { Button } from '@/components/ui/button'
+import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
+import { Link } from '@/components/ui/link'
+import { useChain } from '@/contexts/chain'
 
 export function AppBar() {
-  const { isAuthenticated, login, logout, actor } = useChain();
-  const pathname = usePathname();
-  const router = useRouter();
+  const { isAuthenticated, login, logout, actor } = useChain()
+  const pathname = usePathname()
+  const router = useRouter()
 
   function logoutAndGoToHome() {
-    logout();
-    router.push("/");
+    logout()
+    router.push('/')
   }
 
   return (
@@ -34,7 +34,12 @@ export function AppBar() {
             </NextLink>
             {isAuthenticated ? (
               <>
-                <Link href="/admin/organization" variant={pathname.includes('/admin') ? 'link' : 'default'}>Admin</Link>
+                <Link
+                  href="/admin/organization"
+                  variant={pathname.includes('/admin') ? 'link' : 'default'}
+                >
+                  Admin
+                </Link>
                 <DropdownRoot
                   customTrigger={
                     <button
@@ -45,7 +50,7 @@ export function AppBar() {
                         color="red"
                         className="group-data-[state=open]/dropdown-button:border-white"
                       >
-                        {actor ? actor.slice(0, 2) : "un"}
+                        {actor ? actor.slice(0, 2) : 'un'}
                       </Avatar>
                     </button>
                   }
@@ -54,7 +59,9 @@ export function AppBar() {
                   <DropdownItem asChild>
                     <NextLink href={`/profile/${actor}`}>Profile</NextLink>
                   </DropdownItem>
-                  <DropdownItem onClick={logoutAndGoToHome}>Log out</DropdownItem>
+                  <DropdownItem onClick={logoutAndGoToHome}>
+                    Log out
+                  </DropdownItem>
                 </DropdownRoot>
               </>
             ) : (
@@ -66,5 +73,5 @@ export function AppBar() {
         </div>
       </nav>
     </>
-  );
+  )
 }

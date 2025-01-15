@@ -2,11 +2,11 @@ import {
   HeaderAdmin,
   HeaderAdminBack,
   HeaderAdminTitle,
-} from "@/components/header-admin";
+} from '@/components/header-admin'
 
 type BuySubscriptionProps = {
-  children: React.ReactNode;
-};
+  children: React.ReactNode
+}
 
 export default async function BuySubscription({
   children,
@@ -17,14 +17,14 @@ export default async function BuySubscription({
         <HeaderAdminBack href="/admin/subscription">
           Subscription
         </HeaderAdminBack>
-        <HeaderAdminTitle 
-          title="Buy Subscription" 
+        <HeaderAdminTitle
+          title="Buy Subscription"
           tooltip="Lorem ipsum dolor sit amed"
         />
       </HeaderAdmin>
-      <div className="max-w-container-lg mx-auto px-4 pb-8 min-h-[calc(100vh-24rem)]">
+      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
         {children}
       </div>
     </>
-  );
+  )
 }

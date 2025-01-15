@@ -1,3 +1,2 @@
-export { listSeries } from './list-series';
-
-export type { Series, ListSeriesResult } from '@/api/model/series'
+export { listSeries } from './list-series'
+export type { ListSeriesResult,Series } from '@/api/model/series'

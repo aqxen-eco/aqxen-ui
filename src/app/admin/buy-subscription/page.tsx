@@ -1,7 +1,11 @@
-"use client"
+'use client'
 
-import { listSubscription } from "@/api/chain/subscription/list-subscription";
-import { Button } from "@/components/ui/button";
+import { useQuery } from '@tanstack/react-query'
+import { secondsToHours } from 'date-fns'
+
+import { buySubscription } from '@/api/chain/subscription/buy-subscription'
+import { listSubscription } from '@/api/chain/subscription/list-subscription'
+import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -9,32 +13,32 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { useQuery } from "@tanstack/react-query";
-import { secondsToHours } from "date-fns";
-import { buySubscription } from "@/api/chain/subscription/buy-subscription";
-import { useOrganization } from "@/contexts/organization";
-import { useChain } from "@/contexts/chain";
-import { listOrganizationSubscription } from "@/api/chain/subscription/list-organization-subscription";
-
+} from '@/components/ui/table'
+import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
 
 export default function AtiveSubscriptionPage() {
-  const { session } = useChain();
+  const { session } = useChain()
   const { name } = useOrganization()
 
-  const query = useQuery({ 
-    queryKey: ['subscription'], 
+  const query = useQuery({
+    queryKey: ['subscription'],
     queryFn: async () => await listSubscription(),
   })
 
-  async function handleBuyPackage({ subPackage, quantity }: { subPackage:string, quantity: string }) {
+  async function handleBuyPackage({
+    subPackage,
+    quantity,
+  }: {
+    subPackage: string
+    quantity: string
+  }) {
     await buySubscription({
       session: session!,
       quantity,
       memo: `${name}:${subPackage}`,
-    });
+    })
   }
-
 
   return (
     <>
@@ -51,21 +55,42 @@ export default function AtiveSubscriptionPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {query.data.rows.map((row) => row.display && row.active ? (
-              <TableRow key={row.package}>
-                <TableCell className="py-6 capitalize">{row.descriptive_name}</TableCell>
-                <TableCell className="text-center py-6">{row.action_size}</TableCell>
-                <TableCell className="text-center py-6">{(secondsToHours(row.expiry_duration_in_secs) / 24)} days</TableCell>
-                <TableCell className="text-center py-6">{row.cost.quantity}</TableCell>
-                {/* <TableCell className="text-center py-6"></TableCell> */}
-                <TableCell>
-                  <Button variant="secondary" size="md" onClick={() => handleBuyPackage({ quantity: row.cost.quantity, subPackage: row.package })}>Buy</Button>
-                </TableCell>
-              </TableRow>
-            ): null)}
+            {query.data.rows.map((row) =>
+              row.display && row.active ? (
+                <TableRow key={row.package}>
+                  <TableCell className="py-6 capitalize">
+                    {row.descriptive_name}
+                  </TableCell>
+                  <TableCell className="py-6 text-center">
+                    {row.action_size}
+                  </TableCell>
+                  <TableCell className="py-6 text-center">
+                    {secondsToHours(row.expiry_duration_in_secs) / 24} days
+                  </TableCell>
+                  <TableCell className="py-6 text-center">
+                    {row.cost.quantity}
+                  </TableCell>
+                  {/* <TableCell className="text-center py-6"></TableCell> */}
+                  <TableCell>
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={() =>
+                        handleBuyPackage({
+                          quantity: row.cost.quantity,
+                          subPackage: row.package,
+                        })
+                      }
+                    >
+                      Buy
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ) : null
+            )}
           </TableBody>
         </Table>
       )}
     </>
-  );
+  )
 }

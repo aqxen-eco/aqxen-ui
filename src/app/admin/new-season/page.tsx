@@ -1,30 +1,30 @@
-"use client";
+'use client'
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import z from "zod";
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Controller, useForm } from 'react-hook-form'
+import z from 'zod'
 
-import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { InputBadges } from "@/components/ui/input-badges";
-import { InputSymbol } from "@/components/ui/input-symbol";
-import { createSeason } from "@/api/chain/season/create-season";
-import { useChain } from "@/contexts/chain";
-import { useOrganization } from "@/contexts/organization";
+import { createSeason } from '@/api/chain/season/create-season'
+import { Box } from '@/components/ui/box'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { InputBadges } from '@/components/ui/input-badges'
+import { InputSymbol } from '@/components/ui/input-symbol'
+import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
 
 const newSeasonSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  symbol: z.string().min(3, "Symbol is required"),
-  badges: z.string().array().min(1, "Badges is required"),
-  stats: z.string().array().min(1, "Stats badges is required"),
-});
+  name: z.string().min(1, 'Name is required'),
+  symbol: z.string().min(3, 'Symbol is required'),
+  badges: z.string().array().min(1, 'Badges is required'),
+  stats: z.string().array().min(1, 'Stats badges is required'),
+})
 
-type NewSeasonSchema = z.infer<typeof newSeasonSchema>;
+type NewSeasonSchema = z.infer<typeof newSeasonSchema>
 
 export default function NewSeasonPage() {
   const { symbol: organizationSymbol } = useOrganization()
-  const { session } = useChain();
+  const { session } = useChain()
 
   const {
     control,
@@ -33,7 +33,7 @@ export default function NewSeasonPage() {
     formState: { errors, isSubmitting },
   } = useForm<NewSeasonSchema>({
     resolver: zodResolver(newSeasonSchema),
-  });
+  })
 
   async function onSubmit({ name, symbol, badges, stats }: NewSeasonSchema) {
     await createSeason({
@@ -41,7 +41,7 @@ export default function NewSeasonPage() {
       symbol: organizationSymbol + symbol,
       description: name,
       badge_symbols: badges,
-      stats_badge_symbols: stats
+      stats_badge_symbols: stats,
     })
   }
 
@@ -52,10 +52,10 @@ export default function NewSeasonPage() {
         className="space-y-8 p-8 mobile:p-0"
       >
         <Input
-          {...register("name")}
+          {...register('name')}
           label="Name"
           placeholder="String"
-          error={errors["name"]?.message}
+          error={errors['name']?.message}
         />
         <Controller
           name="symbol"
@@ -63,7 +63,7 @@ export default function NewSeasonPage() {
           render={({ field }) => (
             <InputSymbol
               label="Symbol"
-              error={errors["symbol"]?.message}
+              error={errors['symbol']?.message}
               maxLength={3}
               {...field}
             />
@@ -76,7 +76,7 @@ export default function NewSeasonPage() {
             <InputBadges
               value={field.value}
               onChange={field.onChange}
-              error={errors["badges"]?.message}
+              error={errors['badges']?.message}
             />
           )}
         />
@@ -88,14 +88,14 @@ export default function NewSeasonPage() {
               label="Stats badges"
               value={field.value}
               onChange={field.onChange}
-              error={errors["badges"]?.message}
+              error={errors['badges']?.message}
             />
           )}
         />
         <Button type="submit" variant="primary" size="lg">
-          {isSubmitting ? "Creating..." : "Create"}
+          {isSubmitting ? 'Creating...' : 'Create'}
         </Button>
       </form>
     </Box>
-  );
+  )
 }

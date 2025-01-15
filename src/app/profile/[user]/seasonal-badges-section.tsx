@@ -1,39 +1,39 @@
-"use client";
+'use client'
 
-import { usePathname, useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge'
 import {
   BadgeSwiper,
   BadgeSwiperSlide,
   BadgeSwiperWrapper,
-} from "@/components/ui/badge-swiper";
-import { Box } from "@/components/ui/box";
-import { DropdownItem, DropdownRoot } from "@/components/ui/dropdown";
+} from '@/components/ui/badge-swiper'
+import { Box } from '@/components/ui/box'
+import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 
-import type { Seasons } from "./functions";
+import type { Seasons } from './functions'
 
 type SeasonalBadgesSectionProps = {
-  seasons: Seasons;
-};
+  seasons: Seasons
+}
 
 export function SeasonalBadgesSection({ seasons }: SeasonalBadgesSectionProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-  const seasonIndex = Number(searchParams.get("season")) ?? 0;
+  const seasonIndex = Number(searchParams.get('season')) ?? 0
 
   if (seasons.length === 0 || !seasons[seasonIndex]) {
-    return null;
+    return null
   }
 
   return (
     <section className="py-8">
-      <header className="flex items-center justify-between gap-4 mb-4 px-8 mobile:px-4">
+      <header className="mb-4 flex items-center justify-between gap-4 px-8 mobile:px-4">
         <h3 className="text-title-2 text-white">
-          {seasons[seasonIndex].name}{" "}
+          {seasons[seasonIndex].name}{' '}
           <span className="text-gray-3">({seasons[0].badges.length})</span>
         </h3>
         <DropdownRoot label={seasons[seasonIndex].name} align="end">
@@ -42,7 +42,7 @@ export function SeasonalBadgesSection({ seasons }: SeasonalBadgesSectionProps) {
               key={index}
               isSelected={index === seasonIndex}
               onClick={() => {
-                router.push(`${pathname}?season=${index}`);
+                router.push(`${pathname}?season=${index}`)
               }}
             >
               {season.name}
@@ -68,5 +68,5 @@ export function SeasonalBadgesSection({ seasons }: SeasonalBadgesSectionProps) {
         </div>
       )}
     </section>
-  );
+  )
 }

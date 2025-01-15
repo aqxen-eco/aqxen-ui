@@ -1,86 +1,80 @@
-"use client";
+'use client'
 
-import { Chains } from "@wharfkit/common";
-import SessionKit, { type Session } from "@wharfkit/session";
-import { WalletPluginAnchor } from "@wharfkit/wallet-plugin-anchor";
-import { WalletPluginCloudWallet } from "@wharfkit/wallet-plugin-cloudwallet";
-import WebRenderer from "@wharfkit/web-renderer";
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-  use,
-} from "react";
+import { Chains } from '@wharfkit/common'
+import SessionKit, { type Session } from '@wharfkit/session'
+import { WalletPluginAnchor } from '@wharfkit/wallet-plugin-anchor'
+import { WalletPluginCloudWallet } from '@wharfkit/wallet-plugin-cloudwallet'
+import WebRenderer from '@wharfkit/web-renderer'
+import { createContext, use,useCallback, useEffect, useState } from 'react'
 
 type ChainContext = {
-  login: () => Promise<void>;
-  logout: () => Promise<void>;
-  session?: Session;
-  isAuthenticated: boolean;
-};
+  login: () => Promise<void>
+  logout: () => Promise<void>
+  session?: Session
+  isAuthenticated: boolean
+}
 
-const ChainContext = createContext({} as ChainContext);
+const ChainContext = createContext({} as ChainContext)
 
-const appName = "reputationsystem";
+const appName = 'reputationsystem'
 
 const sessionKit = new SessionKit({
   appName,
   chains: [Chains.Jungle4],
   ui: new WebRenderer(),
   walletPlugins: [new WalletPluginAnchor(), new WalletPluginCloudWallet()],
-});
+})
 
-const localStorageSessionKey = `wharf-${sessionKit.appName}-session`;
+const localStorageSessionKey = `wharf-${sessionKit.appName}-session`
 
 export function ChainProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session>();
-  const isAuthenticated = session != null ? !!session?.actor.toString() : false;
+  const [session, setSession] = useState<Session>()
+  const isAuthenticated = session != null ? !!session?.actor.toString() : false
 
   async function logout() {
-    await sessionKit.logout(session);
-    setSession(undefined);
+    await sessionKit.logout(session)
+    setSession(undefined)
   }
 
   async function login() {
-    const response = await sessionKit.login();
-    setSession(response.session);
+    const response = await sessionKit.login()
+    setSession(response.session)
   }
 
   const restoreSession = useCallback(async () => {
     try {
-      const restoredSession = await sessionKit.restore();
-      setSession(restoredSession);
+      const restoredSession = await sessionKit.restore()
+      setSession(restoredSession)
     } catch {
-      setSession(undefined);
+      setSession(undefined)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    restoreSession();
-  }, [restoreSession]);
+    restoreSession()
+  }, [restoreSession])
 
   useEffect(() => {
     // handle what happens on key press
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === localStorageSessionKey && event.newValue == null) {
-        setSession(undefined);
+        setSession(undefined)
       } else if (
         event.key === localStorageSessionKey &&
         event.newValue != null
       ) {
-        restoreSession();
+        restoreSession()
       }
-    };
+    }
 
     // attach the event listener
-    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener('storage', handleStorageChange)
 
     // remove the event listener
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, [restoreSession]);
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [restoreSession])
 
   return (
     <ChainContext
@@ -93,11 +87,11 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
     </ChainContext>
-  );
+  )
 }
 
 export function useChain() {
-  const { login, logout, isAuthenticated, session } = use(ChainContext);
+  const { login, logout, isAuthenticated, session } = use(ChainContext)
 
   return {
     login,
@@ -106,5 +100,5 @@ export function useChain() {
     isAuthenticated,
     actor: session?.actor?.toString(),
     permission: session?.permission?.toString(),
-  };
+  }
 }

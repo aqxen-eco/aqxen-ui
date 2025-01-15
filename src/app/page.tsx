@@ -1,4 +1,4 @@
-import { CallToAction } from "@/components/call-to-action";
+import { CallToAction } from '@/components/call-to-action'
 
 export default function HomePage() {
   return (
@@ -18,5 +18,5 @@ export default function HomePage() {
         className="absolute -z-10 mobile:bottom-0 mobile:left-1/2 mobile:-translate-x-1/2 mobile:translate-y-1/2 desktop:right-4 desktop:top-1/2 desktop:-translate-y-1/2"
       />
     </header>
-  );
+  )
 }

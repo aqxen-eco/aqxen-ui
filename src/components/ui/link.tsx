@@ -1,12 +1,12 @@
-import NextLink, { type LinkProps as NextLinkProps } from "next/link";
+import NextLink, { type LinkProps as NextLinkProps } from 'next/link'
 
-import { type ButtonVariants, button } from "@/components/ui/button";
+import { button,type ButtonVariants } from '@/components/ui/button'
 
 type LinkProps = {
-  className?: string;
-  children: React.ReactNode;
+  className?: string
+  children: React.ReactNode
 } & NextLinkProps &
-  ButtonVariants;
+  ButtonVariants
 
 export function Link({
   size,
@@ -23,5 +23,5 @@ export function Link({
     >
       {children}
     </NextLink>
-  );
+  )
 }

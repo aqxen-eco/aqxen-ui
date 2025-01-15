@@ -2,12 +2,12 @@ import {
   HeaderAdmin,
   HeaderAdminMenu,
   HeaderAdminTitle,
-} from "@/components/header-admin";
-import { Link } from "@/components/ui/link";
+} from '@/components/header-admin'
+import { Link } from '@/components/ui/link'
 
 type ActiveSubscriptionLayoutProps = {
-  children: React.ReactNode;
-};
+  children: React.ReactNode
+}
 
 export default async function ActiveSubscriptionLayout({
   children,
@@ -25,9 +25,9 @@ export default async function ActiveSubscriptionLayout({
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
-      <div className="max-w-container-lg mx-auto px-4 pb-8 min-h-[calc(100vh-24rem)]">
+      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
         {children}
       </div>
     </>
-  );
+  )
 }

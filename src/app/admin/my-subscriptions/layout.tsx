@@ -2,11 +2,11 @@ import {
   HeaderAdmin,
   HeaderAdminBack,
   HeaderAdminTitle,
-} from "@/components/header-admin";
+} from '@/components/header-admin'
 
 type MySubscriptionsLayoutProps = {
-  children: React.ReactNode;
-};
+  children: React.ReactNode
+}
 
 export default async function MySubscriptionsLayout({
   children,
@@ -22,9 +22,9 @@ export default async function MySubscriptionsLayout({
           tooltip="Lorem ipsum dolor sit amed"
         />
       </HeaderAdmin>
-      <div className="mx-auto max-w-container-lg px-4 space-y-8 min-h-[calc(100vh-24rem)] pb-8">
+      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg space-y-8 px-4 pb-8">
         {children}
       </div>
     </>
-  );
+  )
 }

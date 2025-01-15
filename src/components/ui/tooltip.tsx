@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {
   Arrow,
@@ -7,16 +7,15 @@ import {
   Provider,
   Root,
   Trigger,
-} from "@radix-ui/react-tooltip";
-import { useState } from "react";
-
-import { twMerge } from "tailwind-merge";
+} from '@radix-ui/react-tooltip'
+import { useState } from 'react'
+import { twMerge } from 'tailwind-merge'
 
 type TooltipProps = {
-  content: string;
-  arrowFill?: string;
-  children: React.ReactNode;
-} & React.ComponentProps<"div">;
+  content: string
+  arrowFill?: string
+  children: React.ReactNode
+} & React.ComponentProps<'div'>
 
 export function Tooltip({
   content,
@@ -25,7 +24,7 @@ export function Tooltip({
   className,
   ...restProps
 }: TooltipProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   return (
     <Provider>
@@ -36,8 +35,8 @@ export function Tooltip({
         <Portal>
           <Content
             className={twMerge(
-              "max-w-64 select-none rounded-lg border border-gray-2 bg-gray-1 p-3 text-body-3",
-              className,
+              'max-w-64 select-none rounded-lg border border-gray-2 bg-gray-1 p-3 text-body-3',
+              className
             )}
             sideOffset={5}
             {...restProps}
@@ -48,5 +47,5 @@ export function Tooltip({
         </Portal>
       </Root>
     </Provider>
-  );
+  )
 }

@@ -1,27 +1,32 @@
-"use client";
+'use client'
 
-import { useQuery } from "@tanstack/react-query";
-import { createContext, use } from "react";
-import { useChain } from "@/contexts/chain";
+import { useQuery } from '@tanstack/react-query'
+import { createContext, use } from 'react'
 
 import { listOrganization } from '@/api/chain/organization'
+import { useChain } from '@/contexts/chain'
 
 type OrganizationContext = {
-  name: string;
-  symbol: string;
-};
+  name: string
+  symbol: string
+}
 
-const OrganizationContext = createContext({} as OrganizationContext);
+const OrganizationContext = createContext({} as OrganizationContext)
 
-export function OrganizationProvider({ children }: { children: React.ReactNode }) {
-  const { actor } = useChain();
+export function OrganizationProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const { actor } = useChain()
 
-  const query = useQuery({ 
-    queryKey: ['organization_symbol', actor], 
-    queryFn: async () => await listOrganization({ lower_bound: actor!, upper_bound: actor! }),
-    enabled: !!actor
+  const query = useQuery({
+    queryKey: ['organization_symbol', actor],
+    queryFn: async () =>
+      await listOrganization({ lower_bound: actor!, upper_bound: actor! }),
+    enabled: !!actor,
   })
-  
+
   const name = query.data?.rows[0]?.org ?? ''
   const symbol = query.data?.rows[0]?.org_code ?? ''
 
@@ -29,14 +34,14 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     <OrganizationContext value={{ name, symbol }}>
       {children}
     </OrganizationContext>
-  );
+  )
 }
 
 export function useOrganization() {
-  const { name, symbol } = use(OrganizationContext);
+  const { name, symbol } = use(OrganizationContext)
 
   return {
     name,
-    symbol
-  };
+    symbol,
+  }
 }

@@ -1,24 +1,24 @@
-import { useId } from "react";
+import { useId } from 'react'
 import {
   MdErrorOutline,
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
-} from "react-icons/md";
+} from 'react-icons/md'
 
 type CheckboxProps = {
-  label: string;
-  error?: string;
-} & React.ComponentProps<"input">;
+  label: string
+  error?: string
+} & React.ComponentProps<'input'>
 
 export function Checkbox({ label, error, ref, ...restProps }: CheckboxProps) {
-  const id = useId();
+  const id = useId()
 
   return (
     <div className="group/input" data-error={!!error}>
-      <div className="flex gap-2 items-center border-b border-gray-3 focus-within:border-white group-data-[error=true]/input:border-red-600">
+      <div className="flex items-center gap-2 border-b border-gray-3 focus-within:border-white group-data-[error=true]/input:border-red-600">
         <label
           htmlFor={id}
-          className="flex-1 select-none text-body-2 font-medium text-white flex gap-1 cursor-pointer group-data-[error=true]/input:text-red-600 py-4"
+          className="flex flex-1 cursor-pointer select-none gap-1 py-4 text-body-2 font-medium text-white group-data-[error=true]/input:text-red-600"
         >
           {label}
         </label>
@@ -27,19 +27,19 @@ export function Checkbox({ label, error, ref, ...restProps }: CheckboxProps) {
             ref={ref}
             type="checkbox"
             id={id}
-            className="appearance-none cursor-pointer absolute size-full z-10 peer"
+            className="peer absolute z-10 size-full cursor-pointer appearance-none"
             {...restProps}
           />
-          <MdOutlineCheckBox className="size-6 peer-checked:block hidden" />
-          <MdOutlineCheckBoxOutlineBlank className="size-6 peer-checked:hidden block" />
+          <MdOutlineCheckBox className="hidden size-6 peer-checked:block" />
+          <MdOutlineCheckBoxOutlineBlank className="block size-6 peer-checked:hidden" />
         </div>
         {error && <MdErrorOutline className="size-6 text-red-600" />}
       </div>
       {error && (
-        <p className="mt-2 group-data-[error=true]/input:text-red-600 text-body-3">
+        <p className="mt-2 text-body-3 group-data-[error=true]/input:text-red-600">
           {error}
         </p>
       )}
     </div>
-  );
+  )
 }

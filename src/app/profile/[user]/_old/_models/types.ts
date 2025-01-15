@@ -5,20 +5,20 @@ import type {
   Name,
   UInt64,
   UInt128,
-} from "@wharfkit/antelope";
+} from '@wharfkit/antelope'
 
 export type IndexPosition =
-  | "primary"
-  | "secondary"
-  | "tertiary"
-  | "fourth"
-  | "fifth"
-  | "sixth"
-  | "seventh"
-  | "eighth"
-  | "ninth"
-  | "tenth"
-  | undefined;
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'fourth'
+  | 'fifth'
+  | 'sixth'
+  | 'seventh'
+  | 'eighth'
+  | 'ninth'
+  | 'tenth'
+  | undefined
 
 export type TableIndexType =
   | Name
@@ -26,4 +26,4 @@ export type TableIndexType =
   | UInt128
   | Float64
   | Checksum256
-  | Checksum160;
+  | Checksum160

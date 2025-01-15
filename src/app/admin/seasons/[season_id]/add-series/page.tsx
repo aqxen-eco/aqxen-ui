@@ -1,32 +1,31 @@
-"use client";
+'use client'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useParams } from 'next/navigation'
+import { Controller, useForm } from 'react-hook-form'
+import z from 'zod'
 
 import {
   HeaderAdmin,
   HeaderAdminBack,
   HeaderAdminTitle,
-} from "@/components/header-admin";
-
-import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { InputBadges } from "@/components/ui/input-badges";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
-import z from "zod";
+} from '@/components/header-admin'
+import { Box } from '@/components/ui/box'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { InputBadges } from '@/components/ui/input-badges'
 
 const addSeriesSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  badges: z.string().array().min(1, "Badges is required"),
+  name: z.string().min(1, 'Name is required'),
+  badges: z.string().array().min(1, 'Badges is required'),
   start_right_away: z.boolean(),
-});
+})
 
-type AddSeriesSchema = z.infer<typeof addSeriesSchema>;
+type AddSeriesSchema = z.infer<typeof addSeriesSchema>
 
 export default function AddSeriesPage() {
-  const params = useParams();
+  const params = useParams()
 
   const {
     control,
@@ -35,14 +34,14 @@ export default function AddSeriesPage() {
     formState: { errors, isSubmitting },
   } = useForm<AddSeriesSchema>({
     resolver: zodResolver(addSeriesSchema),
-  });
+  })
 
   async function onSubmit({ name, badges, start_right_away }: AddSeriesSchema) {
     console.log({
       name,
       badges,
       start_right_away,
-    });
+    })
   }
 
   return (
@@ -60,13 +59,13 @@ export default function AddSeriesPage() {
           className="max-w-container-md"
         />
       </HeaderAdmin>
-      <div className="max-w-container-md mx-auto px-4 pb-8 min-h-[calc(100vh-24rem)]">
+      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md px-4 pb-8">
         <Box className="mobile:rounded-none mobile:border-0 mobile:bg-black mobile:p-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <Input
-              {...register("name")}
+              {...register('name')}
               label="Name"
-              error={errors["name"]?.message}
+              error={errors['name']?.message}
             />
 
             <Controller
@@ -76,22 +75,22 @@ export default function AddSeriesPage() {
                 <InputBadges
                   value={field.value}
                   onChange={field.onChange}
-                  error={errors["badges"]?.message}
+                  error={errors['badges']?.message}
                 />
               )}
             />
 
             <Checkbox
-              {...register("start_right_away")}
+              {...register('start_right_away')}
               label="Start the new series right away"
-              error={errors["start_right_away"]?.message}
+              error={errors['start_right_away']?.message}
             />
             <Button type="submit" variant="primary" size="lg">
-              {isSubmitting ? "Adding..." : "Add"}
+              {isSubmitting ? 'Adding...' : 'Add'}
             </Button>
           </form>
         </Box>
       </div>
     </>
-  );
+  )
 }

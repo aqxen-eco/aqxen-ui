@@ -1,6 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tag } from "@/components/ui/tag";
+import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Tag } from '@/components/ui/tag'
 
 export default function BadgeAutomationPage() {
   return (
@@ -52,5 +59,5 @@ export default function BadgeAutomationPage() {
         </TableRow>
       </TableBody>
     </Table>
-  );
+  )
 }
