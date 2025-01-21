@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import z from 'zod'
 
@@ -23,12 +24,22 @@ export default function OrganizationPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting, isLoading },
   } = useForm<OrganizationSchema>({
     resolver: zodResolver(organizationSchema),
+    defaultValues: {
+      name,
+    },
   })
 
   async function onSubmit({ name, logo }: OrganizationSchema) {}
+
+  useEffect(() => {
+    if (name) {
+      setValue('name', name)
+    }
+  }, [name, setValue])
 
   return (
     <Box className="p-0 mobile:space-y-8 mobile:rounded-none mobile:border-0 mobile:bg-black desktop:grid desktop:grid-cols-6">

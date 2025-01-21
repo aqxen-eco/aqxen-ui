@@ -14,7 +14,7 @@ export async function listSubscription({
   lower_bound,
   upper_bound,
 }: ListSubscriptionProps = {}): Promise<ListSubscriptionResult> {
-  const { rows, more } = await jungleClient.v1.chain.get_table_rows({
+  let { rows, more } = (await jungleClient.v1.chain.get_table_rows({
     code: 'subyyyyyyyyy',
     scope: scope ?? 'subyyyyyyyyy',
     table: 'packages',
@@ -22,7 +22,11 @@ export async function listSubscription({
     upper_bound: upper_bound ? Name.from(upper_bound) : undefined,
     json: true,
     limit: 1000,
-  })
+  })) as ListSubscriptionResult
+
+  rows = rows.sort((a, b) =>
+    a.action_size > b.action_size ? 1 : b.action_size > a.action_size ? -1 : 0
+  )
 
   return {
     rows,

@@ -11,6 +11,7 @@ import {
   HeaderAdminMenu,
   HeaderAdminTitle,
 } from '@/components/header-admin'
+import { TableSkeleton } from '@/components/skeleton'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Link } from '@/components/ui/link'
 import { Select, SelectItem } from '@/components/ui/select'
@@ -75,6 +76,7 @@ export default function SeasonsPage() {
         </HeaderAdminTitle>
       </HeaderAdmin>
       <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
+        {seasonsQuery.isLoading && <TableSkeleton columns={6} />}
         {(seasonsQuery.isSuccess ||
           (seasonsQuery.data && seasonsQuery.data.rows.length > 0)) && (
           <Table>

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { MdOutlineInfo } from 'react-icons/md'
 
 import { listOrganizationSubscription } from '@/api/chain/subscription/list-organization-subscription'
+import { TableSkeleton } from '@/components/skeleton'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -39,6 +40,7 @@ export default function SubscriptionPage() {
             </Button>
           </Tooltip>
         </header>
+        {query.isLoading && <TableSkeleton rows={1} />}
         {(query.isSuccess || (query.data && query.data.rows.length > 0)) && (
           <Table>
             <TableHeader>

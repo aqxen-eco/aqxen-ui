@@ -21,11 +21,11 @@ type GetUserBadges = {
 export async function getUserBadges({
   user,
 }: GetUserBadgesProps): Promise<GetUserBadges> {
-  const { rows: userBadges, more: userBadgesMore } = await listBadge({
+  const { rows: userBadges } = await listBadge({
     scope: user,
   })
 
-  const { rows, more: userSeasonsMore } = await listSeason({
+  const { rows } = await listSeason({
     scope: user,
   })
 

@@ -5,6 +5,7 @@ import { secondsToHours } from 'date-fns'
 
 import { buySubscription } from '@/api/chain/subscription/buy-subscription'
 import { listSubscription } from '@/api/chain/subscription/list-subscription'
+import { TableSkeleton } from '@/components/skeleton'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -42,6 +43,7 @@ export default function AtiveSubscriptionPage() {
 
   return (
     <>
+      {query.isLoading && <TableSkeleton rows={3} columns={4} />}
       {(query.isSuccess || (query.data && query.data.rows.length > 0)) && (
         <Table>
           <TableHeader>

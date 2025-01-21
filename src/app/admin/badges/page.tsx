@@ -8,6 +8,7 @@ import {
   HeaderAdminMenu,
   HeaderAdminTitle,
 } from '@/components/header-admin'
+import { TableSkeleton } from '@/components/skeleton'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Link } from '@/components/ui/link'
 import { Select, SelectItem } from '@/components/ui/select'
@@ -42,6 +43,7 @@ export default function BadgesPage() {
         </HeaderAdminTitle>
       </HeaderAdmin>
       <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
+        {query.isLoading && <TableSkeleton />}
         {(query.isSuccess || (query.data && query.data.rows.length > 0)) && (
           <Table>
             <TableHeader>
