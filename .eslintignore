@@ -1,8 +1,0 @@
-*.min.js
-/.yarn
-/build
-/dist
-/node_modules
-.DS_Store
-**/*.md
-jest.config.js

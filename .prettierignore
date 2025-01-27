@@ -1,9 +1,0 @@
-**/*.md
-**/*.ejs
-/node_modules
-
-/config
-build
-dist
-
-.DS_Store
