@@ -18,12 +18,12 @@ docker compose down
 ### 2. Run migrate to create database schema.  
 [Link to doc migrate](https://www.prisma.io/docs/orm/reference/prisma-cli-reference#prisma-migrate)
 ```bash
-yarn prisma:migrate
+pnpm prisma:migrate
 ```
 
 ### 3. Run the development server:
 ```bash
-yarn dev
+pnpm dev
 ```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
@@ -31,6 +31,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Open prisma studio
 Prisma Studio is a visual editor for the data in your database.
 ```bash
-yarn prisma:studio
+pnpm prisma:studio
 ```
 

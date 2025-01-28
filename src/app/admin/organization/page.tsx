@@ -33,7 +33,9 @@ export default function OrganizationPage() {
     },
   })
 
-  async function onSubmit({ name, logo }: OrganizationSchema) {}
+  async function onSubmit({ name, logo }: OrganizationSchema) {
+    console.log(name, logo)
+  }
 
   useEffect(() => {
     if (name) {
