@@ -36,8 +36,6 @@ export default function SubscriptionPage() {
       }),
   })
 
-  console.log(query.data?.rows)
-
   const data = query.data?.rows?.reduce(
     (accumulator, currentValue) => {
       if (currentValue.status === 'new') {
