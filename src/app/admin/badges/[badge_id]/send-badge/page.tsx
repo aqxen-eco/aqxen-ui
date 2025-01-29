@@ -14,6 +14,9 @@ import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
+import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
+import { sendBadge } from '@/api/chain/badge/send-badge'
 
 const sendBadgeSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),
@@ -26,6 +29,9 @@ type SendBadgeSchema = z.infer<typeof sendBadgeSchema>
 
 export default function SendBadgePage() {
   const params = useParams()
+  const { session } = useChain()
+
+  const badgeIdDecoded = decodeURIComponent(params.badge_id as string)
 
   const {
     control,
@@ -34,15 +40,23 @@ export default function SendBadgePage() {
     formState: { errors, isSubmitting },
   } = useForm<SendBadgeSchema>({
     resolver: zodResolver(sendBadgeSchema),
+    defaultValues: {
+      badges: [badgeIdDecoded],
+    },
   })
 
   async function onSubmit({ badges, amount, to, message }: SendBadgeSchema) {
-    console.log({
-      badges,
-      amount,
-      to,
-      message,
-    })
+    try {
+      await sendBadge({
+        session: session!,
+        symbol: badges[0],
+        amount: Number(amount),
+        to,
+        memo: message,
+      })
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
@@ -52,10 +66,8 @@ export default function SendBadgePage() {
         <HeaderAdminTitle
           title={
             <>
-              Send badge{' '}
-              <span className="text-gray-3">
-                ({decodeURIComponent(params.badge_id as string)})
-              </span>
+              Send badge
+              {/* <span className="text-gray-3">({badgeIdDecoded})</span> */}
             </>
           }
           tooltip="Lorem ipsum dolor sit amed"

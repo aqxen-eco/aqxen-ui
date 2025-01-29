@@ -20,3 +20,11 @@ export type CreateBadgeProps = {
   lifetime_stats: boolean
   memo: string
 }
+
+export type SendBadgeProps = {
+  session: Session
+  symbol: string
+  amount: number
+  to: string
+  memo: string
+}

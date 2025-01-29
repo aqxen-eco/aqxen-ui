@@ -121,11 +121,6 @@ export default function NewBadgePage() {
           name={name ? name : 'Badge Name'}
           balance={symbol ? symbol.toUpperCase() : 'BDG'}
         />
-        <hr className="border-t border-gray-2" />
-        <div className="flex justify-between py-2">
-          <p className="text-body-2 text-white">Lorem</p>
-          <p className="text-body-2 text-white">914</p>
-        </div>
       </div>
     </Box>
   )

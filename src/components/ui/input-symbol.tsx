@@ -30,7 +30,6 @@ export function InputSymbol({ label, error, ref, ...props }: InputSymbolProps) {
           id={id}
           textAlign="center"
           inputMode="text"
-          pattern={REGEXP_ONLY_CHARS}
           containerClassName="flex gap-2 items-center w-full"
           style={{ width: '100%' }}
           render={({ slots }) => (
