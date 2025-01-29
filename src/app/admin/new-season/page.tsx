@@ -12,6 +12,7 @@ import { InputBadges } from '@/components/ui/input-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useRouter } from 'next/navigation'
 
 const newSeasonSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -25,6 +26,7 @@ type NewSeasonSchema = z.infer<typeof newSeasonSchema>
 export default function NewSeasonPage() {
   const { symbol: organizationSymbol } = useOrganization()
   const { session } = useChain()
+  const router = useRouter()
 
   const {
     control,
@@ -36,13 +38,16 @@ export default function NewSeasonPage() {
   })
 
   async function onSubmit({ name, symbol, badges, stats }: NewSeasonSchema) {
-    await createSeason({
-      session: session!,
-      symbol: organizationSymbol + symbol,
-      description: name,
-      badge_symbols: badges,
-      stats_badge_symbols: stats,
-    })
+    try {
+      await createSeason({
+        session: session!,
+        symbol: organizationSymbol + symbol,
+        description: name,
+        badge_symbols: badges,
+        stats_badge_symbols: stats,
+      })
+      router.push('/admin/seasons')
+    } catch {}
   }
 
   return (
