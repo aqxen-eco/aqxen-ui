@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 
@@ -30,6 +30,7 @@ type SendBadgeSchema = z.infer<typeof sendBadgeSchema>
 export default function SendBadgePage() {
   const params = useParams()
   const { session } = useChain()
+  const router = useRouter()
 
   const badgeIdDecoded = decodeURIComponent(params.badge_id as string)
 
@@ -54,6 +55,7 @@ export default function SendBadgePage() {
         to,
         memo: message,
       })
+      router.push('/admin/badges')
     } catch (error) {
       console.log(error)
     }

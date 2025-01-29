@@ -14,6 +14,7 @@ import { InputSymbol } from '@/components/ui/input-symbol'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useRouter } from 'next/navigation'
 
 const newBadgeSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -28,6 +29,7 @@ type NewBadgeSchema = z.infer<typeof newBadgeSchema>
 
 export default function NewBadgePage() {
   const { symbol: organizationSymbol } = useOrganization()
+  const router = useRouter()
   const { session } = useChain()
 
   const {
@@ -62,6 +64,7 @@ export default function NewBadgePage() {
         lifetime_stats: lifetimeStats,
         memo: description,
       })
+      router.push('/admin/badges')
     } catch (error) {
       console.log(error)
     }
