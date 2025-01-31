@@ -1,7 +1,7 @@
 'use client'
 
 import { useQueries } from '@tanstack/react-query'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { MdOutlineAdd, MdOutlineInfo } from 'react-icons/md'
 
 import { listBadge } from '@/api/chain/badge'
@@ -26,45 +26,82 @@ import {
 import { Tag } from '@/components/ui/tag'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useOrganization } from '@/contexts/organization'
+import { endSeries } from '@/api/chain/series/end-series'
+import { useChain } from '@/contexts/chain'
+import { resumeSeries } from '@/api/chain/series/resume-series'
+import { pauseSeries } from '@/api/chain/series/pause-series'
+import { startSeries } from '@/api/chain/series/start-series'
+import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
 
 export default function SeasonPage() {
   const { name, symbol } = useOrganization()
   const { season_id } = useParams()
+  const { session } = useChain()
   const seasonId = decodeURIComponent(season_id as string).split(',')[1]
 
-  const [seasonQuery, badgesQuery, seriesQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ['seasons', seasonId, name, symbol],
-        queryFn: async () =>
-          await listSeason({
-            scope: name,
-            lower_bound: seasonId,
-            upper_bound: seasonId,
-            organization_symbol: symbol,
-          }),
-      },
-      {
-        queryKey: ['badges', name, symbol],
-        queryFn: async () =>
-          await listBadge({
-            scope: name,
-            organization_symbol: symbol,
-          }),
-      },
-      {
-        queryKey: ['series', seasonId],
-        queryFn: async () =>
-          await listSeries({
-            scope: seasonId,
-          }),
-      },
-    ],
-  })
+  const [seasonQuery, badgesQuery, badgesStatusQuery, seriesQuery] = useQueries(
+    {
+      queries: [
+        {
+          queryKey: ['seasons', seasonId, name, symbol],
+          queryFn: async () =>
+            await listSeason({
+              scope: name,
+              lower_bound: seasonId,
+              upper_bound: seasonId,
+              organization_symbol: symbol,
+            }),
+        },
+        {
+          queryKey: ['badges', name, symbol],
+          queryFn: async () =>
+            await listBadge({
+              scope: name,
+              organization_symbol: symbol,
+            }),
+        },
+        {
+          queryKey: ['badges-status', name],
+          queryFn: async () =>
+            await listBadgeStatus({
+              scope: name,
+            }),
+        },
+        {
+          queryKey: ['series', seasonId],
+          queryFn: async () =>
+            await listSeries({
+              scope: seasonId,
+            }),
+        },
+      ],
+    }
+  )
 
-  if (seasonQuery.isPending || badgesQuery.isPending || seriesQuery.isPending) {
+  if (
+    seasonQuery.isPending ||
+    badgesQuery.isPending ||
+    badgesStatusQuery.isPending ||
+    seriesQuery.isPending
+  ) {
     return null
   }
+
+  // const seasonBadgesStatus = badgesStatusQuery.data?.rows.reduce(
+  //   (accumulate, currentValue) => {
+  //     if (currentValue.agg_symbol === decodeURIComponent(season_id as string)) {
+  //       accumulate[currentValue.seq_id] = [
+  //         accumulate[currentValue.seq_id],
+  //         currentValue,
+  //       ]
+  //       return accumulate
+  //     }
+  //     return accumulate
+  //   },
+  //   {} as Record<string, Record<any, any>[]>
+  // )
+
+  // console.log(seasonBadgesStatus)
 
   return (
     <>
@@ -180,42 +217,117 @@ export default function SeasonPage() {
                         </Tooltip>
                         {serie.status !== 'end' && (
                           <Tooltip content="Add badge">
-                            <Button variant="secondary" size="md" square>
+                            <Link
+                              href={`/admin/seasons/${season_id}/add-badges?series=${serie.id}`}
+                              variant="secondary"
+                              size="md"
+                              square
+                            >
                               <MdOutlineAdd className="size-6" />
-                            </Button>
+                            </Link>
                           </Tooltip>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
                       {serie.status === 'init' ? (
-                        <Tag variant="yellow">Paused</Tag>
+                        <Tag variant="blue">Created</Tag>
                       ) : serie.status === 'end' ? (
                         <Tag variant="red">Ended</Tag>
                       ) : serie.status === 'active' ? (
                         <Tag variant="green">Started</Tag>
                       ) : (
-                        <Tag variant="blue">Created</Tag>
+                        <></>
                       )}
                     </TableCell>
                     <TableCell className="flex justify-end gap-2">
                       {serie.status === 'init' ? (
                         <>
-                          <Button variant="secondary" size="md">
+                          <Button
+                            variant="secondary"
+                            size="md"
+                            onClick={async () => {
+                              await startSeries({
+                                session: session!,
+                                agg_symbol: decodeURIComponent(
+                                  season_id as string
+                                ),
+                                seq_ids: [serie.id],
+                              })
+                              seriesQuery.refetch()
+                            }}
+                          >
+                            Start
+                          </Button>
+                          {/* <Button
+                            variant="secondary"
+                            size="md"
+                            onClick={() =>
+                              resumeSeries({
+                                session: session!,
+                                agg_symbol: decodeURIComponent(
+                                  season_id as string
+                                ),
+                                seq_id: String(serie.id),
+                              })
+                            }
+                          >
                             Resume
                           </Button>
-                          <Button variant="secondary" size="md">
+                          <Button
+                            variant="secondary"
+                            size="md"
+                            onClick={() =>
+                              endSeries({
+                                session: session!,
+                                agg_symbol: decodeURIComponent(
+                                  season_id as string
+                                ),
+                                seq_ids: [String(serie.id)],
+                              })
+                            }
+                          >
                             End
-                          </Button>
+                          </Button> */}
                         </>
                       ) : serie.status === 'end' ? (
                         <></>
                       ) : serie.status === 'active' ? (
                         <>
-                          <Button variant="secondary" size="md">
+                          {/* <Button
+                            variant="secondary"
+                            size="md"
+                            onClick={async () => {
+                              try {
+                                await pauseSeries({
+                                  session: session!,
+                                  agg_symbol: decodeURIComponent(
+                                    season_id as string
+                                  ),
+                                  seq_id: serie.id,
+                                })
+                                seriesQuery.refetch()
+                              } catch (error) {
+                                console.log(error)
+                              }
+                            }}
+                          >
                             Pause
-                          </Button>
-                          <Button variant="secondary" size="md">
+                          </Button> */}
+                          <Button
+                            variant="secondary"
+                            size="md"
+                            onClick={() => {
+                              endSeries({
+                                session: session!,
+                                agg_symbol: decodeURIComponent(
+                                  season_id as string
+                                ),
+                                seq_ids: [serie.id],
+                              })
+                              seriesQuery.refetch()
+                            }}
+                          >
                             End
                           </Button>
                         </>

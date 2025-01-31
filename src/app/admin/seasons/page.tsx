@@ -106,7 +106,13 @@ export default function SeasonsPage() {
                               key={badge.id}
                               className="capitalize"
                             >
-                              <BadgeImage src={badge.ipfs} size="xs" />
+                              <div>
+                                <BadgeImage
+                                  src={badge.ipfs}
+                                  size="xs"
+                                  alt={badge.name}
+                                />
+                              </div>
                             </Tooltip>
                           )
                       )}

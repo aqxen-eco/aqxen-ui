@@ -2,7 +2,7 @@ import { Name } from '@wharfkit/antelope'
 
 import { jungleClient } from '@/api/chain/jungle-client'
 import type { ListBadgeResult } from '@/api/model/badge'
-import { BADGES_INFO_CONTRACT, IPFS_IMAGE_SOURCE, Table } from '@/constants'
+import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { safeParse } from '@/utils/safe-parse'
 
 type ListBadgeProps = {
@@ -19,9 +19,9 @@ export async function listBadge({
   organization_symbol,
 }: ListBadgeProps): Promise<ListBadgeResult> {
   let { rows, more } = await jungleClient.v1.chain.get_table_rows({
-    code: BADGES_INFO_CONTRACT,
+    code: 'orchyyyyyyyy',
     scope: scope,
-    table: Table.BADGE,
+    table: 'badge',
     lower_bound: lower_bound ? Name.from(lower_bound) : undefined,
     upper_bound: upper_bound ? Name.from(upper_bound) : undefined,
     json: true,

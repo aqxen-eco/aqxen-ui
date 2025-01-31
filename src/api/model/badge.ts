@@ -9,7 +9,22 @@ export type Badge = {
   rarity_counts: string
 }
 
+export type UserBadge = {
+  balance: string
+}
+
 export type ListBadgeResult = GetTableRowsResult<Badge>
+
+export type ListUserBadgeResult = GetTableRowsResult<UserBadge>
+
+export type ListBadgeStatusResult = GetTableRowsResult<{
+  badge_agg_seq_id: number
+  agg_symbol: string
+  seq_id: number
+  badge_symbol: string
+  badge_status: string
+  seq_status: string
+}>
 
 export type CreateBadgeProps = {
   session: Session
