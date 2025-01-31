@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 
@@ -14,7 +15,6 @@ import { InputSymbol } from '@/components/ui/input-symbol'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { useRouter } from 'next/navigation'
 
 const newBadgeSchema = z.object({
   name: z.string().min(1, 'Name is required'),

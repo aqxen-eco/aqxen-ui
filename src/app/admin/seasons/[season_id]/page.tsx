@@ -1,12 +1,15 @@
 'use client'
 
 import { useQueries } from '@tanstack/react-query'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { MdOutlineAdd, MdOutlineInfo } from 'react-icons/md'
 
 import { listBadge } from '@/api/chain/badge'
+import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
 import { listSeason } from '@/api/chain/season'
 import { listSeries } from '@/api/chain/series'
+import { endSeries } from '@/api/chain/series/end-series'
+import { startSeries } from '@/api/chain/series/start-series'
 import {
   HeaderAdmin,
   HeaderAdminBack,
@@ -25,13 +28,8 @@ import {
 } from '@/components/ui/table'
 import { Tag } from '@/components/ui/tag'
 import { Tooltip } from '@/components/ui/tooltip'
-import { useOrganization } from '@/contexts/organization'
-import { endSeries } from '@/api/chain/series/end-series'
 import { useChain } from '@/contexts/chain'
-import { resumeSeries } from '@/api/chain/series/resume-series'
-import { pauseSeries } from '@/api/chain/series/pause-series'
-import { startSeries } from '@/api/chain/series/start-series'
-import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
+import { useOrganization } from '@/contexts/organization'
 
 export default function SeasonPage() {
   const { name, symbol } = useOrganization()

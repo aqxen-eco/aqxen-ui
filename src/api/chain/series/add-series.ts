@@ -6,25 +6,25 @@ export async function addSeries({
   agg_symbol,
   badge_symbols,
   sequence_description,
-  start_right_away,
+  // start_right_away,
 }: AddSeriesProps) {
-  let startRightAway = {}
+  // let startRightAway = {}
 
-  if (start_right_away) {
-    startRightAway = {
-      account: 'bamanageryyy',
-      name: 'actseq',
-      authorization: [session.permissionLevel],
-      data: {
-        authorized: session.actor.toString(),
-        permission: session.permission.toString(),
-        actor: session.actor.toString(),
+  // if (start_right_away) {
+  //   startRightAway = {
+  //     account: 'bamanageryyy',
+  //     name: 'actseq',
+  //     authorization: [session.permissionLevel],
+  //     data: {
+  //       authorized: session.actor.toString(),
+  //       permission: session.permission.toString(),
+  //       actor: session.actor.toString(),
 
-        agg_symbol,
-        seq_ids: [1, 2],
-      },
-    }
-  }
+  //       agg_symbol,
+  //       seq_ids: [1, 2],
+  //     },
+  //   }
+  // }
 
   await execute(session, [
     {

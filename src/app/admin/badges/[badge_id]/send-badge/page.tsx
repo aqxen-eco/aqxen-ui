@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 
+import { sendBadge } from '@/api/chain/badge/send-badge'
 import {
   HeaderAdmin,
   HeaderAdminBack,
@@ -15,8 +16,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
-import { useOrganization } from '@/contexts/organization'
-import { sendBadge } from '@/api/chain/badge/send-badge'
 
 const sendBadgeSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),

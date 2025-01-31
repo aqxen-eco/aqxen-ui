@@ -1,10 +1,18 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import {
+  differenceInMinutes,
+  minutesToHours,
+  parseISO,
+  secondsToHours,
+} from 'date-fns'
 import { MdOutlineInfo } from 'react-icons/md'
 
 import { listOrganizationSubscription } from '@/api/chain/subscription/list-organization-subscription'
+import { OrganizationSubscription } from '@/api/model/subscription'
 import { TableSkeleton } from '@/components/skeleton'
+import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -16,14 +24,6 @@ import {
 } from '@/components/ui/table'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useOrganization } from '@/contexts/organization'
-import {
-  differenceInMinutes,
-  minutesToHours,
-  parseISO,
-  secondsToHours,
-} from 'date-fns'
-import { OrganizationSubscription } from '@/api/model/subscription'
-import { Box } from '@/components/ui/box'
 
 export default function SubscriptionPage() {
   const { name } = useOrganization()

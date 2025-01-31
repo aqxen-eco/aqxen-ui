@@ -1,4 +1,3 @@
-import { Name } from '@wharfkit/antelope'
 
 import { jungleClient } from '@/api/chain/jungle-client'
 import type { ListBadgeStatusResult } from '@/api/model/badge'
