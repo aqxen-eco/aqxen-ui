@@ -1,8 +1,9 @@
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
+import { type Series } from '@/api/chain/series'
+import type { Badge as BadgeType } from '@/api/model/badge'
 import { Badge } from '@/components/ui/badge'
 import {
   BadgeSwiper,
@@ -12,11 +13,6 @@ import {
 import { Box } from '@/components/ui/box'
 import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 
-import type { Seasons } from './functions'
-import { useQueries, useQuery } from '@tanstack/react-query'
-import { listSeries, type Series } from '@/api/chain/series'
-import { useState } from 'react'
-import type { Badge as BadgeType } from '@/api/model/badge'
 
 type SeasonalBadgesSectionProps = {
   lastSeriesId?: number

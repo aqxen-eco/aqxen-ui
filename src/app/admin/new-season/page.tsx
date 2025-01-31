@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 
@@ -12,7 +13,6 @@ import { InputBadges } from '@/components/ui/input-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { useRouter } from 'next/navigation'
 
 const newSeasonSchema = z.object({
   name: z.string().min(1, 'Name is required'),

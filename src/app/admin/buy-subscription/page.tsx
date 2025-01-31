@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { secondsToHours } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 import { buySubscription } from '@/api/chain/subscription/buy-subscription'
 import { listSubscription } from '@/api/chain/subscription/list-subscription'
@@ -17,7 +18,6 @@ import {
 } from '@/components/ui/table'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { useRouter } from 'next/navigation'
 
 export default function AtiveSubscriptionPage() {
   const { session } = useChain()
@@ -43,7 +43,7 @@ export default function AtiveSubscriptionPage() {
         memo: `${name}:${subPackage}`,
       })
       router.push('/admin/subscription')
-    } catch (error) {}
+    } catch {}
   }
 
   return (

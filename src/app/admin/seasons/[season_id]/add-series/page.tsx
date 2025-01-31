@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 
+import { addSeries } from '@/api/chain/series/add-series'
 import {
   HeaderAdmin,
   HeaderAdminBack,
@@ -16,7 +17,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
-import { addSeries } from '@/api/chain/series/add-series'
 
 const addSeriesSchema = z.object({
   name: z.string().min(1, 'Name is required'),

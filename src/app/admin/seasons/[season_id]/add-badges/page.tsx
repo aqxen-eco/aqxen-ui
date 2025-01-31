@@ -5,6 +5,8 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 
+import { addBadgeToSeason } from '@/api/chain/season/add-badge-to-season'
+import { addBadgeToSeries } from '@/api/chain/series/add-badge-to-series'
 import {
   HeaderAdmin,
   HeaderAdminBack,
@@ -13,9 +15,7 @@ import {
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { InputBadges } from '@/components/ui/input-badges'
-import { addBadgeToSeason } from '@/api/chain/season/add-badge-to-season'
 import { useChain } from '@/contexts/chain'
-import { addBadgeToSeries } from '@/api/chain/series/add-badge-to-series'
 
 const addBadgesSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),
