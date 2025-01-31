@@ -17,10 +17,12 @@ import {
 } from '@/components/ui/table'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useRouter } from 'next/navigation'
 
 export default function AtiveSubscriptionPage() {
   const { session } = useChain()
   const { name } = useOrganization()
+  const router = useRouter()
 
   const query = useQuery({
     queryKey: ['subscription'],
@@ -34,11 +36,14 @@ export default function AtiveSubscriptionPage() {
     subPackage: string
     quantity: string
   }) {
-    await buySubscription({
-      session: session!,
-      quantity,
-      memo: `${name}:${subPackage}`,
-    })
+    try {
+      await buySubscription({
+        session: session!,
+        quantity,
+        memo: `${name}:${subPackage}`,
+      })
+      router.push('/admin/subscription')
+    } catch (error) {}
   }
 
   return (
@@ -52,7 +57,7 @@ export default function AtiveSubscriptionPage() {
               <TableHead className="text-center">Actions</TableHead>
               <TableHead className="text-center">Term</TableHead>
               <TableHead className="text-center">Investment</TableHead>
-              {/* <TableHead className="text-center">Recommended for</TableHead> */}
+              <TableHead className="text-center">Recommended for</TableHead>
               <TableHead className="w-24"></TableHead>
             </TableRow>
           </TableHeader>
@@ -72,7 +77,9 @@ export default function AtiveSubscriptionPage() {
                   <TableCell className="py-6 text-center">
                     {row.cost.quantity}
                   </TableCell>
-                  {/* <TableCell className="text-center py-6"></TableCell> */}
+                  <TableCell className="py-6 text-center">
+                    {row.action_size / 10} members
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="secondary"

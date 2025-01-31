@@ -13,47 +13,67 @@ import { Box } from '@/components/ui/box'
 import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 
 import type { Seasons } from './functions'
+import { useQueries, useQuery } from '@tanstack/react-query'
+import { listSeries, type Series } from '@/api/chain/series'
+import { useState } from 'react'
+import type { Badge as BadgeType } from '@/api/model/badge'
 
 type SeasonalBadgesSectionProps = {
-  seasons: Seasons
+  lastSeriesId?: number
+  name: string
+  badges: BadgeType[]
+  series: Series[]
 }
 
-export function SeasonalBadgesSection({ seasons }: SeasonalBadgesSectionProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+export function SeasonalBadgesSection({
+  name,
+  lastSeriesId,
+  badges,
+  series,
+}: SeasonalBadgesSectionProps) {
+  const [selectedSeries, setSelectedSeries] = useState(lastSeriesId)
 
-  const seasonIndex = Number(searchParams.get('season')) ?? 0
+  // const seasonIdFormatted = seasonId.split(',')[1]
 
-  if (seasons.length === 0 || !seasons[seasonIndex]) {
-    return null
-  }
+  // const seriesQueries = useQuery({
+  //   queryKey: ['series', seasonIdFormatted],
+  //   queryFn: async () =>
+  //     await listSeries({
+  //       scope: seasonIdFormatted,
+  //     }),
+  // })
+
+  console.log(series)
 
   return (
     <section className="py-8">
       <header className="mb-4 flex items-center justify-between gap-4 px-8 mobile:px-4">
         <h3 className="text-title-2 text-white">
-          {seasons[seasonIndex].name}{' '}
-          <span className="text-gray-3">({seasons[0].badges.length})</span>
+          {name} <span className="text-gray-3">({badges.length})</span>
         </h3>
-        <DropdownRoot label={seasons[seasonIndex].name} align="end">
-          {seasons.map((season, index) => (
-            <DropdownItem
-              key={index}
-              isSelected={index === seasonIndex}
-              onClick={() => {
-                router.push(`${pathname}?season=${index}`)
-              }}
-            >
-              {season.name}
-            </DropdownItem>
-          ))}
-        </DropdownRoot>
+        {series.length > 0 && (
+          <DropdownRoot
+            label={series.find((series) => series.id === selectedSeries)?.name}
+            align="end"
+          >
+            {series.map((series) => (
+              <DropdownItem
+                key={series.id}
+                isSelected={series.id === selectedSeries}
+                onClick={() => {
+                  setSelectedSeries(series.id)
+                }}
+              >
+                {series.name}
+              </DropdownItem>
+            ))}
+          </DropdownRoot>
+        )}
       </header>
-      {seasons[seasonIndex].badges.length > 0 ? (
+      {badges.length > 0 ? (
         <BadgeSwiper>
           <BadgeSwiperWrapper>
-            {seasons[seasonIndex].badges.map((badge) => (
+            {badges.map((badge) => (
               <BadgeSwiperSlide key={badge.id}>
                 <Badge name={badge.name} balance="0" ipfs={badge.ipfs} />
               </BadgeSwiperSlide>

@@ -16,9 +16,16 @@ import {
 } from '@/components/ui/table'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useOrganization } from '@/contexts/organization'
+import {
+  differenceInMinutes,
+  minutesToHours,
+  parseISO,
+  secondsToHours,
+} from 'date-fns'
+import { OrganizationSubscription } from '@/api/model/subscription'
+import { Box } from '@/components/ui/box'
 
 export default function SubscriptionPage() {
-  // const { session } = useChain()
   const { name } = useOrganization()
 
   const query = useQuery({
@@ -28,6 +35,49 @@ export default function SubscriptionPage() {
         scope: name,
       }),
   })
+
+  const data = query.data?.rows?.reduce(
+    (accumulator, currentValue) => {
+      if (currentValue.status === 'new') {
+        accumulator.upcoming.push(currentValue)
+        return accumulator
+      }
+
+      if (currentValue.status === 'used') {
+        accumulator.used.push(currentValue)
+        return accumulator
+      }
+
+      accumulator.active.push(currentValue)
+      return accumulator
+    },
+    {
+      active: [] as OrganizationSubscription[],
+      upcoming: [] as OrganizationSubscription[],
+      used: [] as OrganizationSubscription[],
+    }
+  )
+
+  function showEndsIn(value: string) {
+    const today = new Date()
+    const expiryTime = parseISO(value)
+    const resultInMinutes = differenceInMinutes(expiryTime, today)
+
+    if (resultInMinutes <= 0) {
+      return 'Expired'
+    }
+
+    if (resultInMinutes < 60) {
+      return `${resultInMinutes} minutes`
+    }
+    const resultInHours = minutesToHours(resultInMinutes)
+
+    if (resultInHours < 24) {
+      return `${resultInHours} hours`
+    }
+
+    return `${Math.floor(resultInHours / 24)} days`
+  }
 
   return (
     <div className="space-y-8">
@@ -41,29 +91,43 @@ export default function SubscriptionPage() {
           </Tooltip>
         </header>
         {query.isLoading && <TableSkeleton rows={1} />}
-        {(query.isSuccess || (query.data && query.data.rows.length > 0)) && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tier</TableHead>
-                <TableHead className="text-center">Remaining Actions</TableHead>
-                <TableHead className="text-center">Ends in</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {query.data.rows.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell className="py-6 capitalize">
-                    {row.package}
-                  </TableCell>
-                  <TableCell className="py-6 text-center">
-                    {row.total_actions_bought - row.actions_used}
-                  </TableCell>
-                  <TableCell className="py-6 text-center">25 days</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        {query.isSuccess && (
+          <>
+            {data?.active && data?.active.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tier</TableHead>
+                    <TableHead className="text-center">
+                      Remaining Actions
+                    </TableHead>
+                    <TableHead className="text-center">Ends in</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data?.active.map((row, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="py-6 capitalize">
+                        {row.package}
+                      </TableCell>
+                      <TableCell className="py-6 text-center">
+                        {row.total_actions_bought - row.actions_used}
+                      </TableCell>
+                      <TableCell className="py-6 text-center">
+                        {showEndsIn(row.expiry_time)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Box className="flex w-full items-center justify-center text-center">
+                <p className="text-body-2 text-gray-3">
+                  No Subscriptions activated
+                </p>
+              </Box>
+            )}
+          </>
         )}
       </section>
 
@@ -76,33 +140,49 @@ export default function SubscriptionPage() {
             </Button>
           </Tooltip>
         </header>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-10">Order</TableHead>
-              <TableHead>Tier</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
-              <TableHead className="text-center">Term</TableHead>
-              <TableHead className="text-center">Investment</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell className="py-6 text-gray-3">1</TableCell>
-              <TableCell className="py-6">Professional</TableCell>
-              <TableCell className="py-6 text-center">1,000</TableCell>
-              <TableCell className="py-6 text-center">3 months</TableCell>
-              <TableCell className="py-6 text-center">100 USD</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="py-6 text-gray-3">2</TableCell>
-              <TableCell className="py-6">Community</TableCell>
-              <TableCell className="py-6 text-center">100</TableCell>
-              <TableCell className="py-6 text-center">2 months</TableCell>
-              <TableCell className="py-6 text-center">50 USD</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        {query.isLoading && <TableSkeleton rows={1} />}
+        {query.isSuccess && (
+          <>
+            {data?.upcoming && data?.upcoming.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">Order</TableHead>
+                    <TableHead>Tier</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
+                    <TableHead className="text-center">Term</TableHead>
+                    {/* <TableHead className="text-center">Investment</TableHead> */}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data?.upcoming.map((row, index) => (
+                    <TableRow key={row.seq_id}>
+                      <TableCell className="py-6 text-gray-3">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell className="py-6 capitalize">
+                        {row.package}
+                      </TableCell>
+                      <TableCell className="py-6 text-center">
+                        {row.total_actions_bought}
+                      </TableCell>
+                      <TableCell className="py-6 text-center">
+                        {secondsToHours(row.expiry_duration_in_secs) / 24} days
+                      </TableCell>
+                      {/* <TableCell className="py-6 text-center"></TableCell> */}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Box className="flex w-full items-center justify-center text-center">
+                <p className="text-body-2 text-gray-3">
+                  No upcoming Subscriptions
+                </p>
+              </Box>
+            )}
+          </>
+        )}
       </section>
 
       <section className="space-y-2">
@@ -114,33 +194,47 @@ export default function SubscriptionPage() {
             </Button>
           </Tooltip>
         </header>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-10">Order</TableHead>
-              <TableHead>Tier</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
-              <TableHead className="text-center">Term</TableHead>
-              <TableHead className="text-center">Investment</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell className="py-6 text-gray-3">1</TableCell>
-              <TableCell className="py-6">Community</TableCell>
-              <TableCell className="py-6 text-center">100</TableCell>
-              <TableCell className="py-6 text-center">3 months</TableCell>
-              <TableCell className="py-6 text-center">50 USD</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="py-6 text-gray-3">2</TableCell>
-              <TableCell className="py-6">Group</TableCell>
-              <TableCell className="py-6 text-center">50</TableCell>
-              <TableCell className="py-6 text-center">1 month</TableCell>
-              <TableCell className="py-6 text-center">25 USD</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        {query.isLoading && <TableSkeleton rows={1} />}
+        {query.isSuccess && (
+          <>
+            {data?.used && data?.used.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">Order</TableHead>
+                    <TableHead>Tier</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
+                    <TableHead className="text-center">Term</TableHead>
+                    {/* <TableHead className="text-center">Investment</TableHead> */}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data?.used.map((row, index) => (
+                    <TableRow key={row.seq_id}>
+                      <TableCell className="py-6 text-gray-3">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell className="py-6 capitalize">
+                        {row.package}
+                      </TableCell>
+                      <TableCell className="py-6 text-center">
+                        {row.total_actions_bought}
+                      </TableCell>
+                      <TableCell className="py-6 text-center">
+                        {secondsToHours(row.expiry_duration_in_secs) / 24} days
+                      </TableCell>
+                      {/* <TableCell className="py-6 text-center"></TableCell> */}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Box className="flex w-full items-center justify-center text-center">
+                <p className="text-body-2 text-gray-3">No Subscription used</p>
+              </Box>
+            )}
+          </>
+        )}
       </section>
     </div>
   )

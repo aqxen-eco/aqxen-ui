@@ -19,3 +19,9 @@ export type CreateSeasonProps = {
   badge_symbols: string[]
   stats_badge_symbols: string[]
 }
+
+export type AddBadgeToSeasonProps = {
+  session: Session
+  agg_symbol: string
+  badge_symbols: string[]
+}

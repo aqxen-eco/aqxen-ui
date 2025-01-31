@@ -1,8 +1,7 @@
-import { Name } from '@wharfkit/antelope'
+import { Int64 } from '@wharfkit/antelope'
 
 import { jungleClient } from '@/api/chain/jungle-client'
 import type { ListSeasonResult } from '@/api/model/season'
-import { SEASONS_INFO_CONTRACT, Table } from '@/constants'
 
 type ListSeasonProps = {
   scope?: string
@@ -18,14 +17,17 @@ export async function listSeason({
   organization_symbol,
 }: ListSeasonProps): Promise<ListSeasonResult> {
   let { rows, more } = await jungleClient.v1.chain.get_table_rows({
-    code: SEASONS_INFO_CONTRACT,
+    code: 'baggyyyyyyyy',
     scope: scope,
-    table: Table.AGGREGATES,
-    lower_bound: lower_bound ? Name.from(lower_bound) : undefined,
-    upper_bound: upper_bound ? Name.from(upper_bound) : undefined,
+    table: 'aggdetails',
+    key_type: 'i64',
+    lower_bound: lower_bound ? (lower_bound as unknown as Int64) : undefined,
+    upper_bound: upper_bound ? (upper_bound as unknown as Int64) : undefined,
     json: true,
     limit: 1000,
   })
+
+  console.log(rows)
 
   rows = rows.map((row) => ({
     id: row.agg_symbol,
