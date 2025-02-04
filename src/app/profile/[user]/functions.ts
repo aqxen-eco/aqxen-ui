@@ -1,9 +1,11 @@
 'use server'
 
 import { type Badge, listBadge } from '@/api/chain/badge'
+import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
 import { listUserBadge } from '@/api/chain/badge/list-user-badge'
 import { listSeason, type Season } from '@/api/chain/season'
-import { listSeries, Series } from '@/api/chain/series'
+import { listSeries, type Series } from '@/api/chain/series'
+import { BadgeStatus } from '@/api/model/badge'
 
 type GetUserBadgesProps = {
   user: string
@@ -16,26 +18,37 @@ export type Seasons = Array<
   } & Omit<Season, 'badges'>
 >
 
+type UserBadges = {
+  balance: string
+} & Badge
+
 type GetUserBadges = {
-  badges: Badge[]
+  badges: UserBadges[]
   seasons: Seasons
 }
 
 export async function getUserBadges({
   user,
 }: GetUserBadgesProps): Promise<GetUserBadges> {
-  const [{ rows: badges }, { rows: seasons }, { rows: userBadges }] =
-    await Promise.all([
-      listBadge({
-        scope: user,
-      }),
-      listSeason({
-        scope: user,
-      }),
-      listUserBadge({
-        scope: user,
-      }),
-    ])
+  const [
+    { rows: badges },
+    { rows: seasons },
+    { rows: userBadges },
+    { rows: badgesStatus },
+  ] = await Promise.all([
+    listBadge({
+      scope: user,
+    }),
+    listSeason({
+      scope: user,
+    }),
+    listUserBadge({
+      scope: user,
+    }),
+    listBadgeStatus({
+      scope: user,
+    }),
+  ])
 
   const userBadgesBalanceSymbol = userBadges.map((userBadge) => ({
     balance: userBadge.balance.split(' ')[0],
@@ -56,18 +69,40 @@ export async function getUserBadges({
       ]
     }
     return accumulate
-  }, [] as Badge[])
+  }, [] as UserBadges[])
 
   const seriesPromise = seasons.map((season) =>
     listSeries({ scope: season.symbol })
   )
   const series = await Promise.all(seriesPromise)
 
-  const seasonsWithBadgesAndSeries = seasons.map((season, seasonIndex) => ({
-    ...season,
-    badges: badges.filter((userBadge) => season.badges.includes(userBadge.id)),
-    series: series[seasonIndex].rows,
-  }))
+  // console.log(badgesStatus)
+
+  const seasonsWithBadgesAndSeries = seasons.map((season, seasonIndex) => {
+    const seasonSeries = series[seasonIndex].rows.map((series) => {
+      const seriesBadge = badgesStatus.reduce((acc: any, crr: BadgeStatus) => {
+        if (crr.seq_id === series.id && crr.agg_symbol === season.id) {
+          const badge = badges.find((item) => item.id === crr.badge_symbol)
+
+          return [...acc, badge]
+        }
+        return acc
+      }, [])
+
+      return {
+        ...series,
+        badges: seriesBadge as Badge[],
+      }
+    })
+
+    return {
+      ...season,
+      badges: badges.filter((userBadge) =>
+        season.badges.includes(userBadge.id)
+      ),
+      series: seasonSeries,
+    }
+  })
 
   return {
     badges: lifeTimeBadges,

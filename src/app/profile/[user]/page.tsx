@@ -65,7 +65,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <BadgeSwiperSlide key={index}>
                     <Badge
                       name={badge.name}
-                      balance={badge.rarity_counts}
+                      balance={badge.balance}
                       ipfs={badge.ipfs}
                     />
                   </BadgeSwiperSlide>

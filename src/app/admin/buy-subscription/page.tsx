@@ -65,9 +65,7 @@ export default function AtiveSubscriptionPage() {
             {query.data.rows.map((row) =>
               row.display && row.active ? (
                 <TableRow key={row.package}>
-                  <TableCell className="py-6 capitalize">
-                    {row.descriptive_name}
-                  </TableCell>
+                  <TableCell className="py-6">{row.descriptive_name}</TableCell>
                   <TableCell className="py-6 text-center">
                     {row.action_size}
                   </TableCell>

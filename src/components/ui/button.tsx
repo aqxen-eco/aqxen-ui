@@ -2,7 +2,7 @@ import { Slot } from '@radix-ui/react-slot'
 import { tv, type VariantProps } from 'tailwind-variants'
 
 export const button = tv({
-  base: 'inline-flex cursor-pointer select-none gap-1 text-nowrap rounded-full border font-sans text-body-2 font-medium duration-150 focus:outline-0 focus:ring-2 focus:ring-gray-3 disabled:cursor-not-allowed disabled:opacity-50',
+  base: 'inline-flex cursor-pointer select-none gap-1 text-nowrap rounded-full border font-sans text-body-2 font-medium duration-150 focus:border-gray-3 focus:outline-0 disabled:cursor-not-allowed disabled:opacity-50',
   variants: {
     variant: {
       primary:
