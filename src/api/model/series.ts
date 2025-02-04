@@ -14,7 +14,7 @@ export type ListSeriesResult = GetTableRowsResult<Series>
 export type AddSeriesProps = {
   session: Session
   agg_symbol: string
-  badge_symbols: string[]
+  badge_symbols?: string[] | null
   sequence_description: string
   start_right_away: boolean
 }

@@ -101,11 +101,7 @@ export default function SeasonsPage() {
                       {badgesQuery?.data?.rows.map(
                         (badge) =>
                           season.badges.includes(badge.id) && (
-                            <Tooltip
-                              content={badge.name}
-                              key={badge.id}
-                              className="capitalize"
-                            >
+                            <Tooltip content={badge.name} key={badge.id}>
                               <div>
                                 <BadgeImage
                                   src={badge.ipfs}

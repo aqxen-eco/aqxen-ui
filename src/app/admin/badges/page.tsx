@@ -63,7 +63,7 @@ export default function BadgesPage() {
                   <TableCell>
                     <div className="inline-flex items-center gap-2">
                       <BadgeImage src={row.ipfs} size="xs" />
-                      <span className="text-nowrap font-sans text-body-2 font-medium capitalize text-white">
+                      <span className="text-nowrap font-sans text-body-2 font-medium text-white">
                         {row.name}
                       </span>
                     </div>

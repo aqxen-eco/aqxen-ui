@@ -27,8 +27,6 @@ export async function listSeason({
     limit: 1000,
   })
 
-  console.log(rows)
-
   rows = rows.map((row) => ({
     id: row.agg_symbol,
     symbol: row.agg_symbol

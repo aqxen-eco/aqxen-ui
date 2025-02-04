@@ -16,6 +16,7 @@ import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
 
 const addBadgesSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),
@@ -27,9 +28,14 @@ export default function AddBadgesPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const series = searchParams.get('series')
+  const { symbol } = useOrganization()
   const router = useRouter()
 
   const { session } = useChain()
+
+  const title = decodeURIComponent(params.season_id as string)
+    .split(',')[1]
+    .replace(symbol.toUpperCase(), '')
 
   const {
     control,
@@ -65,7 +71,7 @@ export default function AddBadgesPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminBack href={`/admin/seasons/${params.season_id}`}>
-          {decodeURIComponent(params.season_id as string)}
+          {title}
         </HeaderAdminBack>
         <HeaderAdminTitle
           title={

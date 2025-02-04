@@ -10,7 +10,7 @@ import { Button } from './button'
 
 type InputBadgesProps = {
   label?: string
-  value?: string[]
+  value?: string[] | null
   onChange: (value: string[]) => void
   error?: string
 }
@@ -43,7 +43,7 @@ export function InputBadges({
 
       {badgesQuery.isSuccess && (
         <>
-          {value.length > 0 && (
+          {value && value.length > 0 && (
             <ul className="flex flex-wrap items-start justify-start gap-2">
               {value.map((id) => {
                 const badge = badgesQuery?.data?.rows.find((b) => b.id === id)
@@ -93,16 +93,16 @@ export function InputBadges({
                 className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-gray-3 data-[selected=true]:text-white data-[disabled=true]:opacity-50"
                 value={badge.id}
                 onSelect={(currentValue) => {
-                  const newValue = value.includes(currentValue)
+                  const newValue = value?.includes(currentValue)
                     ? value.filter((i) => i !== currentValue)
-                    : [...value, currentValue]
+                    : [...(value ?? []), currentValue]
                   onChange(newValue)
                 }}
-                checked={value.includes(badge.id)}
+                checked={value?.includes(badge.id)}
               >
                 <div className="inline-flex items-center gap-2">
                   <BadgeImage src={badge.ipfs} size="xs" />
-                  <span className="text-nowrap font-sans text-body-2 font-medium capitalize text-white">
+                  <span className="text-nowrap font-sans text-body-2 font-medium text-white">
                     {badge.name}
                   </span>
                 </div>

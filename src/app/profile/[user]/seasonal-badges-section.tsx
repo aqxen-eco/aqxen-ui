@@ -13,12 +13,11 @@ import {
 import { Box } from '@/components/ui/box'
 import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 
-
 type SeasonalBadgesSectionProps = {
   lastSeriesId?: number
   name: string
   badges: BadgeType[]
-  series: Series[]
+  series: (Series & { badges: BadgeType[] })[]
 }
 
 export function SeasonalBadgesSection({
@@ -29,29 +28,21 @@ export function SeasonalBadgesSection({
 }: SeasonalBadgesSectionProps) {
   const [selectedSeries, setSelectedSeries] = useState(lastSeriesId)
 
-  // const seasonIdFormatted = seasonId.split(',')[1]
-
-  // const seriesQueries = useQuery({
-  //   queryKey: ['series', seasonIdFormatted],
-  //   queryFn: async () =>
-  //     await listSeries({
-  //       scope: seasonIdFormatted,
-  //     }),
-  // })
-
-  console.log(series)
+  const seriesValue = series.find((series) => series.id === selectedSeries)
 
   return (
     <section className="py-8">
       <header className="mb-4 flex items-center justify-between gap-4 px-8 mobile:px-4">
         <h3 className="text-title-2 text-white">
-          {name} <span className="text-gray-3">({badges.length})</span>
+          {name}{' '}
+          <span className="text-gray-3">
+            {seriesValue?.badges && seriesValue?.badges.length > 0
+              ? `(${seriesValue?.badges.length})`
+              : null}
+          </span>
         </h3>
         {series.length > 0 && (
-          <DropdownRoot
-            label={series.find((series) => series.id === selectedSeries)?.name}
-            align="end"
-          >
+          <DropdownRoot label={seriesValue?.name} align="end">
             {series.map((series) => (
               <DropdownItem
                 key={series.id}
@@ -66,10 +57,10 @@ export function SeasonalBadgesSection({
           </DropdownRoot>
         )}
       </header>
-      {badges.length > 0 ? (
-        <BadgeSwiper>
+      {seriesValue?.badges && seriesValue?.badges.length > 0 ? (
+        <BadgeSwiper useEffectDep={[selectedSeries]}>
           <BadgeSwiperWrapper>
-            {badges.map((badge) => (
+            {seriesValue.badges.map((badge) => (
               <BadgeSwiperSlide key={badge.id}>
                 <Badge name={badge.name} balance="0" ipfs={badge.ipfs} />
               </BadgeSwiperSlide>
