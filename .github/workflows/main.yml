@@ -41,8 +41,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "upscale.tar.gz"
           target: "/root/upscale"
+          overwrite: true
 
-      - name: Deploy on Server
+      - name: Deploy new build
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
