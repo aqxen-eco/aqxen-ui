@@ -80,7 +80,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             key={season.id}
             lastSeriesId={season.last_started_series.at(-1)}
             name={season.name}
-            badges={season.badges}
             series={season.series}
           />
         ))}

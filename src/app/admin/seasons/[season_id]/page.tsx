@@ -10,12 +10,14 @@ import { listSeason } from '@/api/chain/season'
 import { listSeries } from '@/api/chain/series'
 import { endSeries } from '@/api/chain/series/end-series'
 import { startSeries } from '@/api/chain/series/start-series'
+import { BadgeStatus } from '@/api/model/badge'
 import {
   HeaderAdmin,
   HeaderAdminBack,
   HeaderAdminTitle,
 } from '@/components/header-admin'
 import { BadgeImage } from '@/components/ui/badge-image'
+import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
 import {
@@ -30,8 +32,6 @@ import { Tag } from '@/components/ui/tag'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { BadgeStatus } from '@/api/model/badge'
-import { Box } from '@/components/ui/box'
 
 export default function SeasonPage() {
   const { name, symbol } = useOrganization()
@@ -88,8 +88,8 @@ export default function SeasonPage() {
   }
 
   const series = seriesQuery?.data?.rows.map((series) => {
-    const seriesBadge = badgesStatusQuery.data?.rows.reduce(
-      (acc: any, crr: BadgeStatus) => {
+    const seriesBadge = badgesStatusQuery.data?.rows.reduce<Badge[]>(
+      (acc, crr: BadgeStatus) => {
         if (
           crr.seq_id === series.id &&
           crr.agg_symbol === decodeURIComponent(season_id as string) &&
@@ -99,7 +99,11 @@ export default function SeasonPage() {
             (item) => item.id === crr.badge_symbol
           )
 
-          return [...acc, badge]
+          if (badge) {
+            return [...acc, badge]
+          }
+
+          return acc
         }
         return acc
       },
@@ -108,7 +112,7 @@ export default function SeasonPage() {
 
     return {
       ...series,
-      badges: seriesBadge as Badge[],
+      badges: seriesBadge,
     }
   })
 
@@ -231,13 +235,15 @@ export default function SeasonPage() {
                           <TableCell>{seriesItem.name}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-4">
-                              {seriesItem.badges.map((badge) => (
-                                <Tooltip key={badge.id} content={badge.name}>
-                                  <div>
-                                    <BadgeImage src={badge.ipfs} size="xs" />
-                                  </div>
-                                </Tooltip>
-                              ))}
+                              {seriesItem.badges &&
+                                seriesItem.badges.length > 0 &&
+                                seriesItem.badges.map((badge) => (
+                                  <Tooltip key={badge.id} content={badge.name}>
+                                    <div>
+                                      <BadgeImage src={badge.ipfs} size="xs" />
+                                    </div>
+                                  </Tooltip>
+                                ))}
                               {seriesItem.status !== 'end' && (
                                 <Tooltip content="Add badge">
                                   <Link

@@ -16,14 +16,14 @@ import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 type SeasonalBadgesSectionProps = {
   lastSeriesId?: number
   name: string
-  badges: BadgeType[]
-  series: (Series & { badges: BadgeType[] })[]
+  series: (Series & {
+    badges: BadgeType[]
+  })[]
 }
 
 export function SeasonalBadgesSection({
   name,
   lastSeriesId,
-  badges,
   series,
 }: SeasonalBadgesSectionProps) {
   const [selectedSeries, setSelectedSeries] = useState(lastSeriesId)
@@ -58,7 +58,7 @@ export function SeasonalBadgesSection({
         )}
       </header>
       {seriesValue?.badges && seriesValue?.badges.length > 0 ? (
-        <BadgeSwiper useEffectDep={[selectedSeries]}>
+        <BadgeSwiper>
           <BadgeSwiperWrapper>
             {seriesValue.badges.map((badge) => (
               <BadgeSwiperSlide key={badge.id}>

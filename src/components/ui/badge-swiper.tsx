@@ -9,15 +9,9 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md'
 import Swiper from 'swiper'
 import { Navigation, Pagination } from 'swiper/modules'
 
-export function BadgeSwiper({
-  children,
-  useEffectDep = [],
-}: {
-  children: React.ReactNode
-  useEffectDep: any[]
-}) {
+export function BadgeSwiper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    const swiper = new Swiper('.swiper', {
+    new Swiper('.swiper', {
       modules: [Navigation, Pagination],
       pagination: {
         el: '.swiper-pagination',
@@ -37,7 +31,7 @@ export function BadgeSwiper({
         },
       },
     })
-  }, useEffectDep)
+  }, [children])
 
   return (
     <div className="swiper select-none !px-8">
