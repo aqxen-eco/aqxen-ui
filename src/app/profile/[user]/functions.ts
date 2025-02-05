@@ -13,8 +13,7 @@ type GetUserBadgesProps = {
 
 export type Seasons = Array<
   {
-    badges: Badge[]
-    series: Series[]
+    series: (Series & { badges: Badge[] })[]
   } & Omit<Season, 'badges'>
 >
 
@@ -80,18 +79,25 @@ export async function getUserBadges({
 
   const seasonsWithBadgesAndSeries = seasons.map((season, seasonIndex) => {
     const seasonSeries = series[seasonIndex].rows.map((series) => {
-      const seriesBadge = badgesStatus.reduce((acc: any, crr: BadgeStatus) => {
-        if (crr.seq_id === series.id && crr.agg_symbol === season.id) {
-          const badge = badges.find((item) => item.id === crr.badge_symbol)
+      const seriesBadge = badgesStatus.reduce<Badge[]>(
+        (acc, crr: BadgeStatus) => {
+          if (crr.seq_id === series.id && crr.agg_symbol === season.id) {
+            const badge = badges.find((item) => item.id === crr.badge_symbol)
 
-          return [...acc, badge]
-        }
-        return acc
-      }, [])
+            if (badge) {
+              return [...acc, badge]
+            }
+
+            return acc
+          }
+          return acc
+        },
+        []
+      )
 
       return {
         ...series,
-        badges: seriesBadge as Badge[],
+        badges: seriesBadge,
       }
     })
 

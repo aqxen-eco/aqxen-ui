@@ -28,16 +28,16 @@ const addSeriesSchema = z.object({
 type AddSeriesSchema = z.infer<typeof addSeriesSchema>
 
 const nthNumber = (number: number) => {
-  if (number > 3 && number < 21) return number + 'th'
+  if (number > 3 && number < 21) return `${number  }th`
   switch (number % 10) {
     case 1:
-      return number + 'st'
+      return `${number  }st`
     case 2:
-      return number + 'nd'
+      return `${number  }nd`
     case 3:
-      return number + 'rd'
+      return `${number  }rd`
     default:
-      return number + 'th'
+      return `${number  }th`
   }
 }
 
