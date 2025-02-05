@@ -9,12 +9,13 @@ import { createBadge } from '@/api/chain/badge'
 import { Badge } from '@/components/ui/badge'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const newBadgeSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -76,43 +77,76 @@ export default function NewBadgePage() {
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-8 p-8 mobile:p-0 desktop:col-span-4"
       >
-        <Input
-          {...register('name')}
-          label="Name"
-          error={errors['name']?.message}
-        />
+        <Field>
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            {...register('name')}
+            aria-invalid={!!errors['name']}
+          />
+          <ErrorMessage>{errors['name']?.message}</ErrorMessage>
+        </Field>
         <Controller
           name="symbol"
           control={control}
           render={({ field }) => (
-            <InputSymbol
-              label="Symbol"
-              error={errors['symbol']?.message}
-              maxLength={3}
-              {...field}
-            />
+            <Field>
+              <Label htmlFor="symbol">Symbol</Label>
+              <InputSymbol
+                id="symbol"
+                aria-invalid={!!errors['symbol']}
+                maxLength={3}
+                {...field}
+              />
+              <ErrorMessage>{errors['symbol']?.message}</ErrorMessage>
+            </Field>
           )}
         />
-        <Input
-          {...register('image')}
-          label="IPFS Image hash"
-          error={errors['image']?.message}
-        />
-        <Input
-          {...register('description')}
-          label="Description"
-          error={errors['description']?.message}
-        />
-        <Checkbox
-          {...register('lifetimeAggregate')}
-          label="Lifetime Aggregate"
-          error={errors['lifetimeAggregate']?.message}
-        />
-        <Checkbox
-          {...register('lifetimeStats')}
-          label="Lifetime Stats"
-          error={errors['lifetimeStats']?.message}
-        />
+        <Field>
+          <Label htmlFor="image">IPFS Image hash</Label>
+          <Input
+            id="image"
+            {...register('image')}
+            aria-invalid={!!errors['image']}
+          />
+          <ErrorMessage>{errors['image']?.message}</ErrorMessage>
+        </Field>
+        <Field>
+          <Label htmlFor="description">Description</Label>
+          <Input
+            id="description"
+            {...register('description')}
+            aria-invalid={!!errors['description']}
+          />
+          <ErrorMessage>{errors['description']?.message}</ErrorMessage>
+        </Field>
+        <Field>
+          <CheckboxWrapper>
+            <Label htmlFor="lifetimeAggregate" className="flex-1">
+              Lifetime Aggregate
+            </Label>
+            <Checkbox
+              id="lifetimeAggregate"
+              {...register('lifetimeAggregate')}
+              aria-invalid={!!errors['lifetimeAggregate']}
+            />
+          </CheckboxWrapper>
+          <ErrorMessage>{errors['lifetimeAggregate']?.message}</ErrorMessage>
+        </Field>
+        <Field>
+          <CheckboxWrapper>
+            <Label htmlFor="lifetimeStats" className="flex-1">
+              Lifetime Stats
+            </Label>
+            <Checkbox
+              id="lifetimeStats"
+              {...register('lifetimeStats')}
+              aria-invalid={!!errors['lifetimeStats']}
+            />
+          </CheckboxWrapper>
+          <ErrorMessage>{errors['lifetimeStats']?.message}</ErrorMessage>
+        </Field>
+
         <Button type="submit" variant="primary" size="lg">
           {isSubmitting ? 'Creating...' : 'Create'}
         </Button>

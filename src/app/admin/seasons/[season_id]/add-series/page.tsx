@@ -13,11 +13,12 @@ import {
 } from '@/components/header-admin'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const addSeriesSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -28,16 +29,16 @@ const addSeriesSchema = z.object({
 type AddSeriesSchema = z.infer<typeof addSeriesSchema>
 
 const nthNumber = (number: number) => {
-  if (number > 3 && number < 21) return `${number  }th`
+  if (number > 3 && number < 21) return `${number}th`
   switch (number % 10) {
     case 1:
-      return `${number  }st`
+      return `${number}st`
     case 2:
-      return `${number  }nd`
+      return `${number}nd`
     case 3:
-      return `${number  }rd`
+      return `${number}rd`
     default:
-      return `${number  }th`
+      return `${number}th`
   }
 }
 
@@ -97,29 +98,42 @@ export default function AddSeriesPage() {
       <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md px-4 pb-8">
         <Box className="mobile:rounded-none mobile:border-0 mobile:bg-black mobile:p-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <Input
-              {...register('name')}
-              label="Name"
-              error={errors['name']?.message}
-            />
+            <Field>
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                {...register('name')}
+                aria-invalid={!!errors['name']}
+              />
+              <ErrorMessage>{errors['name']?.message}</ErrorMessage>
+            </Field>
 
             <Controller
               name="badges"
               control={control}
               render={({ field }) => (
-                <InputBadges
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors['badges']?.message}
-                />
+                <Field>
+                  <Label>Badges</Label>
+                  <InputBadges value={field.value} onChange={field.onChange} />
+                  <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
+                </Field>
               )}
             />
 
-            <Checkbox
-              {...register('start_right_away')}
-              label="Start the new series right away"
-              error={errors['start_right_away']?.message}
-            />
+            <Field>
+              <CheckboxWrapper>
+                <Label htmlFor="start_right_away" className="flex-1">
+                  Start the new series right away
+                </Label>
+                <Checkbox
+                  id="start_right_away"
+                  {...register('start_right_away')}
+                  aria-invalid={!!errors['start_right_away']}
+                />
+              </CheckboxWrapper>
+              <ErrorMessage>{errors['start_right_away']?.message}</ErrorMessage>
+            </Field>
+
             <Button type="submit" variant="primary" size="lg">
               {isSubmitting ? 'Adding...' : 'Add'}
             </Button>

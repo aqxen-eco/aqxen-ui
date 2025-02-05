@@ -10,6 +10,7 @@ import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useOrganization } from '@/contexts/organization'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const organizationSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -49,18 +50,26 @@ export default function OrganizationPage() {
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-8 p-8 mobile:p-0 desktop:col-span-4"
       >
-        <Input
-          {...register('name')}
-          label="Name"
-          error={errors['name']?.message}
-          disabled={isLoading}
-        />
-        <Input
-          {...register('logo')}
-          label="Logo IPFS Image hash"
-          error={errors['logo']?.message}
-          disabled={isLoading}
-        />
+        <Field>
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            {...register('name')}
+            aria-invalid={!!errors['name']}
+            disabled={isLoading}
+          />
+          <ErrorMessage>{errors['name']?.message}</ErrorMessage>
+        </Field>
+        <Field>
+          <Label htmlFor="logo">Logo IPFS Image hash</Label>
+          <Input
+            id="logo"
+            {...register('logo')}
+            aria-invalid={!!errors['logo']}
+            disabled={isLoading}
+          />
+          <ErrorMessage>{errors['logo']?.message}</ErrorMessage>
+        </Field>
         <Button
           type="submit"
           variant="primary"

@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const sendBadgeSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),
@@ -85,31 +86,43 @@ export default function SendBadgePage() {
               name="badges"
               control={control}
               render={({ field }) => (
-                <InputBadges
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors['badges']?.message}
-                />
+                <Field>
+                  <Label htmlFor="badges">Badges</Label>
+                  <InputBadges value={field.value} onChange={field.onChange} />
+                  <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
+                </Field>
               )}
             />
-            <Input
-              {...register('amount')}
-              label="Amount"
-              placeholder="uint64"
-              error={errors['amount']?.message}
-            />
-            <Input
-              {...register('to')}
-              label="To"
-              placeholder="name"
-              error={errors['to']?.message}
-            />
-            <Input
-              {...register('message')}
-              label="Message"
-              placeholder="String"
-              error={errors['message']?.message}
-            />
+            <Field>
+              <Label htmlFor="amount">Amount</Label>
+              <Input
+                id="amount"
+                {...register('amount')}
+                placeholder="uint64"
+                aria-invalid={!!errors['amount']}
+              />
+              <ErrorMessage>{errors['amount']?.message}</ErrorMessage>
+            </Field>
+            <Field>
+              <Label htmlFor="to">To</Label>
+              <Input
+                id="to"
+                {...register('to')}
+                placeholder="name"
+                aria-invalid={!!errors['to']}
+              />
+              <ErrorMessage>{errors['to']?.message}</ErrorMessage>
+            </Field>
+            <Field>
+              <Label htmlFor="message">Message</Label>
+              <Input
+                id="message"
+                {...register('message')}
+                placeholder="String"
+                aria-invalid={!!errors['message']}
+              />
+              <ErrorMessage>{errors['message']?.message}</ErrorMessage>
+            </Field>
             <Button type="submit" variant="primary" size="lg">
               {isSubmitting ? 'Sending...' : 'Send'}
             </Button>

@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const addBadgesSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),
@@ -92,11 +93,11 @@ export default function AddBadgesPage() {
               name="badges"
               control={control}
               render={({ field }) => (
-                <InputBadges
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors['badges']?.message}
-                />
+                <Field>
+                  <Label>Badges</Label>
+                  <InputBadges value={field.value} onChange={field.onChange} />
+                  <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
+                </Field>
               )}
             />
 
