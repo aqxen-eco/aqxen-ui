@@ -31,7 +31,7 @@ jobs:
         run: pnpm build
 
       - name: Archive build
-        run: tar -czf upscale.tar.gz .next package.json public node_modules .env
+        run: tar -czf build.tar.gz --exclude=.git --exclude=build.tar.gz .[!.]* *
 
       - name: Transfer build to host
         uses: appleboy/scp-action@v0.1.4
@@ -39,7 +39,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "upscale.tar.gz"
+          source: "build.tar.gz"
           target: "/root/upscale"
           overwrite: true
 
@@ -51,7 +51,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /root/upscale
-            tar -xzf upscale.tar.gz
+            tar -xzf build.tar.gz
             systemctl restart upscale
             systemctl restart nginx
             systemctl status upscale --no-pager
