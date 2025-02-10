@@ -87,7 +87,7 @@ export function InputSearchBadges({
         >
           <div className="inline-flex items-center gap-2">
             <BadgeImage src={badge.ipfs} size="xs" />
-            <span className="text-nowrap font-sans text-body-2 font-medium capitalize text-white">
+            <span className="text-nowrap font-sans text-body-2 font-medium text-white">
               {badge.name}
             </span>
           </div>

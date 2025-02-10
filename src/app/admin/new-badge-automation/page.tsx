@@ -137,7 +137,7 @@ export default function NewBadgeAutomationPage() {
                     {...register(`criteria.${badgeIndex}.badge_symbol`)}
                     value={badge.id}
                   />
-                  <span className="text-nowrap font-sans text-body-2 font-medium capitalize text-white">
+                  <span className="text-nowrap font-sans text-body-2 font-medium text-white">
                     {badge.name}
                   </span>
                 </div>
@@ -190,7 +190,7 @@ export default function NewBadgeAutomationPage() {
                     {...register(`emitted.${badgeIndex}.badge_symbol`)}
                     value={badge.id}
                   />
-                  <span className="text-nowrap font-sans text-body-2 font-medium capitalize text-white">
+                  <span className="text-nowrap font-sans text-body-2 font-medium text-white">
                     {badge.name}
                   </span>
                 </div>
