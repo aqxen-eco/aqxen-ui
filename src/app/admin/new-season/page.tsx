@@ -52,10 +52,10 @@ export default function NewSeasonPage() {
   }
 
   return (
-    <Box className="p-0 mobile:rounded-none mobile:border-0 mobile:bg-black">
+    <Box className="p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8 p-8 mobile:p-0"
+        className="space-y-8 p-8 max-md:p-0"
       >
         <Field>
           <Label htmlFor="name">Name</Label>

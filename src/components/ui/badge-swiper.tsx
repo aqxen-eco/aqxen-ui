@@ -34,9 +34,9 @@ export function BadgeSwiper({ children }: { children: React.ReactNode }) {
   }, [children])
 
   return (
-    <div className="swiper select-none !px-8">
+    <div className="swiper !px-8 select-none">
       {children}
-      <div className="swiper-pagination [&_>_.swiper-pagination-bullet]:bg-white" />
+      <div className="swiper-pagination" />
       <div className="swiper-button-prev !h-10 !w-10 p-1 after:hidden">
         <MdKeyboardArrowLeft className="h-4 w-4 text-white" />
       </div>

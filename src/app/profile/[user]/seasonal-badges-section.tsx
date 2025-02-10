@@ -32,7 +32,7 @@ export function SeasonalBadgesSection({
 
   return (
     <section className="py-8">
-      <header className="mb-4 flex items-center justify-between gap-4 px-8 mobile:px-4">
+      <header className="mb-4 flex items-center justify-between gap-4 px-8 max-md:px-4">
         <h3 className="text-title-2 text-white">
           {name}{' '}
           <span className="text-gray-3">
@@ -68,8 +68,8 @@ export function SeasonalBadgesSection({
           </BadgeSwiperWrapper>
         </BadgeSwiper>
       ) : (
-        <div className="px-8 mobile:px-4">
-          <Box className="flex h-[12.5rem] w-full items-center justify-center text-center">
+        <div className="px-8 max-md:px-4">
+          <Box className="flex h-50 w-full items-center justify-center text-center">
             <p className="text-body-2 text-gray-3">No Badges received yet</p>
           </Box>
         </div>

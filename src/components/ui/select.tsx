@@ -42,14 +42,14 @@ export function Select({
         <PrimitiveSelect.Content
           position="popper"
           sideOffset={8}
-          className="w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border border-gray-2 bg-gray-1"
+          className="border-gray-2 bg-gray-1 w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border"
         >
           <PrimitiveSelect.ScrollUpButton className="cursor-default items-center justify-center">
             <MdKeyboardArrowUp className="size-6" />
           </PrimitiveSelect.ScrollUpButton>
           <PrimitiveSelect.Viewport>
             <PrimitiveSelect.Group>
-              <PrimitiveSelect.Label className="px-[calc(1rem-1px)] py-[calc(0.5rem-1px)] text-body-3 text-gray-3">
+              <PrimitiveSelect.Label className="text-body-3 text-gray-3 px-[calc(1rem-1px)] py-[calc(0.5rem-1px)]">
                 {label}
               </PrimitiveSelect.Label>
               {children}
@@ -71,7 +71,7 @@ export function SelectItem({
   return (
     <PrimitiveSelect.Item
       {...props}
-      className="flex items-center justify-between gap-1 px-[calc(1rem-1px)] py-[calc(0.5rem-1px)] outline-none focus:bg-gray-2 desktop:hover:bg-gray-2"
+      className="focus:bg-gray-2 hover:bg-gray-2 flex items-center justify-between gap-1 px-[calc(1rem-1px)] py-[calc(0.5rem-1px)] outline-hidden"
     >
       <PrimitiveSelect.ItemText>{children}</PrimitiveSelect.ItemText>
       <div className="flex size-6 items-center justify-center">

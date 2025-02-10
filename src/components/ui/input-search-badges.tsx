@@ -67,8 +67,8 @@ export function InputSearchBadges({
 
   if (!badgesQuery.isSuccess) {
     return (
-      <div className="flex h-12 w-full items-center justify-between border-b border-gray-3">
-        <div className="h-4 w-20 rounded-full bg-gray-2" />
+      <div className="border-gray-3 flex h-12 w-full items-center justify-between border-b">
+        <div className="bg-gray-2 h-4 w-20 rounded-full" />
       </div>
     )
   }
@@ -80,14 +80,14 @@ export function InputSearchBadges({
       {badgesQuery?.data?.rows.map((badge) => (
         <ComboboxItem
           key={badge.id}
-          className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-gray-3 data-[selected=true]:text-white data-[disabled=true]:opacity-50"
+          className="data-[selected=true]:bg-gray-3 relative flex cursor-default items-center gap-2 rounded-xs px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:text-white"
           value={badge.id}
           onSelect={handleOnSelect}
           checked={value.includes(badge.id)}
         >
           <div className="inline-flex items-center gap-2">
             <BadgeImage src={badge.ipfs} size="xs" />
-            <span className="text-nowrap font-sans text-body-2 font-medium text-white">
+            <span className="text-body-2 font-sans font-medium text-nowrap text-white">
               {badge.name}
             </span>
           </div>

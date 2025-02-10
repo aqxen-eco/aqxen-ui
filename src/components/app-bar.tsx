@@ -22,12 +22,12 @@ export function AppBar() {
 
   return (
     <>
-      <nav className="sticky top-2 z-30 w-full mobile:top-0">
-        <div className="mx-auto max-w-container-lg desktop:px-4">
-          <Box className="flex items-center justify-between rounded-full p-2 mobile:rounded-none mobile:border-0 mobile:border-b mobile:p-4">
+      <nav className="sticky top-2 z-30 w-full max-md:top-0">
+        <div className="max-w-container-lg mx-auto md:px-4">
+          <Box className="flex items-center justify-between rounded-full p-2 max-md:rounded-none max-md:border-0 max-md:border-b max-md:p-4">
             <NextLink
               href="/"
-              className="flex cursor-pointer items-center gap-2 rounded-full pl-2 pr-3 text-2xl leading-10 text-white duration-150 desktop:hover:bg-gray-2"
+              className="hover:bg-gray-2 flex cursor-pointer items-center gap-2 rounded-full pr-3 pl-2 text-2xl leading-10 text-white duration-150"
             >
               <img src="/img/logo.svg" alt="" />
               UpScale
@@ -44,7 +44,7 @@ export function AppBar() {
                   customTrigger={
                     <button
                       type="button"
-                      className="group/dropdown-button focus:outline-none"
+                      className="group/dropdown-button focus:outline-hidden"
                     >
                       <Avatar
                         color="red"

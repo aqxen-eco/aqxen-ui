@@ -72,10 +72,10 @@ export default function NewBadgePage() {
   }
 
   return (
-    <Box className="p-0 mobile:space-y-8 mobile:rounded-none mobile:border-0 mobile:bg-black desktop:grid desktop:grid-cols-6">
+    <Box className="p-0 max-md:space-y-8 max-md:rounded-none max-md:border-0 max-md:bg-black md:grid md:grid-cols-6">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8 p-8 mobile:p-0 desktop:col-span-4"
+        className="space-y-8 p-8 max-md:p-0 md:col-span-4"
       >
         <Field>
           <Label htmlFor="name">Name</Label>
@@ -151,7 +151,7 @@ export default function NewBadgePage() {
           {isSubmitting ? 'Creating...' : 'Create'}
         </Button>
       </form>
-      <div className="space-y-4 border-l border-gray-2 p-8 mobile:rounded-2xl mobile:border mobile:bg-gray-1 mobile:p-4 desktop:col-span-2">
+      <div className="border-gray-2 max-md:bg-gray-1 space-y-4 border-l p-8 max-md:rounded-2xl max-md:border max-md:p-4 md:col-span-2">
         <h2 className="text-title-2 text-white">Badge preview</h2>
         <Badge
           ipfs={image ? IPFS_IMAGE_SOURCE + image : ''}

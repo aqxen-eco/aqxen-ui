@@ -76,11 +76,11 @@ export default function SendBadgePage() {
           className="max-w-container-md"
         />
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md space-y-8 px-4 pb-8">
-        <Box className="p-0 mobile:rounded-none mobile:border-0 mobile:bg-black">
+      <div className="max-w-container-md mx-auto min-h-[calc(100vh-24rem)] space-y-8 px-4 pb-8">
+        <Box className="p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-8 p-8 mobile:p-0"
+            className="space-y-8 p-8 max-md:p-0"
           >
             <Controller
               name="badges"

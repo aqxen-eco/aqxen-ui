@@ -2,15 +2,14 @@ import { Slot } from '@radix-ui/react-slot'
 import { tv, type VariantProps } from 'tailwind-variants'
 
 export const button = tv({
-  base: 'inline-flex cursor-pointer select-none gap-1 text-nowrap rounded-full border font-sans text-body-2 font-medium duration-150 focus:border-gray-3 focus:outline-0 disabled:cursor-not-allowed disabled:opacity-50',
+  base: 'text-body-2 focus:border-gray-3 inline-flex cursor-pointer gap-1 rounded-full border font-sans font-medium text-nowrap duration-150 select-none focus:outline-0 disabled:cursor-not-allowed disabled:opacity-50',
   variants: {
     variant: {
       primary:
-        'border-white bg-white text-black desktop:hover:border-gray-3 desktop:hover:bg-gray-3',
-      secondary: 'border-gray-2 bg-gray-1 text-white desktop:hover:bg-gray-2',
-      link: 'border-transparent bg-transparent text-white desktop:hover:underline',
-      default:
-        'border-transparent bg-transparent text-gray-3 desktop:hover:underline',
+        'hover:border-gray-3 hover:bg-gray-3 border-white bg-white text-black',
+      secondary: 'border-gray-2 bg-gray-1 hover:bg-gray-2 text-white',
+      link: 'border-transparent bg-transparent text-white hover:underline',
+      default: 'text-gray-3 border-transparent bg-transparent hover:underline',
     },
     size: {
       md: 'px-[calc(1rem-1px)] py-[calc(0.5rem-1px)]',

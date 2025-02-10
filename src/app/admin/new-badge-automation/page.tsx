@@ -91,10 +91,10 @@ export default function NewBadgeAutomationPage() {
   }
 
   return (
-    <Box className="p-0 mobile:rounded-none mobile:border-0 mobile:bg-black">
+    <Box className="p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8 p-8 mobile:p-0"
+        className="space-y-8 p-8 max-md:p-0"
       >
         <Field>
           <Label htmlFor="name">Name</Label>
@@ -128,7 +128,7 @@ export default function NewBadgeAutomationPage() {
             {badgesCriteria.map((badge, badgeIndex) => (
               <li
                 key={badge.id}
-                className="flex justify-center gap-4 border-b border-gray-2 py-1"
+                className="border-gray-2 flex justify-center gap-4 border-b py-1"
               >
                 <div className="flex flex-1 items-center gap-2">
                   <BadgeImage src={badge.ipfs} size="xs" />
@@ -137,14 +137,14 @@ export default function NewBadgeAutomationPage() {
                     {...register(`criteria.${badgeIndex}.badge_symbol`)}
                     value={badge.id}
                   />
-                  <span className="text-nowrap font-sans text-body-2 font-medium text-white">
+                  <span className="text-body-2 font-sans font-medium text-nowrap text-white">
                     {badge.name}
                   </span>
                 </div>
                 <div className="flex-1">
                   <input
                     type="text"
-                    className="h-10 w-full bg-transparent placeholder-gray-3 focus:outline-0"
+                    className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
                     placeholder="Quantity"
                     {...register(`criteria.${badgeIndex}.quantity`)}
                   />
@@ -181,7 +181,7 @@ export default function NewBadgeAutomationPage() {
             {badgesEmitted.map((badge, badgeIndex) => (
               <li
                 key={badge.id}
-                className="flex justify-center gap-4 border-b border-gray-2 py-1"
+                className="border-gray-2 flex justify-center gap-4 border-b py-1"
               >
                 <div className="flex flex-1 items-center gap-2">
                   <BadgeImage src={badge.ipfs} size="xs" />
@@ -190,14 +190,14 @@ export default function NewBadgeAutomationPage() {
                     {...register(`emitted.${badgeIndex}.badge_symbol`)}
                     value={badge.id}
                   />
-                  <span className="text-nowrap font-sans text-body-2 font-medium text-white">
+                  <span className="text-body-2 font-sans font-medium text-nowrap text-white">
                     {badge.name}
                   </span>
                 </div>
                 <div className="flex-1">
                   <input
                     type="text"
-                    className="h-10 w-full bg-transparent placeholder-gray-3 focus:outline-0"
+                    className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
                     placeholder="Quantity"
                     {...register(`emitted.${badgeIndex}.quantity`)}
                   />

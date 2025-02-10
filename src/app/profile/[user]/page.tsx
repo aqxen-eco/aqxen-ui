@@ -31,20 +31,20 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   }
 
   return (
-    <div className="mx-auto max-w-container-md space-y-8 py-8 mobile:pt-0 desktop:px-4">
-      <Box className="divide-y divide-gray-2 overflow-hidden p-0 mobile:rounded-none mobile:border-0 mobile:bg-black">
-        <div className="relative h-52 w-full bg-gradient">
+    <div className="max-w-container-md mx-auto space-y-8 py-8 max-md:pt-0 md:px-4">
+      <Box className="divide-gray-2 divide-y overflow-hidden p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
+        <div className="relative h-52 w-full bg-linear-(--gradient)">
           {/* Later control disabled based on the logged in account vs profile link */}
           <Button
             variant="secondary"
-            className="absolute right-4 top-4 z-10"
+            className="absolute top-4 right-4 z-10"
             disabled
           >
             <MdOutlineModeEdit className="h-6 w-6" />
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 p-8 mobile:px-4">
+        <div className="flex flex-wrap items-center gap-4 p-8 max-md:px-4">
           <Avatar size="lg" className="flex-none">
             {user.slice(0, 2)}
           </Avatar>
@@ -53,7 +53,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
         {badges.length > 0 && (
           <section className="py-8">
-            <header className="mb-4 px-8 mobile:px-4">
+            <header className="mb-4 px-8 max-md:px-4">
               <h3 className="text-title-2 text-white">
                 Lifetime Badges{' '}
                 <span className="text-gray-3">({badges.length})</span>

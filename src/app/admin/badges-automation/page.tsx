@@ -19,7 +19,7 @@ export default function BadgeAutomationPage() {
           <TableHead className="w-40">Emitter criteria</TableHead>
           <TableHead className="w-40">Emit badges</TableHead>
           <TableHead className="w-32">Status</TableHead>
-          <TableHead className="w-[5.5rem]" />
+          <TableHead className="w-22" />
         </TableRow>
       </TableHeader>
       <TableBody>

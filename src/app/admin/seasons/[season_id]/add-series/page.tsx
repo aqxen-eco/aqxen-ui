@@ -95,8 +95,8 @@ export default function AddSeriesPage() {
           className="max-w-container-md"
         />
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md px-4 pb-8">
-        <Box className="mobile:rounded-none mobile:border-0 mobile:bg-black mobile:p-0">
+      <div className="max-w-container-md mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
+        <Box className="max-md:rounded-none max-md:border-0 max-md:bg-black max-md:p-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <Field>
               <Label htmlFor="name">Name</Label>
