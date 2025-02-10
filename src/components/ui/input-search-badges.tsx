@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
 import { listBadge } from '@/api/chain/badge'
 import type { Badge } from '@/api/model/badge'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Combobox, ComboboxEmpty, ComboboxItem } from '@/components/ui/combobox'
 import { useOrganization } from '@/contexts/organization'
-import { useEffect } from 'react'
 
 type InputSearchBadgesProps = {
   value?: string[]
@@ -40,7 +40,7 @@ export function InputSearchBadges({
       )
       onChange(selectedBadges ?? [])
     }
-  }, [badgesQuery.isSuccess])
+  }, [badgesQuery.isSuccess, onChange])
 
   function handleOnSelect(currentValue: string) {
     const newValue = value.includes(currentValue)

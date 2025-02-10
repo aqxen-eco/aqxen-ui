@@ -13,10 +13,10 @@ import {
 } from '@/components/header-admin'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
-import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const sendBadgeSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),

@@ -14,8 +14,6 @@ import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputSearchBadges } from '@/components/ui/input-search-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
-import { useChain } from '@/contexts/chain'
-import { useOrganization } from '@/contexts/organization'
 
 const newBadgeAutomationSchema = z.object({
   name: z.string().nonempty('Name is required'),
@@ -44,8 +42,8 @@ const newBadgeAutomationSchema = z.object({
 type NewBadgeAutomationSchema = z.infer<typeof newBadgeAutomationSchema>
 
 export default function NewBadgeAutomationPage() {
-  const { symbol: organizationSymbol } = useOrganization()
-  const { session } = useChain()
+  // const { symbol: organizationSymbol } = useOrganization()
+  // const { session } = useChain()
 
   const [badgesCriteria, setBadgesCriteria] = useState<Badge[]>([])
   const [badgesEmitted, setBadgesEmitted] = useState<Badge[]>([])
@@ -64,7 +62,6 @@ export default function NewBadgeAutomationPage() {
     control,
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<NewBadgeAutomationSchema>({
     resolver: zodResolver(newBadgeAutomationSchema),

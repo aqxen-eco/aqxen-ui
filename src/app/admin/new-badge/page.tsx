@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/badge'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const newBadgeSchema = z.object({
   name: z.string().min(1, 'Name is required'),

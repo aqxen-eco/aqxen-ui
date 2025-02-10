@@ -8,12 +8,12 @@ import z from 'zod'
 import { createSeason } from '@/api/chain/season/create-season'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const newSeasonSchema = z.object({
   name: z.string().min(1, 'Name is required'),

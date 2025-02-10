@@ -14,11 +14,11 @@ import {
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { ErrorMessage, Field, Label } from '@/components/ui/field'
 
 const addSeriesSchema = z.object({
   name: z.string().min(1, 'Name is required'),
