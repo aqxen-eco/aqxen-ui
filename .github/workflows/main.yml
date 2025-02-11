@@ -21,7 +21,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "SSH connection successful"
+            echo "SSH connection successful" >> /opt/upscale/ssh.log
 
       - name: Set up node
         shell: bash -l {0}
