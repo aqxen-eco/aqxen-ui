@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - dev
-      - dlt-runner
 
 jobs:
   deploy:
@@ -14,15 +13,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: DEBUG SSH
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "SSH connection successful" >> /opt/upscale/ssh.log
 
       - name: Set up node
         shell: bash -l {0}
