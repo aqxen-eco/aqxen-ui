@@ -9,6 +9,7 @@ on:
 jobs:
   deploy:
     runs-on: [self-hosted]
+    environment: dev
 
     steps:
       - name: Checkout code
@@ -17,9 +18,9 @@ jobs:
       - name: DEBUG SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.dev.SSH_HOST }}
-          username: ${{ secrets.dev.SSH_USER }}
-          key: ${{ secrets.dev.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             echo "SSH connection successful" >> /opt/upscale/ssh.log
 
@@ -51,9 +52,9 @@ jobs:
       - name: Transfer build to host
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.dev.SSH_HOST }}
-          username: ${{ secrets.dev.SSH_USER }}
-          key: ${{ secrets.dev.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "build.tar.gz"
           target: "/root/upscale"
           overwrite: true
@@ -61,9 +62,9 @@ jobs:
       - name: Deploy new build
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.dev.SSH_HOST }}
-          username: ${{ secrets.dev.SSH_USER }}
-          key: ${{ secrets.dev.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /root/upscale
             tar -xzf build.tar.gz
