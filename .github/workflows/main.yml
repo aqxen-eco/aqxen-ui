@@ -14,10 +14,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: DEBUG SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "SSH connection successful"
+
       - name: Set up node
         shell: bash -l {0}
         run: |
-          nvm use 20
+          nvm install 22
+          nvm use 22
         
       - name: Install pnpm
         shell: bash -l {0}
