@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-import { listBadge } from '@/api/chain/badge'
+import { listBadge } from '@/api/chain/badge/list-badge'
 import type { Badge } from '@/api/model/badge'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Combobox, ComboboxEmpty, ComboboxItem } from '@/components/ui/combobox'

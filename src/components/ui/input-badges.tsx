@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { MdClose } from 'react-icons/md'
 
-import { listBadge } from '@/api/chain/badge'
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Combobox, ComboboxEmpty, ComboboxItem } from '@/components/ui/combobox'
 import { useOrganization } from '@/contexts/organization'

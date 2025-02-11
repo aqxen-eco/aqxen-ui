@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 
-import { type Series } from '@/api/chain/series'
 import type { Badge as BadgeType } from '@/api/model/badge'
+import { type Series } from '@/api/model/series'
 import { Badge } from '@/components/ui/badge'
 import {
   BadgeSwiper,

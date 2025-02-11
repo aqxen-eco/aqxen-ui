@@ -1,11 +1,14 @@
 'use server'
 
-import { type Badge, listBadge } from '@/api/chain/badge'
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
 import { listUserBadge } from '@/api/chain/badge/list-user-badge'
-import { listSeason, type Season } from '@/api/chain/season'
-import { listSeries, type Series } from '@/api/chain/series'
+import { listSeason } from '@/api/chain/season/list-season'
+import { listSeries } from '@/api/chain/series/list-series'
+import { type Badge } from '@/api/model/badge'
 import { BadgeStatus } from '@/api/model/badge'
+import { type Season } from '@/api/model/season'
+import { type Series } from '@/api/model/series'
 
 type GetUserBadgesProps = {
   user: string

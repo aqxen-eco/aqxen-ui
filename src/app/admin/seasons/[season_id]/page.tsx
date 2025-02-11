@@ -4,12 +4,13 @@ import { useQueries } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
 import { MdOutlineAdd, MdOutlineInfo } from 'react-icons/md'
 
-import { Badge, listBadge } from '@/api/chain/badge'
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
-import { listSeason } from '@/api/chain/season'
-import { listSeries } from '@/api/chain/series'
+import { listSeason } from '@/api/chain/season/list-season'
 import { endSeries } from '@/api/chain/series/end-series'
+import { listSeries } from '@/api/chain/series/list-series'
 import { startSeries } from '@/api/chain/series/start-series'
+import type { Badge } from '@/api/model/badge'
 import { BadgeStatus } from '@/api/model/badge'
 import {
   HeaderAdmin,

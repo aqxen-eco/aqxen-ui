@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { createContext, use } from 'react'
 
-import { listOrganization } from '@/api/chain/organization'
+import { listOrganization } from '@/api/chain/organization/list-organization'
 import { useChain } from '@/contexts/chain'
 
 type OrganizationContext = {

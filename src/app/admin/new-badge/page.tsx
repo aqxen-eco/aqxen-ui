@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 
-import { createBadge } from '@/api/chain/badge'
+import { createBadge } from '@/api/chain/badge/create-badge'
 import { Badge } from '@/components/ui/badge'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'

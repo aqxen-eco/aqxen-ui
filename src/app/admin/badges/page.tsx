@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 
-import { listBadge } from '@/api/chain/badge'
+import { listBadge } from '@/api/chain/badge/list-badge'
 import {
   HeaderAdmin,
   HeaderAdminMenu,
@@ -42,7 +42,7 @@ export default function BadgesPage() {
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
+      <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
         {query.isLoading && <TableSkeleton />}
         {(query.isSuccess || (query.data && query.data.rows.length > 0)) && (
           <Table>
@@ -63,7 +63,7 @@ export default function BadgesPage() {
                   <TableCell>
                     <div className="inline-flex items-center gap-2">
                       <BadgeImage src={row.ipfs} size="xs" />
-                      <span className="text-nowrap font-sans text-body-2 font-medium text-white">
+                      <span className="text-body-2 font-sans font-medium text-nowrap text-white">
                         {row.name}
                       </span>
                     </div>
@@ -89,7 +89,7 @@ export default function BadgesPage() {
                   <TableCell
                     colSpan={Object.keys(query.data.rows[0]).length + 1}
                   >
-                    <div className="flex items-center justify-center gap-2 pt-8 text-body-2 text-white">
+                    <div className="text-body-2 flex items-center justify-center gap-2 pt-8 text-white">
                       Page
                       <Select label="Page" placeholder="Page" defaultValue="1">
                         {['1', '2', '3', '4', '5', '6'].map((item) => (
