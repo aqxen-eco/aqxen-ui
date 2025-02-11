@@ -14,9 +14,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up nodejs via nvm
+      - name: Set up node
         run: |
-          echo 'boop'
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          nvm use 22
+          export PATH="$NVM_DIR/versions/node/$(nvm version)/bin:$PATH"
+          node -v
+          npm -v
+          which node
+          which npm
+
       - name: Install pnpm
         run: npm install -g pnpm
 
