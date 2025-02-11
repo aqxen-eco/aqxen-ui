@@ -14,6 +14,7 @@ import {
 } from '@/components/header-admin'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
@@ -85,18 +86,18 @@ export default function AddBadgesPage() {
           className="max-w-container-md"
         />
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md px-4 pb-8">
-        <Box className="mobile:rounded-none mobile:border-0 mobile:bg-black mobile:p-0">
+      <div className="max-w-container-md mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
+        <Box className="max-md:rounded-none max-md:border-0 max-md:bg-black max-md:p-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <Controller
               name="badges"
               control={control}
               render={({ field }) => (
-                <InputBadges
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors['badges']?.message}
-                />
+                <Field>
+                  <Label>Badges</Label>
+                  <InputBadges value={field.value} onChange={field.onChange} />
+                  <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
+                </Field>
               )}
             />
 

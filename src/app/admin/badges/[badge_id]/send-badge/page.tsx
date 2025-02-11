@@ -13,9 +13,11 @@ import {
 } from '@/components/header-admin'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
+import { numberMask } from '@/utils/masks'
 
 const sendBadgeSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),
@@ -75,41 +77,57 @@ export default function SendBadgePage() {
           className="max-w-container-md"
         />
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md space-y-8 px-4 pb-8">
-        <Box className="p-0 mobile:rounded-none mobile:border-0 mobile:bg-black">
+      <div className="max-w-container-md mx-auto min-h-[calc(100vh-24rem)] space-y-8 px-4 pb-8">
+        <Box className="p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-8 p-8 mobile:p-0"
+            className="space-y-8 p-8 max-md:p-0"
           >
             <Controller
               name="badges"
               control={control}
               render={({ field }) => (
-                <InputBadges
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors['badges']?.message}
-                />
+                <Field>
+                  <Label htmlFor="badges">Badges</Label>
+                  <InputBadges value={field.value} onChange={field.onChange} />
+                  <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
+                </Field>
               )}
             />
-            <Input
-              {...register('amount')}
-              label="Amount"
-              placeholder="uint64"
-              error={errors['amount']?.message}
-            />
-            <Input
-              {...register('to')}
-              label="To"
-              placeholder="name"
-              error={errors['to']?.message}
-            />
-            <Input
-              {...register('message')}
-              label="Message"
-              placeholder="String"
-              error={errors['message']?.message}
-            />
+            <Field>
+              <Label htmlFor="amount">Amount</Label>
+              <Input
+                id="amount"
+                {...register('amount', {
+                  onChange: (event) => {
+                    event.target.value = numberMask(event.target.value)
+                  },
+                })}
+                placeholder="uint64"
+                aria-invalid={!!errors['amount']}
+              />
+              <ErrorMessage>{errors['amount']?.message}</ErrorMessage>
+            </Field>
+            <Field>
+              <Label htmlFor="to">To</Label>
+              <Input
+                id="to"
+                {...register('to')}
+                placeholder="name"
+                aria-invalid={!!errors['to']}
+              />
+              <ErrorMessage>{errors['to']?.message}</ErrorMessage>
+            </Field>
+            <Field>
+              <Label htmlFor="message">Message</Label>
+              <Input
+                id="message"
+                {...register('message')}
+                placeholder="String"
+                aria-invalid={!!errors['message']}
+              />
+              <ErrorMessage>{errors['message']?.message}</ErrorMessage>
+            </Field>
             <Button type="submit" variant="primary" size="lg">
               {isSubmitting ? 'Sending...' : 'Send'}
             </Button>

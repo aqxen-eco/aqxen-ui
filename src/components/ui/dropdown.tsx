@@ -50,7 +50,7 @@ export function DropdownRoot({
             <Content
               forceMount
               align={align}
-              className="z-40 mt-1 max-h-72 w-64 space-y-2 overflow-y-auto rounded-2xl border border-gray-2 bg-gray-1 px-2 py-4"
+              className="border-gray-2 bg-gray-1 z-40 mt-1 max-h-72 w-64 space-y-2 overflow-y-auto rounded-2xl border px-2 py-4"
               asChild
             >
               <motion.div
@@ -81,7 +81,7 @@ export function DropdownItem({
   return (
     <Item
       data-state={isSelected && 'selected'}
-      className="block cursor-pointer rounded-full px-4 py-2 text-body-2 font-medium text-gray-3 focus:bg-gray-2 focus:outline-none data-[state=selected]:bg-gray-2 data-[state=selected]:text-white desktop:hover:bg-gray-2"
+      className="text-body-2 text-gray-3 focus:bg-gray-2 data-[state=selected]:bg-gray-2 hover:bg-gray-2 block cursor-pointer rounded-full px-4 py-2 font-medium focus:outline-hidden data-[state=selected]:text-white"
       {...props}
     >
       {children}

@@ -3,9 +3,9 @@
 import { useQueries } from '@tanstack/react-query'
 import { MdKeyboardArrowRight } from 'react-icons/md'
 
-import { listBadge } from '@/api/chain/badge'
-import { listSeason } from '@/api/chain/season'
-import { listSeries } from '@/api/chain/series'
+import { listBadge } from '@/api/chain/badge/list-badge'
+import { listSeason } from '@/api/chain/season/list-season'
+import { listSeries } from '@/api/chain/series/list-series'
 import {
   HeaderAdmin,
   HeaderAdminMenu,
@@ -75,7 +75,7 @@ export default function SeasonsPage() {
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
+      <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
         {seasonsQuery.isLoading && <TableSkeleton columns={6} />}
         {(seasonsQuery.isSuccess ||
           (seasonsQuery.data && seasonsQuery.data.rows.length > 0)) && (
@@ -154,7 +154,7 @@ export default function SeasonsPage() {
                   <TableCell
                     colSpan={Object.keys(seasonsQuery.data.rows[0]).length + 1}
                   >
-                    <div className="flex items-center justify-center gap-2 pt-8 text-body-2 text-white">
+                    <div className="text-body-2 flex items-center justify-center gap-2 pt-8 text-white">
                       Page
                       <Select label="Page" placeholder="Page" defaultValue="1">
                         {['1', '2', '3', '4', '5', '6'].map((item) => (

@@ -10,11 +10,11 @@ const badgeImage = tv({
     size: {
       lg: {
         root: 'size-32',
-        image: 'size-[7.5rem]',
+        image: 'size-30',
       },
       xs: {
         root: 'size-6',
-        image: 'size-[1.375rem]',
+        image: 'size-5.5',
       },
     },
   },

@@ -35,7 +35,7 @@ type HeaderAdminProps = {
 }
 
 export function HeaderAdmin({ children }: HeaderAdminProps) {
-  return <div className="mobile:pt-2 desktop:pt-4">{children}</div>
+  return <div className="max-md:pt-2 md:pt-4">{children}</div>
 }
 
 type HeaderAdminMenuProps = {
@@ -44,8 +44,8 @@ type HeaderAdminMenuProps = {
 
 export function HeaderAdminMenu({ activeHref }: HeaderAdminMenuProps) {
   return (
-    <div className="mx-auto max-w-container-lg desktop:px-4">
-      <nav className="overflow-x-auto border-b border-gray-2 pb-2">
+    <div className="max-w-container-lg mx-auto md:px-4">
+      <nav className="border-gray-2 overflow-x-auto border-b pb-2">
         <ul className="flex gap-2">
           {navLinks.map((link) => (
             <li key={link.href}>
@@ -69,8 +69,8 @@ type HeaderAdminBackProps = {
 
 export function HeaderAdminBack({ children, ...props }: HeaderAdminBackProps) {
   return (
-    <div className="mx-auto max-w-container-lg desktop:px-4">
-      <nav className="overflow-x-auto border-b border-gray-2 pb-2">
+    <div className="max-w-container-lg mx-auto md:px-4">
+      <nav className="border-gray-2 overflow-x-auto border-b pb-2">
         <Link {...props} variant="default">
           <MdKeyboardArrowLeft className="size-6" />
           {children}
@@ -94,7 +94,7 @@ export function HeaderAdminTitle({
   children,
 }: HeaderAdminTitleProps) {
   return (
-    <div className={twMerge('mx-auto max-w-container-lg px-4 py-8', className)}>
+    <div className={twMerge('max-w-container-lg mx-auto px-4 py-8', className)}>
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-1">
           <h1 className="text-title-1 text-white">{title}</h1>

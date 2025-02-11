@@ -4,12 +4,13 @@ import { useQueries } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
 import { MdOutlineAdd, MdOutlineInfo } from 'react-icons/md'
 
-import { Badge, listBadge } from '@/api/chain/badge'
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
-import { listSeason } from '@/api/chain/season'
-import { listSeries } from '@/api/chain/series'
+import { listSeason } from '@/api/chain/season/list-season'
 import { endSeries } from '@/api/chain/series/end-series'
+import { listSeries } from '@/api/chain/series/list-series'
 import { startSeries } from '@/api/chain/series/start-series'
+import type { Badge } from '@/api/model/badge'
 import { BadgeStatus } from '@/api/model/badge'
 import {
   HeaderAdmin,
@@ -122,7 +123,7 @@ export default function SeasonPage() {
         <HeaderAdminBack href="/admin/seasons">Seasons</HeaderAdminBack>
         <HeaderAdminTitle title={seasonQuery?.data?.rows?.[0]?.name ?? ''} />
       </HeaderAdmin>
-      <div className="by-8 mx-auto max-w-container-lg space-y-8 px-4 pb-8">
+      <div className="by-8 max-w-container-lg mx-auto space-y-8 px-4 pb-8">
         <section className="space-y-4">
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
@@ -169,7 +170,7 @@ export default function SeasonPage() {
                             <TableCell>
                               <div className="inline-flex items-center gap-2">
                                 <BadgeImage src={badge.ipfs} size="xs" />
-                                <span className="text-nowrap font-sans text-body-2 font-medium text-white">
+                                <span className="text-body-2 font-sans font-medium text-nowrap text-white">
                                   {badge.name}
                                 </span>
                               </div>
@@ -183,7 +184,7 @@ export default function SeasonPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <Box className="flex h-[12.5rem] w-full items-center justify-center text-center">
+                <Box className="flex h-50 w-full items-center justify-center text-center">
                   <p className="text-body-2 text-gray-3">
                     No badges in this season
                   </p>
@@ -229,7 +230,7 @@ export default function SeasonPage() {
                     {series &&
                       series.map((seriesItem) => (
                         <TableRow key={seriesItem.id}>
-                          <TableCell className="text-center text-gray-3">
+                          <TableCell className="text-gray-3 text-center">
                             {seriesItem.id}
                           </TableCell>
                           <TableCell>{seriesItem.name}</TableCell>
@@ -321,7 +322,7 @@ export default function SeasonPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <Box className="flex h-[12.5rem] w-full items-center justify-center text-center">
+                <Box className="flex h-50 w-full items-center justify-center text-center">
                   <p className="text-body-2 text-gray-3">
                     No series in this season
                   </p>

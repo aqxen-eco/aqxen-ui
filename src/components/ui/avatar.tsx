@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from 'tailwind-variants'
 
 export const avatar = tv({
-  base: 'flex items-center justify-center rounded-full border border-black/20 font-medium uppercase text-white',
+  base: 'flex items-center justify-center rounded-full border border-black/20 font-medium text-white uppercase',
   variants: {
     color: {
       red: 'bg-badge-red',
@@ -12,8 +12,8 @@ export const avatar = tv({
     },
     size: {
       sm: 'h-6 w-6 text-[0.625rem]',
-      md: 'h-10 w-10 text-body-2',
-      lg: 'h-24 w-24 border-4 text-title-1',
+      md: 'text-body-2 h-10 w-10',
+      lg: 'text-title-1 h-24 w-24 border-4',
     },
   },
   defaultVariants: {

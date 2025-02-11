@@ -16,9 +16,9 @@ type ComboboxProps = {
 export function Combobox({ title, children, ...props }: ComboboxProps) {
   return (
     <Popover.Root>
-      <div className="flex items-center gap-1 border-b border-gray-3 focus-within:border-white group-data-[error=true]/input:border-red-600">
-        <Popover.Trigger className="flex w-full items-center justify-between gap-2 text-left text-body-2 text-gray-3 focus:outline-none">
-          <span className="pb-[calc(1rem-1px)] pt-2">{title}</span>
+      <div className="border-gray-3 flex items-center gap-1 border-b group-data-[error=true]/input:border-red-600 focus-within:border-white">
+        <Popover.Trigger className="text-body-2 text-gray-3 flex w-full items-center justify-between gap-2 text-left focus:outline-hidden">
+          <span className="pt-2 pb-[calc(1rem-1px)]">{title}</span>
           <div className="p-2">
             <MdKeyboardArrowDown className="size-6" />
           </div>
@@ -31,9 +31,9 @@ export function Combobox({ title, children, ...props }: ComboboxProps) {
           className="w-[var(--radix-popover-trigger-width)]"
         >
           <Command {...props}>
-            <div className="flex items-center gap-2 bg-gray-1 mobile:bg-black">
+            <div className="bg-gray-1 flex items-center gap-2 max-md:bg-black">
               <Command.Input
-                className="w-full flex-1 bg-transparent pb-[calc(1rem-1px)] pt-2 text-body-2 text-white placeholder-gray-3 focus:outline-none focus:outline-0"
+                className="text-body-2 placeholder-gray-3 w-full flex-1 bg-transparent pt-2 pb-[calc(1rem-1px)] text-white focus:outline-hidden focus:outline-0"
                 placeholder={title}
               />
               <Popover.Close asChild>
@@ -42,7 +42,7 @@ export function Combobox({ title, children, ...props }: ComboboxProps) {
                 </Button>
               </Popover.Close>
             </div>
-            <Command.List className="mt-2 max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-2 bg-gray-1 p-4 [&_[cmdk-list-sizer]]:space-y-1">
+            <Command.List className="border-gray-2 bg-gray-1 mt-2 max-h-64 overflow-x-hidden overflow-y-auto rounded-2xl border p-4 [&_[cmdk-list-sizer]]:space-y-1">
               {children}
             </Command.List>
           </Command>
@@ -54,7 +54,7 @@ export function Combobox({ title, children, ...props }: ComboboxProps) {
 
 export function ComboboxLoading() {
   return (
-    <Command.Loading className="py-4 text-center text-body-2 text-white">
+    <Command.Loading className="text-body-2 py-4 text-center text-white">
       Loading...
     </Command.Loading>
   )
@@ -62,7 +62,7 @@ export function ComboboxLoading() {
 
 export function ComboboxEmpty() {
   return (
-    <Command.Empty className="py-4 text-center text-body-2 text-white">
+    <Command.Empty className="text-body-2 py-4 text-center text-white">
       No results found.
     </Command.Empty>
   )
@@ -80,7 +80,7 @@ export function ComboboxItem({
   return (
     <Command.Item
       {...props}
-      className="flex select-none items-center justify-between rounded border border-transparent p-[calc(0.5rem-1px)] text-body-2 text-gray-3 outline-none aria-checked:border-gray-2 aria-checked:text-white data-[disabled=true]:pointer-events-none data-[selected=true]:bg-gray-2 data-[selected=true]:text-white data-[disabled=true]:opacity-50"
+      className="text-body-2 text-gray-3 aria-checked:border-gray-2 data-[selected=true]:bg-gray-2 flex items-center justify-between rounded-sm border border-transparent p-[calc(0.5rem-1px)] outline-hidden select-none aria-checked:text-white data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:text-white"
       aria-checked={checked}
     >
       {children}

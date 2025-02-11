@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 
-import { createBadge } from '@/api/chain/badge'
+import { createBadge } from '@/api/chain/badge/create-badge'
 import { Badge } from '@/components/ui/badge'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
@@ -71,53 +72,86 @@ export default function NewBadgePage() {
   }
 
   return (
-    <Box className="p-0 mobile:space-y-8 mobile:rounded-none mobile:border-0 mobile:bg-black desktop:grid desktop:grid-cols-6">
+    <Box className="p-0 max-md:space-y-8 max-md:rounded-none max-md:border-0 max-md:bg-black md:grid md:grid-cols-6">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8 p-8 mobile:p-0 desktop:col-span-4"
+        className="space-y-8 p-8 max-md:p-0 md:col-span-4"
       >
-        <Input
-          {...register('name')}
-          label="Name"
-          error={errors['name']?.message}
-        />
+        <Field>
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            {...register('name')}
+            aria-invalid={!!errors['name']}
+          />
+          <ErrorMessage>{errors['name']?.message}</ErrorMessage>
+        </Field>
         <Controller
           name="symbol"
           control={control}
           render={({ field }) => (
-            <InputSymbol
-              label="Symbol"
-              error={errors['symbol']?.message}
-              maxLength={3}
-              {...field}
-            />
+            <Field>
+              <Label htmlFor="symbol">Symbol</Label>
+              <InputSymbol
+                id="symbol"
+                aria-invalid={!!errors['symbol']}
+                maxLength={3}
+                {...field}
+              />
+              <ErrorMessage>{errors['symbol']?.message}</ErrorMessage>
+            </Field>
           )}
         />
-        <Input
-          {...register('image')}
-          label="IPFS Image hash"
-          error={errors['image']?.message}
-        />
-        <Input
-          {...register('description')}
-          label="Description"
-          error={errors['description']?.message}
-        />
-        <Checkbox
-          {...register('lifetimeAggregate')}
-          label="Lifetime Aggregate"
-          error={errors['lifetimeAggregate']?.message}
-        />
-        <Checkbox
-          {...register('lifetimeStats')}
-          label="Lifetime Stats"
-          error={errors['lifetimeStats']?.message}
-        />
+        <Field>
+          <Label htmlFor="image">IPFS Image hash</Label>
+          <Input
+            id="image"
+            {...register('image')}
+            aria-invalid={!!errors['image']}
+          />
+          <ErrorMessage>{errors['image']?.message}</ErrorMessage>
+        </Field>
+        <Field>
+          <Label htmlFor="description">Description</Label>
+          <Input
+            id="description"
+            {...register('description')}
+            aria-invalid={!!errors['description']}
+          />
+          <ErrorMessage>{errors['description']?.message}</ErrorMessage>
+        </Field>
+        <Field>
+          <CheckboxWrapper>
+            <Label htmlFor="lifetimeAggregate" className="flex-1">
+              Lifetime Aggregate
+            </Label>
+            <Checkbox
+              id="lifetimeAggregate"
+              {...register('lifetimeAggregate')}
+              aria-invalid={!!errors['lifetimeAggregate']}
+            />
+          </CheckboxWrapper>
+          <ErrorMessage>{errors['lifetimeAggregate']?.message}</ErrorMessage>
+        </Field>
+        <Field>
+          <CheckboxWrapper>
+            <Label htmlFor="lifetimeStats" className="flex-1">
+              Lifetime Stats
+            </Label>
+            <Checkbox
+              id="lifetimeStats"
+              {...register('lifetimeStats')}
+              aria-invalid={!!errors['lifetimeStats']}
+            />
+          </CheckboxWrapper>
+          <ErrorMessage>{errors['lifetimeStats']?.message}</ErrorMessage>
+        </Field>
+
         <Button type="submit" variant="primary" size="lg">
           {isSubmitting ? 'Creating...' : 'Create'}
         </Button>
       </form>
-      <div className="space-y-4 border-l border-gray-2 p-8 mobile:rounded-2xl mobile:border mobile:bg-gray-1 mobile:p-4 desktop:col-span-2">
+      <div className="border-gray-2 max-md:bg-gray-1 space-y-4 border-l p-8 max-md:rounded-2xl max-md:border max-md:p-4 md:col-span-2">
         <h2 className="text-title-2 text-white">Badge preview</h2>
         <Badge
           ipfs={image ? IPFS_IMAGE_SOURCE + image : ''}

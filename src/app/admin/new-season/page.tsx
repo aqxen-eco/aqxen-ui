@@ -8,6 +8,7 @@ import z from 'zod'
 import { createSeason } from '@/api/chain/season/create-season'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
@@ -51,50 +52,57 @@ export default function NewSeasonPage() {
   }
 
   return (
-    <Box className="p-0 mobile:rounded-none mobile:border-0 mobile:bg-black">
+    <Box className="p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8 p-8 mobile:p-0"
+        className="space-y-8 p-8 max-md:p-0"
       >
-        <Input
-          {...register('name')}
-          label="Name"
-          placeholder="String"
-          error={errors['name']?.message}
-        />
+        <Field>
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            {...register('name')}
+            placeholder="String"
+            aria-invalid={!!errors['name']}
+          />
+          <ErrorMessage>{errors['name']?.message}</ErrorMessage>
+        </Field>
         <Controller
           name="symbol"
           control={control}
           render={({ field }) => (
-            <InputSymbol
-              label="Symbol"
-              error={errors['symbol']?.message}
-              maxLength={3}
-              {...field}
-            />
+            <Field>
+              <Label htmlFor="symbol">Symbol</Label>
+              <InputSymbol
+                id="symbol"
+                aria-invalid={!!errors['symbol']}
+                maxLength={3}
+                {...field}
+              />
+              <ErrorMessage>{errors['symbol']?.message}</ErrorMessage>
+            </Field>
           )}
         />
         <Controller
           name="badges"
           control={control}
           render={({ field }) => (
-            <InputBadges
-              value={field.value}
-              onChange={field.onChange}
-              error={errors['badges']?.message}
-            />
+            <Field>
+              <Label htmlFor="badges">Badges</Label>
+              <InputBadges value={field.value} onChange={field.onChange} />
+              <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
+            </Field>
           )}
         />
         <Controller
           name="stats"
           control={control}
           render={({ field }) => (
-            <InputBadges
-              label="Stats badges"
-              value={field.value}
-              onChange={field.onChange}
-              error={errors['badges']?.message}
-            />
+            <Field>
+              <Label htmlFor="stats">Stats badges</Label>
+              <InputBadges value={field.value} onChange={field.onChange} />
+              <ErrorMessage>{errors['stats']?.message}</ErrorMessage>
+            </Field>
           )}
         />
         <Button type="submit" variant="primary" size="lg">
