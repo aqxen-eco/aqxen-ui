@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - dlt-runner
 
 jobs:
   deploy:
@@ -13,13 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up nodejs via nvm
+        run: |
+          echo 'boop'
       - name: Install pnpm
         run: npm install -g pnpm
-          
-      - name: Set up node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
