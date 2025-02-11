@@ -15,7 +15,7 @@ export default async function NewBadgeLayoutAutomation({
     <>
       <HeaderAdmin>
         <HeaderAdminBack href="/admin/badges-automation">
-          Badges
+          Badges Automation
         </HeaderAdminBack>
         <HeaderAdminTitle
           title="New Badge Automation"
@@ -23,7 +23,7 @@ export default async function NewBadgeLayoutAutomation({
           className="max-w-container-md"
         />
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md space-y-8 px-4 pb-8">
+      <div className="max-w-container-md mx-auto min-h-[calc(100vh-24rem)] space-y-8 px-4 pb-8">
         {children}
       </div>
     </>

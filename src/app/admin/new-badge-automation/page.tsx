@@ -14,6 +14,7 @@ import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputSearchBadges } from '@/components/ui/input-search-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
+import { numberMask } from '@/utils/masks'
 
 const newBadgeAutomationSchema = z.object({
   name: z.string().nonempty('Name is required'),
@@ -143,7 +144,11 @@ export default function NewBadgeAutomationPage() {
                     type="text"
                     className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
                     placeholder="Quantity"
-                    {...register(`criteria.${badgeIndex}.quantity`)}
+                    {...register(`criteria.${badgeIndex}.quantity`, {
+                      onChange: (event) => {
+                        event.target.value = numberMask(event.target.value)
+                      },
+                    })}
                   />
                 </div>
                 <div className="flex-none">
@@ -196,7 +201,11 @@ export default function NewBadgeAutomationPage() {
                     type="text"
                     className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
                     placeholder="Quantity"
-                    {...register(`emitted.${badgeIndex}.quantity`)}
+                    {...register(`emitted.${badgeIndex}.quantity`, {
+                      onChange: (event) => {
+                        event.target.value = numberMask(event.target.value)
+                      },
+                    })}
                   />
                 </div>
                 <div className="flex-none">
