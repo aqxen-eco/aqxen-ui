@@ -1,13 +1,13 @@
 import { jungleClient } from '@/api/chain/jungle-client'
-import type { ListUserBadgeResult } from '@/api/model/badge'
+import type { ListLifetimeBadgeResult } from '@/api/model/badge'
 
-type ListUserBadgeProps = {
+type ListLifetimeBadgeProps = {
   scope?: string
 }
 
-export async function listUserBadge({
+export async function listLifetimeBadge({
   scope,
-}: ListUserBadgeProps): Promise<ListUserBadgeResult> {
+}: ListLifetimeBadgeProps): Promise<ListLifetimeBadgeResult> {
   let { rows, more } = await jungleClient.v1.chain.get_table_rows({
     code: 'cumulativeyy',
     scope: scope,
