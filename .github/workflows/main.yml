@@ -24,12 +24,14 @@ jobs:
         shell: bash -l {0}
         run: |
           npm install -g pnpm
-          mkdir -p ~/.pnpm-store
-          pnpm config set store-dir ~/.pnpm-store
-
+          
       - name: Install dependencies
         shell: bash -l {0}
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        shell: bash -l {0}
+        run: pnpm prisma generate
 
       - name: Run ESLint
         shell: bash -l {0}
