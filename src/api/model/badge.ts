@@ -9,8 +9,13 @@ export type Badge = {
   rarity_counts: string
 }
 
-export type UserBadge = {
+export type LifetimeBadge = {
   balance: string
+}
+
+export type SeasonalBadge = {
+  badge_agg_seq_id: number
+  count: number
 }
 
 export type BadgeStatus = {
@@ -24,7 +29,9 @@ export type BadgeStatus = {
 
 export type ListBadgeResult = GetTableRowsResult<Badge>
 
-export type ListUserBadgeResult = GetTableRowsResult<UserBadge>
+export type ListLifetimeBadgeResult = GetTableRowsResult<LifetimeBadge>
+
+export type ListSeasonalBadgeResult = GetTableRowsResult<SeasonalBadge>
 
 export type ListBadgeStatusResult = GetTableRowsResult<BadgeStatus>
 

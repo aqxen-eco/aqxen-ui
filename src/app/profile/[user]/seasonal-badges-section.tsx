@@ -17,7 +17,7 @@ type SeasonalBadgesSectionProps = {
   lastSeriesId?: number
   name: string
   series: (Series & {
-    badges: BadgeType[]
+    badges: ({ balance: number } & BadgeType)[]
   })[]
 }
 
@@ -62,7 +62,11 @@ export function SeasonalBadgesSection({
           <BadgeSwiperWrapper>
             {seriesValue.badges.map((badge) => (
               <BadgeSwiperSlide key={badge.id}>
-                <Badge name={badge.name} balance="0" ipfs={badge.ipfs} />
+                <Badge
+                  name={badge.name}
+                  balance={String(badge.balance)}
+                  ipfs={badge.ipfs}
+                />
               </BadgeSwiperSlide>
             ))}
           </BadgeSwiperWrapper>
