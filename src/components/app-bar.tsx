@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button'
 import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 import { Link } from '@/components/ui/link'
 import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
 
 export function AppBar() {
   const { isAuthenticated, login, logout, actor } = useChain()
+  const { hasOrganization } = useOrganization()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -32,14 +34,18 @@ export function AppBar() {
               <img src="/img/logo.svg" alt="" />
               UpScale
             </NextLink>
+
             {isAuthenticated ? (
               <>
-                <Link
-                  href="/admin/organization"
-                  variant={pathname.includes('/admin') ? 'link' : 'default'}
-                >
-                  Admin
-                </Link>
+                {hasOrganization && (
+                  <Link
+                    href="/admin/organization"
+                    variant={pathname.includes('/admin') ? 'link' : 'default'}
+                  >
+                    Admin
+                  </Link>
+                )}
+
                 <DropdownRoot
                   customTrigger={
                     <button

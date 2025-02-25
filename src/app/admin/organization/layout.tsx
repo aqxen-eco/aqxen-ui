@@ -17,7 +17,7 @@ export default async function OrganizationLayout({
         <HeaderAdminMenu activeHref="/admin/organization" />
         <HeaderAdminTitle title="Organization" className="max-w-container-md" />
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-md px-4 pb-8">
+      <div className="max-w-container-md mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
         {children}
       </div>
     </>
