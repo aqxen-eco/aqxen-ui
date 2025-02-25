@@ -1,23 +1,28 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
 import z from 'zod'
 
+import { createBadgeAutomation } from '@/api/chain/badge-automation/create-badge-automation'
 import { Badge } from '@/api/model/badge'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
+import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+// import { Input } from '@/components/ui/input'
 import { InputSearchBadges } from '@/components/ui/input-search-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
+import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
 import { numberMask } from '@/utils/masks'
 
 const newBadgeAutomationSchema = z.object({
-  name: z.string().nonempty('Name is required'),
+  // name: z.string().nonempty('Name is required'),
   symbol: z.string().length(3, 'Symbol is required'),
   criteria: z
     .object({
@@ -38,13 +43,15 @@ const newBadgeAutomationSchema = z.object({
     .nonempty({
       message: "Can't be empty!",
     }),
+  cyclic: z.boolean(),
 })
 
 type NewBadgeAutomationSchema = z.infer<typeof newBadgeAutomationSchema>
 
 export default function NewBadgeAutomationPage() {
-  // const { symbol: organizationSymbol } = useOrganization()
-  // const { session } = useChain()
+  const { symbol: organizationSymbol } = useOrganization()
+  const router = useRouter()
+  const { session } = useChain()
 
   const [badgesCriteria, setBadgesCriteria] = useState<Badge[]>([])
   const [badgesEmitted, setBadgesEmitted] = useState<Badge[]>([])
@@ -68,21 +75,30 @@ export default function NewBadgeAutomationPage() {
     resolver: zodResolver(newBadgeAutomationSchema),
   })
 
-  console.log(errors)
-
   async function onSubmit({
-    name,
     symbol,
     criteria,
     emitted,
+    cyclic,
   }: NewBadgeAutomationSchema) {
     try {
-      console.log({
-        name,
-        symbol,
-        criteria,
-        emitted,
+      const emission_symbol = `0,${organizationSymbol}${symbol}`.toUpperCase()
+      const emitter_criteria = criteria.map(
+        (item) => `${item.quantity} ${item.badge_symbol.split(',')[1]}`
+      )
+      const emit_badges = emitted.map(
+        (item) => `${item.quantity} ${item.badge_symbol.split(',')[1]}`
+      )
+
+      await createBadgeAutomation({
+        session: session!,
+        emission_symbol,
+        emitter_criteria,
+        emit_badges,
+        cyclic,
       })
+
+      router.push('/admin/badges-automation')
     } catch (error) {
       console.log(error)
     }
@@ -94,7 +110,7 @@ export default function NewBadgeAutomationPage() {
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-8 p-8 max-md:p-0"
       >
-        <Field>
+        {/* <Field>
           <Label htmlFor="name">Name</Label>
           <Input
             id="name"
@@ -102,7 +118,7 @@ export default function NewBadgeAutomationPage() {
             aria-invalid={!!errors['name']}
           />
           <ErrorMessage>{errors['name']?.message}</ErrorMessage>
-        </Field>
+        </Field> */}
         <Controller
           name="symbol"
           control={control}
@@ -232,6 +248,20 @@ export default function NewBadgeAutomationPage() {
             }}
           />
           <ErrorMessage>{errors['emitted']?.message}</ErrorMessage>
+        </Field>
+
+        <Field>
+          <CheckboxWrapper>
+            <Label htmlFor="cyclic" className="flex-1">
+              Cyclic
+            </Label>
+            <Checkbox
+              id="cyclic"
+              {...register('cyclic')}
+              aria-invalid={!!errors['cyclic']}
+            />
+          </CheckboxWrapper>
+          <ErrorMessage>{errors['cyclic']?.message}</ErrorMessage>
         </Field>
 
         <Button type="submit" variant="primary" size="lg">
