@@ -4,7 +4,7 @@ export function Input({ className, ...props }: React.ComponentProps<'input'>) {
   return (
     <input
       className={twMerge(
-        'block w-full border-b border-gray-3 bg-transparent pb-[calc(1rem-1px)] pt-2 text-body-2 text-white placeholder-gray-3 focus:border-white focus:outline-0',
+        'border-gray-3 text-body-2 placeholder-gray-3 block w-full border-b bg-transparent pt-2 pb-[calc(1rem-1px)] text-white focus:border-white focus:outline-0',
         className
       )}
       {...props}

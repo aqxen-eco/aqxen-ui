@@ -106,7 +106,7 @@ export default function SubscriptionPage() {
           )}
         </HeaderAdminTitle>
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
+      <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
         <div className="space-y-8">
           <section className="space-y-2">
             <header className="flex flex-1 items-center gap-1">
@@ -184,7 +184,7 @@ export default function SubscriptionPage() {
                     <TableBody>
                       {data?.upcoming.map((row, index) => (
                         <TableRow key={row.seq_id}>
-                          <TableCell className="py-6 text-gray-3">
+                          <TableCell className="text-gray-3 py-6">
                             {index + 1}
                           </TableCell>
                           <TableCell className="py-6">{row.package}</TableCell>
@@ -237,7 +237,7 @@ export default function SubscriptionPage() {
                     <TableBody>
                       {data?.used.map((row, index) => (
                         <TableRow key={row.seq_id}>
-                          <TableCell className="py-6 text-gray-3">
+                          <TableCell className="text-gray-3 py-6">
                             {index + 1}
                           </TableCell>
                           <TableCell className="py-6">{row.package}</TableCell>

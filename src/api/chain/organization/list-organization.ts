@@ -17,7 +17,7 @@ export async function listOrganization({
     scope: 'organizayyyy',
     lower_bound: lower_bound ? Name.from(lower_bound) : undefined,
     upper_bound: upper_bound ? Name.from(upper_bound) : undefined,
-    table: 'orgcodes',
+    table: 'orgs',
     json: true,
     limit: 1,
   })

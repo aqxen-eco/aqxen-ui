@@ -33,7 +33,7 @@ export function Badge({ ipfs, name, balance }: BadgeProps) {
   return (
     <div className="text-center">
       <BadgeImage src={ipfs} className="mx-auto" />
-      <p className="mt-2 text-body-2 font-medium text-white">{name}</p>
+      <p className="text-body-2 mt-2 font-medium text-white">{name}</p>
       {/* <p className="font-medium text-white">{symbol}</p> */}
       <p className="text-body-2 text-gray-3">{balance}</p>
     </div>

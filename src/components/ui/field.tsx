@@ -12,7 +12,7 @@ export function Field({ className, ...props }: React.ComponentProps<'div'>) {
 export function Label({ className, ...props }: React.ComponentProps<'label'>) {
   return (
     <label
-      className={twMerge('block text-body-2 font-medium text-white', className)}
+      className={twMerge('text-body-2 block font-medium text-white', className)}
       {...props}
     />
   )
@@ -28,7 +28,7 @@ export function ErrorMessage({
 
   return (
     <span
-      className={twMerge('mt-2 block text-body-3 text-red-600', className)}
+      className={twMerge('text-body-3 mt-2 block text-red-600', className)}
       {...props}
     />
   )

@@ -21,11 +21,11 @@ export default async function BadgesAutomation({
           tooltip="Lorem ipsum dolor sit amed"
         >
           <Link href="/admin/new-badge-automation" variant="primary" size="md">
-            New badge automation
+            New automation rule
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
-      <div className="mx-auto min-h-[calc(100vh-24rem)] max-w-container-lg px-4 pb-8">
+      <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
         {children}
       </div>
     </>

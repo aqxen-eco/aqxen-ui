@@ -22,7 +22,7 @@ export function InputSymbol({ ref, ...props }: InputSymbolProps) {
             {slots.map((slot, index) => (
               <div
                 key={index}
-                className="relative h-12 w-8 border-b border-gray-3 pb-4 pt-2 text-center text-body-2 uppercase group-data-[error=true]/input:border-red-600"
+                className="border-gray-3 text-body-2 relative h-12 w-8 border-b pt-2 pb-4 text-center uppercase group-data-[error=true]/input:border-red-600"
               >
                 {slot.char !== null && slot.char}
                 {(slot.hasFakeCaret || slot.isActive) && (

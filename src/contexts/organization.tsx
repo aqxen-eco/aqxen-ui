@@ -9,6 +9,7 @@ import { useChain } from '@/contexts/chain'
 type OrganizationContext = {
   name: string
   symbol: string
+  hasOrganization: boolean
 }
 
 const OrganizationContext = createContext({} as OrganizationContext)
@@ -31,17 +32,18 @@ export function OrganizationProvider({
   const symbol = query.data?.rows[0]?.org_code ?? ''
 
   return (
-    <OrganizationContext value={{ name, symbol }}>
+    <OrganizationContext value={{ name, symbol, hasOrganization: !!name }}>
       {children}
     </OrganizationContext>
   )
 }
 
 export function useOrganization() {
-  const { name, symbol } = use(OrganizationContext)
+  const { name, symbol, hasOrganization } = use(OrganizationContext)
 
   return {
     name,
     symbol,
+    hasOrganization,
   }
 }

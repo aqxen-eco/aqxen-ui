@@ -1,17 +1,14 @@
 import { execute } from '@/api/chain/execute-action'
-import { CreateBadgeAutomationProps } from '@/api/model/badge-automation'
+import { EnableBadgeAutomationProps } from '@/api/model/badge-automation'
 
-export async function createBadgeAutomation({
+export async function enableBadgeAutomation({
   session,
   emission_symbol,
-  emitter_criteria,
-  emit_badges,
-  cyclic,
-}: CreateBadgeAutomationProps) {
+}: EnableBadgeAutomationProps) {
   await execute(session, [
     {
       account: 'aemanageryyy',
-      name: 'newemission',
+      name: 'activate',
       authorization: [session.permissionLevel],
       data: {
         authorized: session.actor.toString(),
@@ -19,9 +16,6 @@ export async function createBadgeAutomation({
         actor: session.actor.toString(),
 
         emission_symbol,
-        emitter_criteria,
-        emit_badges,
-        cyclic,
       },
     },
   ])

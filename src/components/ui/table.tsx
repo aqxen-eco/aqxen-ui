@@ -27,7 +27,7 @@ export function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
   return (
     <th
       className={twMerge(
-        'text-nowrap px-4 pb-2 text-left font-normal text-gray-3',
+        'text-gray-3 px-4 pb-2 text-left font-normal text-nowrap',
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ export function TableBody({
   return (
     <tbody
       className={twMerge(
-        'relative before:absolute before:inset-0 before:-z-10 before:size-full before:rounded-2xl before:border before:border-gray-2 before:bg-gray-1 before:content-[""] [&_tr:last-child]:border-0',
+        'before:border-gray-2 before:bg-gray-1 relative before:absolute before:inset-0 before:-z-10 before:size-full before:rounded-2xl before:border before:content-[""] [&_tr:last-child]:border-0',
         className
       )}
       {...props}
@@ -64,14 +64,14 @@ export function TableFooter({
 
 export function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
   return (
-    <tr className={twMerge('border-b border-gray-2', className)} {...props} />
+    <tr className={twMerge('border-gray-2 border-b', className)} {...props} />
   )
 }
 
 export function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
   return (
     <td
-      className={twMerge('p-4 text-body-2 text-white', className)}
+      className={twMerge('text-body-2 p-4 text-white', className)}
       {...props}
     />
   )
