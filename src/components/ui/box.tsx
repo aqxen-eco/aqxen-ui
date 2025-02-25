@@ -18,7 +18,7 @@ export function Box({
     <Comp
       ref={ref}
       className={twMerge(
-        'rounded-2xl border border-gray-2 bg-gray-1 p-8',
+        'border-gray-2 bg-gray-1 rounded-2xl border p-8',
         className
       )}
       {...restProps}
