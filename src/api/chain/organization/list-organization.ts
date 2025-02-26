@@ -2,6 +2,7 @@ import { Name } from '@wharfkit/antelope'
 
 import { jungleClient } from '@/api/chain/jungle-client'
 import { ListOrganizationResult } from '@/api/model/organization'
+import { safeParse } from '@/utils/safe-parse'
 
 type ListOrganizationProps = {
   lower_bound?: string
@@ -12,7 +13,7 @@ export async function listOrganization({
   lower_bound,
   upper_bound,
 }: ListOrganizationProps): Promise<ListOrganizationResult> {
-  const { rows, more } = await jungleClient.v1.chain.get_table_rows({
+  let { rows, more } = await jungleClient.v1.chain.get_table_rows({
     code: 'organizayyyy',
     scope: 'organizayyyy',
     lower_bound: lower_bound ? Name.from(lower_bound) : undefined,
@@ -21,6 +22,12 @@ export async function listOrganization({
     json: true,
     limit: 1,
   })
+
+  rows = rows.map((row) => ({
+    ...row,
+    offchain_lookup_data: safeParse(row.offchain_lookup_data),
+    onchain_lookup_data: safeParse(row.onchain_lookup_data),
+  }))
 
   return {
     rows,

@@ -20,3 +20,10 @@ export type CreateOrganizationAndBuySubscriptionProps = {
   quantity: string
   subPackage: string
 }
+
+export type UpdateOrganizationProps = {
+  session: Session
+  org: string
+  ipfs_image?: string
+  display_name?: string
+}

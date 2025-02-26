@@ -9,6 +9,9 @@ import { useChain } from '@/contexts/chain'
 type OrganizationContext = {
   name: string
   symbol: string
+  ipfs: string
+  createdAt: string
+  displayName: string
   hasOrganization: boolean
 }
 
@@ -30,20 +33,37 @@ export function OrganizationProvider({
 
   const name = query.data?.rows[0]?.org ?? ''
   const symbol = query.data?.rows[0]?.org_code ?? ''
+  const ipfs = query.data?.rows[0]?.offchain_lookup_data?.ipfs ?? ''
+  const createdAt =
+    String(query.data?.rows[0]?.onchain_lookup_data?.created_at) ?? ''
+  const displayName = query.data?.rows[0]?.onchain_lookup_data?.name ?? ''
 
   return (
-    <OrganizationContext value={{ name, symbol, hasOrganization: !!name }}>
+    <OrganizationContext
+      value={{
+        name,
+        symbol,
+        hasOrganization: !!name,
+        ipfs,
+        createdAt,
+        displayName,
+      }}
+    >
       {children}
     </OrganizationContext>
   )
 }
 
 export function useOrganization() {
-  const { name, symbol, hasOrganization } = use(OrganizationContext)
+  const { name, symbol, hasOrganization, ipfs, createdAt, displayName } =
+    use(OrganizationContext)
 
   return {
     name,
     symbol,
     hasOrganization,
+    ipfs,
+    createdAt,
+    displayName,
   }
 }
