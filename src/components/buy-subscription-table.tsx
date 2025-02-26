@@ -88,18 +88,20 @@ export function BuySubscriptionTable() {
                     {row.action_size / 10} members
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      onClick={() =>
-                        handleBuyPackage({
-                          quantity: row.cost.quantity,
-                          subPackage: row.package,
-                        })
-                      }
-                    >
-                      Buy
-                    </Button>
+                    {session && (
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        onClick={() =>
+                          handleBuyPackage({
+                            quantity: row.cost.quantity,
+                            subPackage: row.package,
+                          })
+                        }
+                      >
+                        Buy
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ) : null
