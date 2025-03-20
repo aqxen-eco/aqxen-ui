@@ -38,12 +38,22 @@ export function AppBar() {
             {isAuthenticated ? (
               <>
                 {hasOrganization && (
-                  <Link
-                    href="/admin/organization"
-                    variant={pathname.includes('/admin') ? 'link' : 'default'}
-                  >
-                    Admin
-                  </Link>
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href={`/profile/${actor}`}
+                      variant={
+                        pathname.includes('/profile') ? 'link' : 'default'
+                      }
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="/admin/organization"
+                      variant={pathname.includes('/admin') ? 'link' : 'default'}
+                    >
+                      Admin
+                    </Link>
+                  </div>
                 )}
 
                 <DropdownRoot

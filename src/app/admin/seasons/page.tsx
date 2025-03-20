@@ -28,25 +28,17 @@ import { Tooltip } from '@/components/ui/tooltip'
 import { useOrganization } from '@/contexts/organization'
 
 export default function SeasonsPage() {
-  const { name, symbol } = useOrganization()
+  const { name, removeOrganizationSymbol } = useOrganization()
 
   const [seasonsQuery, badgesQuery] = useQueries({
     queries: [
       {
-        queryKey: ['seasons', name, symbol],
-        queryFn: async () =>
-          await listSeason({
-            scope: name,
-            organization_symbol: symbol,
-          }),
+        queryKey: ['seasons', name],
+        queryFn: async () => await listSeason({ scope: name }),
       },
       {
-        queryKey: ['badges', name, symbol],
-        queryFn: async () =>
-          await listBadge({
-            scope: name,
-            organization_symbol: symbol,
-          }),
+        queryKey: ['badges', name],
+        queryFn: async () => await listBadge({ scope: name }),
       },
     ],
   })
@@ -54,13 +46,10 @@ export default function SeasonsPage() {
   const seriesQueries = useQueries({
     queries:
       seasonsQuery.data?.rows.map((season) => {
-        const seasonId = season.id.split(',')[1]
+        const seasonId = season.agg_symbol.split(',')[1]
         return {
           queryKey: ['series', seasonId],
-          queryFn: async () =>
-            await listSeries({
-              scope: seasonId,
-            }),
+          queryFn: async () => await listSeries({ scope: seasonId }),
         }
       }) ?? [],
   })
@@ -93,20 +82,35 @@ export default function SeasonsPage() {
             </TableHeader>
             <TableBody>
               {seasonsQuery.data.rows.map((season, seasonIndex) => (
-                <TableRow key={season.id}>
-                  <TableCell className="text-gray-3">{season.symbol}</TableCell>
-                  <TableCell>{season.name}</TableCell>
+                <TableRow key={season.agg_symbol}>
+                  <TableCell className="text-gray-3">
+                    {removeOrganizationSymbol(season.agg_symbol)}
+                  </TableCell>
+                  <TableCell>
+                    {season.onchain_lookup_data.user.display_name}
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       {badgesQuery?.data?.rows.map(
                         (badge) =>
-                          season.badges.includes(badge.id) && (
-                            <Tooltip content={badge.name} key={badge.id}>
+                          season.init_badge_symbols.includes(
+                            badge.badge_symbol
+                          ) && (
+                            <Tooltip
+                              content={
+                                badge.onchain_lookup_data.user.display_name
+                              }
+                              key={badge.badge_symbol}
+                            >
                               <div>
                                 <BadgeImage
-                                  src={badge.ipfs}
+                                  src={
+                                    badge.offchain_lookup_data.user.ipfs_image
+                                  }
                                   size="xs"
-                                  alt={badge.name}
+                                  alt={
+                                    badge.onchain_lookup_data.user.display_name
+                                  }
                                 />
                               </div>
                             </Tooltip>
@@ -117,27 +121,27 @@ export default function SeasonsPage() {
                   <TableCell>
                     {seriesQueries?.[seasonIndex]?.data?.rows.map(
                       (serie) =>
-                        season.last_created_series.at(-1) === serie.id &&
-                        serie.name
+                        season.last_init_seq_id === serie.seq_id &&
+                        serie.sequence_description
                     )}
                   </TableCell>
                   <TableCell>
                     {seriesQueries?.[seasonIndex]?.data?.rows.map(
                       (serie) =>
-                        season.last_started_series.at(-1) === serie.id &&
-                        serie.name
+                        season.active_seq_ids.at(-1) === serie.seq_id &&
+                        serie.sequence_description
                     )}
                   </TableCell>
                   <TableCell>
                     {seriesQueries?.[seasonIndex]?.data?.rows.map(
                       (serie) =>
-                        season.last_ended_series.at(-1) === serie.id &&
-                        serie.name
+                        season.end_seq_ids.at(-1) === serie.seq_id &&
+                        serie.sequence_description
                     )}
                   </TableCell>
                   <TableCell className="text-right">
                     <Link
-                      href={`/admin/seasons/${season.id}`}
+                      href={`/admin/seasons/${season.agg_symbol}`}
                       size="md"
                       variant="secondary"
                       square

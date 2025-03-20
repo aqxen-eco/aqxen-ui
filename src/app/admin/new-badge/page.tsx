@@ -59,8 +59,9 @@ export default function NewBadgePage() {
       await createBadge({
         session: session!,
         symbol: organizationSymbol + symbol,
-        ipfs: image,
-        name,
+        display_name: name,
+        ipfs_image: image,
+        description,
         lifetime_aggregate: lifetimeAggregate,
         lifetime_stats: lifetimeStats,
         memo: description,
@@ -154,7 +155,7 @@ export default function NewBadgePage() {
       <div className="border-gray-2 max-md:bg-gray-1 space-y-4 border-l p-8 max-md:rounded-2xl max-md:border max-md:p-4 md:col-span-2">
         <h2 className="text-title-2 text-white">Badge preview</h2>
         <Badge
-          ipfs={image ? IPFS_IMAGE_SOURCE + image : ''}
+          ipfs={image}
           name={name ? name : 'Badge Name'}
           balance={symbol ? symbol.toUpperCase() : 'BDG'}
         />

@@ -5,11 +5,17 @@ export type Organization = {
   org_code: string
   checks_contract: boolean
   offchain_lookup_data: {
-    ipfs: string
+    user: {
+      ipfs_image: string
+    }
   }
   onchain_lookup_data: {
-    created_at: number
-    name: string
+    system: {
+      created_at: number
+    }
+    user: {
+      display_name: string
+    }
   }
 }
 

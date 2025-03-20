@@ -1,5 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
 import { type CreateOrganizationAndBuySubscriptionProps } from '@/api/model/organization'
+import { Contract } from '@/constants'
 
 export async function createOrganizationAndBuySubscription({
   session,
@@ -11,7 +12,18 @@ export async function createOrganizationAndBuySubscription({
 
   await execute(session, [
     {
-      account: 'organizayyyy',
+      account: 'eosio.token',
+      name: 'transfer',
+      authorization: [session.permissionLevel],
+      data: {
+        from: session.actor,
+        to: Contract.SUBSCRIPTION,
+        quantity,
+        memo: `${organizationName}:${subPackage}`,
+      },
+    },
+    {
+      account: Contract.ORGANIZATION,
       name: 'initorg',
       authorization: [session.permissionLevel],
       data: {
@@ -21,17 +33,6 @@ export async function createOrganizationAndBuySubscription({
         display_name: '',
         permission: session.permission.toString(),
         actor: organizationName,
-      },
-    },
-    {
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [session.permissionLevel],
-      data: {
-        from: session.actor,
-        to: 'subyyyyyyyyy',
-        quantity,
-        memo: `${organizationName}:${subPackage}`,
       },
     },
   ])

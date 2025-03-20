@@ -1,5 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
 import { EndSeriesProps } from '@/api/model/series'
+import { Contract } from '@/constants'
 
 export async function endSeries({
   session,
@@ -8,7 +9,7 @@ export async function endSeries({
 }: EndSeriesProps) {
   await execute(session, [
     {
-      account: 'bamanageryyy',
+      account: Contract.BOUNDED_AGG_MANAGER,
       name: 'endseq',
       authorization: [session.permissionLevel],
       data: {

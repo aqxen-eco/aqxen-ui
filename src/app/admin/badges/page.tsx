@@ -24,12 +24,11 @@ import {
 import { useOrganization } from '@/contexts/organization'
 
 export default function BadgesPage() {
-  const { name, symbol } = useOrganization()
+  const { name, removeOrganizationSymbol } = useOrganization()
 
   const query = useQuery({
-    queryKey: ['badges', name, symbol],
-    queryFn: async () =>
-      await listBadge({ scope: name, organization_symbol: symbol }),
+    queryKey: ['badges', name],
+    queryFn: async () => await listBadge({ scope: name }),
   })
 
   return (
@@ -58,13 +57,18 @@ export default function BadgesPage() {
             </TableHeader>
             <TableBody>
               {query.data.rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="text-gray-3">{row.symbol}</TableCell>
+                <TableRow key={row.badge_symbol}>
+                  <TableCell className="text-gray-3">
+                    {removeOrganizationSymbol(row.badge_symbol)}
+                  </TableCell>
                   <TableCell>
                     <div className="inline-flex items-center gap-2">
-                      <BadgeImage src={row.ipfs} size="xs" />
+                      <BadgeImage
+                        src={row.offchain_lookup_data.user.ipfs_image}
+                        size="xs"
+                      />
                       <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                        {row.name}
+                        {row.onchain_lookup_data.user.display_name}
                       </span>
                     </div>
                   </TableCell>
@@ -73,7 +77,7 @@ export default function BadgesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Link
-                      href={`/admin/badges/${row.id}/send-badge`}
+                      href={`/admin/badges/${row.badge_symbol}/send-badge`}
                       variant="secondary"
                       size="md"
                     >

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { secondsToHours } from 'date-fns'
+import { secondsToMinutes } from 'date-fns'
 import { useRouter } from 'next/navigation'
 
 import { createOrganizationAndBuySubscription } from '@/api/chain/organization/create-organization-and-buy-subscription'
@@ -55,60 +55,61 @@ export function BuySubscriptionTable() {
     } catch {}
   }
 
+  if (query.isLoading) {
+    return <TableSkeleton rows={3} columns={4} />
+  }
+
+  if (!query.data || query.data.rows.length === 0) {
+    return null
+  }
+
   return (
-    <>
-      {query.isLoading && <TableSkeleton rows={3} columns={4} />}
-      {(query.isSuccess || (query.data && query.data.rows.length > 0)) && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Tier</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
-              <TableHead className="text-center">Term</TableHead>
-              <TableHead className="text-center">Investment</TableHead>
-              <TableHead className="text-center">Recommended for</TableHead>
-              <TableHead className="w-24"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {query.data.rows.map((row) =>
-              row.display && row.active ? (
-                <TableRow key={row.package}>
-                  <TableCell className="py-6">{row.descriptive_name}</TableCell>
-                  <TableCell className="py-6 text-center">
-                    {row.action_size}
-                  </TableCell>
-                  <TableCell className="py-6 text-center">
-                    {secondsToHours(row.expiry_duration_in_secs) / 24} days
-                  </TableCell>
-                  <TableCell className="py-6 text-center">
-                    {row.cost.quantity}
-                  </TableCell>
-                  <TableCell className="py-6 text-center">
-                    {row.action_size / 10} members
-                  </TableCell>
-                  <TableCell>
-                    {session && (
-                      <Button
-                        variant="secondary"
-                        size="md"
-                        onClick={() =>
-                          handleBuyPackage({
-                            quantity: row.cost.quantity,
-                            subPackage: row.package,
-                          })
-                        }
-                      >
-                        Buy
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ) : null
-            )}
-          </TableBody>
-        </Table>
-      )}
-    </>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Tier</TableHead>
+          <TableHead className="text-center">Actions</TableHead>
+          <TableHead className="text-center">Term</TableHead>
+          <TableHead className="text-center">Investment</TableHead>
+          <TableHead className="text-center">Recommended for</TableHead>
+          <TableHead className="w-24"></TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {query.data.rows.map((item) => (
+          <TableRow key={item.package}>
+            <TableCell className="py-6">{item.descriptive_name}</TableCell>
+            <TableCell className="py-6 text-center">
+              {item.action_size}
+            </TableCell>
+            <TableCell className="py-6 text-center">
+              {secondsToMinutes(item.expiry_duration_in_secs)} minutes
+            </TableCell>
+            <TableCell className="py-6 text-center">
+              {item.cost.quantity}
+            </TableCell>
+            <TableCell className="py-6 text-center">
+              {item.action_size / 10} members
+            </TableCell>
+            <TableCell>
+              {session && (
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() =>
+                    handleBuyPackage({
+                      quantity: item.cost.quantity,
+                      subPackage: item.package,
+                    })
+                  }
+                >
+                  Buy
+                </Button>
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   )
 }

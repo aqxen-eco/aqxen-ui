@@ -55,14 +55,21 @@ export async function getUserBadges({
     }),
   ])
 
-  const lifetimeBadgesBalanceSymbol = lifetimeBadges.map((userBadge) => ({
-    balance: Number(userBadge.balance.split(' ')[0]),
-    symbol: userBadge.balance.split(' ')[1],
-  }))
+  const lifetimeBadgesBalanceSymbol = lifetimeBadges.map((userBadge) => {
+    const balance = Number(userBadge.balance.split(' ')[0])
+    const symbol = userBadge.balance.split(' ')[1]
+    const badge_symbol = `0,${symbol}`
+
+    return {
+      badge_symbol,
+      balance,
+      symbol,
+    }
+  })
 
   const lifeTimeBadges = badges.reduce<Badge[]>((accumulate, currentValue) => {
     const findUserBadge = lifetimeBadgesBalanceSymbol.find(
-      (b) => b.symbol === currentValue.symbol
+      (b) => b.badge_symbol === currentValue.badge_symbol
     )
     if (!!findUserBadge) {
       return [
@@ -77,15 +84,20 @@ export async function getUserBadges({
   }, [])
 
   const series = await Promise.all(
-    seasons.map((season) => listSeries({ scope: season.symbol }))
+    seasons.map((season) => listSeries({ scope: season.agg_symbol }))
   )
 
   const seasonsWithBadgesAndSeries = seasons.map((season, seasonIndex) => {
     const seasonSeries = series[seasonIndex].rows.map((series) => {
       const seriesBadge = badgesStatus.reduce<Badge[]>(
         (acc, crr: BadgeStatus) => {
-          if (crr.seq_id === series.id && crr.agg_symbol === season.id) {
-            const badge = badges.find((item) => item.id === crr.badge_symbol)
+          if (
+            crr.seq_id === series.seq_id &&
+            crr.agg_symbol === season.agg_symbol
+          ) {
+            const badge = badges.find(
+              (item) => item.badge_symbol === crr.badge_symbol
+            )
             const seasonalBadgeBalance = seasonalBadges.find(
               (item) => item.badge_agg_seq_id === crr.badge_agg_seq_id
             )

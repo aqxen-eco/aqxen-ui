@@ -1,5 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
 import { AddSeriesProps } from '@/api/model/series'
+import { Contract } from '@/constants'
 
 export async function addSeries({
   session,
@@ -28,7 +29,7 @@ export async function addSeries({
 
   await execute(session, [
     {
-      account: 'bamanageryyy',
+      account: Contract.BOUNDED_AGG_MANAGER,
       name: 'initseq',
       authorization: [session.permissionLevel],
       data: {

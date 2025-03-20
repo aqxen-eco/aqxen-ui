@@ -40,7 +40,7 @@ export default function OrganizationPage() {
     },
   })
 
-  const logo = IPFS_IMAGE_SOURCE + watch('ipfs')
+  const logo = watch('ipfs')
 
   async function onSubmit({ displayName, ipfs }: OrganizationSchema) {
     await updateOrganization({

@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
 import { numberMask } from '@/utils/masks'
+import { useOrganization } from '@/contexts/organization'
 
 const sendBadgeSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),
@@ -32,6 +33,7 @@ export default function SendBadgePage() {
   const params = useParams()
   const { session } = useChain()
   const router = useRouter()
+  const { removeOrganizationSymbol } = useOrganization()
 
   const badgeIdDecoded = decodeURIComponent(params.badge_id as string)
 
@@ -51,7 +53,7 @@ export default function SendBadgePage() {
     try {
       await sendBadge({
         session: session!,
-        symbol: badges[0],
+        badge_symbol: badges[0],
         amount: Number(amount),
         to,
         memo: message,
@@ -69,8 +71,10 @@ export default function SendBadgePage() {
         <HeaderAdminTitle
           title={
             <>
-              Send badge
-              {/* <span className="text-gray-3">({badgeIdDecoded})</span> */}
+              Send badge{' '}
+              <span className="text-gray-3">
+                ({removeOrganizationSymbol(badgeIdDecoded)})
+              </span>
             </>
           }
           tooltip="Lorem ipsum dolor sit amed"
@@ -89,7 +93,12 @@ export default function SendBadgePage() {
               render={({ field }) => (
                 <Field>
                   <Label htmlFor="badges">Badges</Label>
-                  <InputBadges value={field.value} onChange={field.onChange} />
+                  <InputBadges
+                    value={field.value}
+                    onChange={field.onChange}
+                    hideSearch
+                    hideRemoveBadgeButton
+                  />
                   <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
                 </Field>
               )}

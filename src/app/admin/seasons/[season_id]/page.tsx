@@ -35,30 +35,29 @@ import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 
 export default function SeasonPage() {
-  const { name, symbol } = useOrganization()
+  const { name, removeOrganizationSymbol } = useOrganization()
   const { season_id } = useParams()
   const { session } = useChain()
-  const seasonId = decodeURIComponent(season_id as string).split(',')[1]
+  const seasonIdDecoded = decodeURIComponent(season_id as string)
+  const seasonId = seasonIdDecoded.split(',')[1]
 
   const [seasonQuery, badgesQuery, badgesStatusQuery, seriesQuery] = useQueries(
     {
       queries: [
         {
-          queryKey: ['seasons', seasonId, name, symbol],
+          queryKey: ['seasons', seasonId, name],
           queryFn: async () =>
             await listSeason({
               scope: name,
               lower_bound: seasonId,
               upper_bound: seasonId,
-              organization_symbol: symbol,
             }),
         },
         {
-          queryKey: ['badges', name, symbol],
+          queryKey: ['badges', name],
           queryFn: async () =>
             await listBadge({
               scope: name,
-              organization_symbol: symbol,
             }),
         },
         {
@@ -88,16 +87,24 @@ export default function SeasonPage() {
     return null
   }
 
+  const season = seasonQuery?.data?.rows?.[0]
+  const seasonBadges = badgesQuery?.data?.rows.filter((badge) =>
+    season?.init_badge_symbols.includes(badge.badge_symbol)
+  )
+
   const series = seriesQuery?.data?.rows.map((series) => {
     const seriesBadge = badgesStatusQuery.data?.rows.reduce<Badge[]>(
       (acc, crr: BadgeStatus) => {
-        if (
-          crr.seq_id === series.id &&
-          crr.agg_symbol === decodeURIComponent(season_id as string) &&
-          !seasonQuery?.data?.rows?.[0]?.badges.includes(crr.badge_symbol)
-        ) {
+        const additionalBadgeInSeriesExists =
+          crr.agg_symbol === seasonIdDecoded &&
+          crr.seq_id === series.seq_id &&
+          !seasonQuery?.data?.rows?.[0]?.init_badge_symbols.includes(
+            crr.badge_symbol
+          )
+
+        if (additionalBadgeInSeriesExists) {
           const badge = badgesQuery.data?.rows.find(
-            (item) => item.id === crr.badge_symbol
+            (item) => item.badge_symbol === crr.badge_symbol
           )
 
           if (badge) {
@@ -113,7 +120,7 @@ export default function SeasonPage() {
 
     return {
       ...series,
-      badges: seriesBadge,
+      badges: seriesBadge ?? [],
     }
   })
 
@@ -121,7 +128,9 @@ export default function SeasonPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminBack href="/admin/seasons">Seasons</HeaderAdminBack>
-        <HeaderAdminTitle title={seasonQuery?.data?.rows?.[0]?.name ?? ''} />
+        <HeaderAdminTitle
+          title={season?.onchain_lookup_data.user.display_name}
+        />
       </HeaderAdmin>
       <div className="by-8 max-w-container-lg mx-auto space-y-8 px-4 pb-8">
         <section className="space-y-4">
@@ -146,7 +155,7 @@ export default function SeasonPage() {
           </header>
           {badgesQuery.isSuccess && (
             <>
-              {badgesQuery.data && badgesQuery.data.rows.length > 0 ? (
+              {seasonBadges && seasonBadges.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -158,29 +167,27 @@ export default function SeasonPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {badgesQuery.data.rows.map(
-                      (badge) =>
-                        seasonQuery?.data?.rows?.[0]?.badges.includes(
-                          badge.id
-                        ) && (
-                          <TableRow key={badge.symbol}>
-                            <TableCell className="text-gray-3">
-                              {badge.symbol}
-                            </TableCell>
-                            <TableCell>
-                              <div className="inline-flex items-center gap-2">
-                                <BadgeImage src={badge.ipfs} size="xs" />
-                                <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                                  {badge.name}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {badge.rarity_counts}
-                            </TableCell>
-                          </TableRow>
-                        )
-                    )}
+                    {seasonBadges?.map((badge) => (
+                      <TableRow key={badge.badge_symbol}>
+                        <TableCell className="text-gray-3">
+                          {removeOrganizationSymbol(badge.badge_symbol)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="inline-flex items-center gap-2">
+                            <BadgeImage
+                              src={badge.offchain_lookup_data.user.ipfs_image}
+                              size="xs"
+                            />
+                            <span className="text-body-2 font-sans font-medium text-nowrap text-white">
+                              {badge.onchain_lookup_data.user.display_name}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {badge.rarity_counts}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               ) : (
@@ -205,7 +212,7 @@ export default function SeasonPage() {
             </div>
             <div className="flex-none">
               <Link
-                href={`/admin/seasons/${season_id}/add-series${series?.at(-1) ? `?last-series-id=${series?.at(-1)?.id}` : ''}`}
+                href={`/admin/seasons/${season_id}/add-series${series?.at(-1) ? `?last-series-id=${series?.at(-1)?.seq_id}` : ''}`}
                 variant="secondary"
                 size="md"
               >
@@ -221,7 +228,7 @@ export default function SeasonPage() {
                     <TableRow>
                       <TableHead className="w-10 text-center">ID</TableHead>
                       <TableHead>Name</TableHead>
-                      <TableHead>Badges</TableHead>
+                      <TableHead>Additional Badges</TableHead>
                       <TableHead className="w-40">Status</TableHead>
                       <TableHead className="w-40" />
                     </TableRow>
@@ -229,26 +236,39 @@ export default function SeasonPage() {
                   <TableBody>
                     {series &&
                       series.map((seriesItem) => (
-                        <TableRow key={seriesItem.id}>
+                        <TableRow key={seriesItem.seq_id}>
                           <TableCell className="text-gray-3 text-center">
-                            {seriesItem.id}
+                            {seriesItem.seq_id}
                           </TableCell>
-                          <TableCell>{seriesItem.name}</TableCell>
+                          <TableCell>
+                            {seriesItem.sequence_description}
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-4">
-                              {seriesItem.badges &&
-                                seriesItem.badges.length > 0 &&
+                              {seriesItem.badges.length > 0 &&
                                 seriesItem.badges.map((badge) => (
-                                  <Tooltip key={badge.id} content={badge.name}>
+                                  <Tooltip
+                                    key={badge.badge_symbol}
+                                    content={
+                                      badge.onchain_lookup_data.user
+                                        .display_name
+                                    }
+                                  >
                                     <div>
-                                      <BadgeImage src={badge.ipfs} size="xs" />
+                                      <BadgeImage
+                                        src={
+                                          badge.offchain_lookup_data.user
+                                            .ipfs_image
+                                        }
+                                        size="xs"
+                                      />
                                     </div>
                                   </Tooltip>
                                 ))}
-                              {seriesItem.status !== 'end' && (
+                              {seriesItem.seq_status !== 'end' && (
                                 <Tooltip content="Add badge">
                                   <Link
-                                    href={`/admin/seasons/${season_id}/add-badges?series=${seriesItem.id}`}
+                                    href={`/admin/seasons/${season_id}/add-badges?series=${seriesItem.seq_id}`}
                                     variant="secondary"
                                     size="md"
                                     square
@@ -260,18 +280,18 @@ export default function SeasonPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            {seriesItem.status === 'init' ? (
+                            {seriesItem.seq_status === 'init' ? (
                               <Tag variant="blue">Created</Tag>
-                            ) : seriesItem.status === 'end' ? (
+                            ) : seriesItem.seq_status === 'end' ? (
                               <Tag variant="red">Ended</Tag>
-                            ) : seriesItem.status === 'active' ? (
+                            ) : seriesItem.seq_status === 'active' ? (
                               <Tag variant="green">Started</Tag>
                             ) : (
                               <></>
                             )}
                           </TableCell>
                           <TableCell className="flex justify-end gap-2">
-                            {seriesItem.status === 'init' ? (
+                            {seriesItem.seq_status === 'init' ? (
                               <>
                                 <Button
                                   variant="secondary"
@@ -279,10 +299,8 @@ export default function SeasonPage() {
                                   onClick={async () => {
                                     await startSeries({
                                       session: session!,
-                                      agg_symbol: decodeURIComponent(
-                                        season_id as string
-                                      ),
-                                      seq_ids: [seriesItem.id],
+                                      agg_symbol: seasonIdDecoded,
+                                      seq_ids: [seriesItem.seq_id],
                                     })
                                     seriesQuery.refetch()
                                   }}
@@ -290,9 +308,9 @@ export default function SeasonPage() {
                                   Start
                                 </Button>
                               </>
-                            ) : seriesItem.status === 'end' ? (
+                            ) : seriesItem.seq_status === 'end' ? (
                               <></>
-                            ) : seriesItem.status === 'active' ? (
+                            ) : seriesItem.seq_status === 'active' ? (
                               <>
                                 <Button
                                   variant="secondary"
@@ -300,10 +318,8 @@ export default function SeasonPage() {
                                   onClick={() => {
                                     endSeries({
                                       session: session!,
-                                      agg_symbol: decodeURIComponent(
-                                        season_id as string
-                                      ),
-                                      seq_ids: [seriesItem.id],
+                                      agg_symbol: seasonIdDecoded,
+                                      seq_ids: [seriesItem.seq_id],
                                     })
                                     seriesQuery.refetch()
                                   }}

@@ -25,7 +25,7 @@ const newSeasonSchema = z.object({
 type NewSeasonSchema = z.infer<typeof newSeasonSchema>
 
 export default function NewSeasonPage() {
-  const { symbol: organizationSymbol } = useOrganization()
+  const { addOrganizationSymbol } = useOrganization()
   const { session } = useChain()
   const router = useRouter()
 
@@ -42,10 +42,12 @@ export default function NewSeasonPage() {
     try {
       await createSeason({
         session: session!,
-        symbol: organizationSymbol + symbol,
-        description: name,
+        agg_symbol: addOrganizationSymbol(symbol),
         badge_symbols: badges,
         stats_badge_symbols: stats,
+        ipfs_image: '',
+        display_name: name,
+        description: '',
       })
       router.push('/admin/seasons')
     } catch {}

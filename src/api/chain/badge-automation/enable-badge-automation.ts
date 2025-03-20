@@ -1,5 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
 import { EnableBadgeAutomationProps } from '@/api/model/badge-automation'
+import { Contract } from '@/constants'
 
 export async function enableBadgeAutomation({
   session,
@@ -7,7 +8,7 @@ export async function enableBadgeAutomation({
 }: EnableBadgeAutomationProps) {
   await execute(session, [
     {
-      account: 'aemanageryyy',
+      account: Contract.ANDEMITTER_MANAGER,
       name: 'activate',
       authorization: [session.permissionLevel],
       data: {

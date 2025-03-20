@@ -1,3 +1,4 @@
+import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { Fallback, Image, Root } from '@radix-ui/react-avatar'
 import { tv, type VariantProps } from 'tailwind-variants'
 
@@ -32,7 +33,7 @@ export function BadgeImage({ size, src, className }: BadgeImageProps) {
 
   return (
     <Root className={root({ class: className })}>
-      <Image className={image()} src={src} alt="" />
+      <Image className={image()} src={IPFS_IMAGE_SOURCE + src} alt="" />
       <Fallback asChild>
         <img src="/img/badges/badge_0.png" className={image()} alt="" />
       </Fallback>
