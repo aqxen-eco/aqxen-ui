@@ -1,6 +1,7 @@
-import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { Fallback, Image, Root } from '@radix-ui/react-avatar'
 import { tv, type VariantProps } from 'tailwind-variants'
+
+import { IPFS_IMAGE_SOURCE } from '@/constants'
 
 const badgeImage = tv({
   slots: {

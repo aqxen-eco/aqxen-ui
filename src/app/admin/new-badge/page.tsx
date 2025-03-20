@@ -13,7 +13,6 @@ import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputSymbol } from '@/components/ui/input-symbol'
-import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 

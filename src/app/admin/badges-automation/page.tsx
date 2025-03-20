@@ -4,6 +4,7 @@ import { useQueries } from '@tanstack/react-query'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { disableBadgeAutomation } from '@/api/chain/badge-automation/disable-badge-automation'
+import { enableBadgeAutomation } from '@/api/chain/badge-automation/enable-badge-automation'
 import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-automation'
 import { Badge } from '@/api/model/badge'
 import { TableSkeleton } from '@/components/skeleton'
@@ -21,7 +22,6 @@ import { Tag } from '@/components/ui/tag'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { enableBadgeAutomation } from '@/api/chain/badge-automation/enable-badge-automation'
 
 export default function BadgeAutomationPage() {
   const { actor, session } = useChain()

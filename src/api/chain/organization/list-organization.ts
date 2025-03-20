@@ -2,8 +2,8 @@ import { Name } from '@wharfkit/antelope'
 
 import { jungleClient } from '@/api/chain/jungle-client'
 import { ListOrganizationResult } from '@/api/model/organization'
-import { safeParse } from '@/utils/safe-parse'
 import { Contract } from '@/constants'
+import { safeParse } from '@/utils/safe-parse'
 
 type ListOrganizationProps = {
   lower_bound?: string

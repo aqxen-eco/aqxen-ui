@@ -17,8 +17,8 @@ import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
-import { numberMask } from '@/utils/masks'
 import { useOrganization } from '@/contexts/organization'
+import { numberMask } from '@/utils/masks'
 
 const sendBadgeSchema = z.object({
   badges: z.string().array().min(1, 'Badges is required'),

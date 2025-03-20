@@ -5,7 +5,6 @@ import {
   differenceInMinutes,
   minutesToHours,
   parseISO,
-  secondsToHours,
   secondsToMinutes,
 } from 'date-fns'
 import { MdOutlineInfo } from 'react-icons/md'

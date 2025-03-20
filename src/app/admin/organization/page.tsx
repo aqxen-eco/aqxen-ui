@@ -11,7 +11,6 @@ import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 

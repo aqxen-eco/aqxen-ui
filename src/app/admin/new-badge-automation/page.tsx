@@ -14,12 +14,12 @@ import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 import { InputSearchBadges } from '@/components/ui/input-search-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { numberMask } from '@/utils/masks'
-import { Input } from '@/components/ui/input'
 
 const newBadgeAutomationSchema = z.object({
   display_name: z.string().nonempty('Name is required'),

@@ -16,7 +16,7 @@ export function InputSearchBadges({
   value = [],
   onChange,
 }: InputSearchBadgesProps) {
-  const { name, removeOrganizationSymbol } = useOrganization()
+  const { name } = useOrganization()
 
   const badgesQuery = useQuery({
     queryKey: ['badges', name],
