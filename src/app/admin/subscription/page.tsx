@@ -5,7 +5,7 @@ import {
   differenceInMinutes,
   minutesToHours,
   parseISO,
-  secondsToHours,
+  secondsToMinutes,
 } from 'date-fns'
 import { MdOutlineInfo } from 'react-icons/md'
 
@@ -192,8 +192,8 @@ export default function SubscriptionPage() {
                             {row.total_actions_bought}
                           </TableCell>
                           <TableCell className="py-6 text-center">
-                            {secondsToHours(row.expiry_duration_in_secs) / 24}{' '}
-                            days
+                            {secondsToMinutes(row.expiry_duration_in_secs)}{' '}
+                            minutes
                           </TableCell>
                           {/* <TableCell className="py-6 text-center"></TableCell> */}
                         </TableRow>
@@ -245,8 +245,8 @@ export default function SubscriptionPage() {
                             {row.total_actions_bought}
                           </TableCell>
                           <TableCell className="py-6 text-center">
-                            {secondsToHours(row.expiry_duration_in_secs) / 24}{' '}
-                            days
+                            {secondsToMinutes(row.expiry_duration_in_secs)}{' '}
+                            minutes
                           </TableCell>
                           {/* <TableCell className="py-6 text-center"></TableCell> */}
                         </TableRow>

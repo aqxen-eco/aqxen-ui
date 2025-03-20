@@ -4,6 +4,7 @@ import { useQueries } from '@tanstack/react-query'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { disableBadgeAutomation } from '@/api/chain/badge-automation/disable-badge-automation'
+import { enableBadgeAutomation } from '@/api/chain/badge-automation/enable-badge-automation'
 import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-automation'
 import { Badge } from '@/api/model/badge'
 import { TableSkeleton } from '@/components/skeleton'
@@ -33,21 +34,11 @@ export default function BadgeAutomationPage() {
         queryFn: async () => await listBadgeAutomation({ scope: actor }),
       },
       {
-        queryKey: ['badges', name, symbol],
-        queryFn: async () =>
-          await listBadge({
-            scope: name,
-            organization_symbol: symbol,
-          }),
+        queryKey: ['badges', name],
+        queryFn: async () => await listBadge({ scope: name }),
       },
     ],
   })
-
-  // function handleDisable({ emission_symbol }: { emission_symbol: string }) {
-  //   disableBadgeAutomation({ session: session!, emission_symbol })
-  // }
-
-  // function handleEnable() {}
 
   if (badgeAutomationQuery.isLoading || badgesQuery.isLoading) {
     return <TableSkeleton />
@@ -80,7 +71,7 @@ export default function BadgeAutomationPage() {
 
     const { emit_assets, emitter_criteria } = badgesQuery.data.rows.reduce(
       (acc, crr) => {
-        const badgeSymbol = crr.id.split(',')[1]
+        const badgeSymbol = crr.badge_symbol.split(',')[1]
 
         const emitAssetsBadgeItem = emitAssetsBadge.find(
           (item) => item.symbol === badgeSymbol
@@ -123,8 +114,6 @@ export default function BadgeAutomationPage() {
     }
   })
 
-  // console.log('data', data)
-
   return (
     <Table>
       <TableHeader>
@@ -144,18 +133,23 @@ export default function BadgeAutomationPage() {
               {row.emission_symbol_formatted}
             </TableCell>
             <TableCell className="space-x-2">
-              <span className="inline-block">Placeholder name</span>
+              <span className="inline-block">
+                {row.onchain_lookup_data.user.name}
+              </span>
               {row.cyclic && <Tag>Cyclic</Tag>}
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-4">
                 {row.emitter_criteria.map((badge) => (
                   <Tooltip
-                    key={badge.id}
-                    content={`${badge.quantity} ${badge.name}`}
+                    key={badge.badge_symbol}
+                    content={`${badge.quantity} ${badge.onchain_lookup_data.user.display_name}`}
                   >
                     <div>
-                      <BadgeImage src={badge.ipfs} size="xs" />
+                      <BadgeImage
+                        src={badge.offchain_lookup_data.user.ipfs_image}
+                        size="xs"
+                      />
                     </div>
                   </Tooltip>
                 ))}
@@ -165,38 +159,55 @@ export default function BadgeAutomationPage() {
               <div className="flex items-center gap-4">
                 {row.emit_assets.map((badge) => (
                   <Tooltip
-                    key={badge.id}
-                    content={`${badge.quantity} ${badge.name}`}
+                    key={badge.badge_symbol}
+                    content={`${badge.quantity} ${badge.onchain_lookup_data.user.display_name}`}
                   >
                     <div>
-                      <BadgeImage src={badge.ipfs} size="xs" />
+                      <BadgeImage
+                        src={badge.offchain_lookup_data.user.ipfs_image}
+                        size="xs"
+                      />
                     </div>
                   </Tooltip>
                 ))}
               </div>
             </TableCell>
             <TableCell>
-              {row.status === 'init' && <Tag variant="green">Enabled</Tag>}
-              {/* <Tag variant="red">Disabled</Tag> */}
+              {row.status === 'init' && <Tag variant="green">Created</Tag>}
+              {row.status === 'activate' && <Tag variant="green">Enabled</Tag>}
+              {row.status === 'deactivate' && <Tag variant="red">Disabled</Tag>}
             </TableCell>
             <TableCell className="text-right">
-              {row.status === 'init' && (
+              {row.status === 'activate' && (
                 <Button
                   variant="secondary"
                   size="md"
-                  onClick={() => {
-                    disableBadgeAutomation({
+                  onClick={async () => {
+                    await disableBadgeAutomation({
                       session: session!,
                       emission_symbol: row.emission_symbol,
                     })
+                    badgeAutomationQuery.refetch()
                   }}
                 >
                   Disable
                 </Button>
               )}
-              {/* <Button variant="secondary" size="md">
-              Enable
-            </Button> */}
+              {(row.status === 'init' || row.status === 'deactivate') && (
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={async () => {
+                    await enableBadgeAutomation({
+                      session: session!,
+                      emission_symbol: row.emission_symbol,
+                    })
+                    badgeAutomationQuery.refetch()
+                  }}
+                >
+                  Enable
+                </Button>
+              )}
             </TableCell>
           </TableRow>
         ))}

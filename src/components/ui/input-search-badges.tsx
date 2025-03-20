@@ -16,22 +16,18 @@ export function InputSearchBadges({
   value = [],
   onChange,
 }: InputSearchBadgesProps) {
-  const { name, symbol } = useOrganization()
+  const { name } = useOrganization()
 
   const badgesQuery = useQuery({
-    queryKey: ['badges', name, symbol],
-    queryFn: async () =>
-      await listBadge({
-        scope: name,
-        organization_symbol: symbol,
-      }),
+    queryKey: ['badges', name],
+    queryFn: async () => await listBadge({ scope: name }),
   })
 
   useEffect(() => {
     if (badgesQuery.isSuccess && value.length > 0) {
       const selectedBadges = badgesQuery?.data?.rows.reduce<Badge[]>(
         (accumulator, currentValue) => {
-          if (value.includes(currentValue.id)) {
+          if (value.includes(currentValue.badge_symbol)) {
             return [...accumulator, currentValue]
           }
           return accumulator
@@ -49,7 +45,7 @@ export function InputSearchBadges({
 
     const selectedBadges = badgesQuery?.data?.rows.reduce<Badge[]>(
       (accumulator, currentValue) => {
-        if (newValue.includes(currentValue.id)) {
+        if (newValue.includes(currentValue.badge_symbol)) {
           return [...accumulator, currentValue]
         }
         return accumulator
@@ -60,8 +56,14 @@ export function InputSearchBadges({
   }
 
   function handleFilter(badgeId: string, search: string) {
-    const badge = badgesQuery?.data?.rows.find((b) => b.id === badgeId)
-    if (badge?.name && badge.name.includes(search.toLowerCase())) return 1
+    const badge = badgesQuery?.data?.rows.find(
+      (b) => b.badge_symbol === badgeId
+    )
+    if (
+      badge?.onchain_lookup_data &&
+      badge.onchain_lookup_data.user.display_name.includes(search.toLowerCase())
+    )
+      return 1
     return 0
   }
 
@@ -79,16 +81,19 @@ export function InputSearchBadges({
 
       {badgesQuery?.data?.rows.map((badge) => (
         <ComboboxItem
-          key={badge.id}
+          key={badge.badge_symbol}
           className="data-[selected=true]:bg-gray-3 relative flex cursor-default items-center gap-2 rounded-xs px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:text-white"
-          value={badge.id}
+          value={badge.badge_symbol}
           onSelect={handleOnSelect}
-          checked={value.includes(badge.id)}
+          checked={value.includes(badge.badge_symbol)}
         >
           <div className="inline-flex items-center gap-2">
-            <BadgeImage src={badge.ipfs} size="xs" />
+            <BadgeImage
+              src={badge.offchain_lookup_data.user.ipfs_image}
+              size="xs"
+            />
             <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-              {badge.name}
+              {badge.onchain_lookup_data.user.display_name}
             </span>
           </div>
         </ComboboxItem>

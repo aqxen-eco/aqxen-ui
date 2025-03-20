@@ -64,9 +64,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 {badges.map((badge, index) => (
                   <BadgeSwiperSlide key={index}>
                     <Badge
-                      name={badge.name}
+                      name={badge.onchain_lookup_data.user.display_name}
                       balance={String(badge.balance)}
-                      ipfs={badge.ipfs}
+                      ipfs={badge.offchain_lookup_data.user.ipfs_image}
                     />
                   </BadgeSwiperSlide>
                 ))}
@@ -77,9 +77,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
         {seasons.map((season) => (
           <SeasonalBadgesSection
-            key={season.id}
-            lastSeriesId={season.last_started_series.at(-1)}
-            name={season.name}
+            key={season.agg_symbol}
+            lastSeriesId={season.active_seq_ids.at(-1)}
+            name={season.onchain_lookup_data.user.display_name}
             series={season.series}
           />
         ))}

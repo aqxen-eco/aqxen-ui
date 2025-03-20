@@ -1,12 +1,12 @@
 import { GetTableRowsResult, Session } from './index'
 
 export type Series = {
-  id: number
-  status: 'end' | 'active' | 'init'
-  name: string
-  init_time: string
   active_time: string
   end_time: string
+  init_time: string
+  seq_id: number
+  seq_status: 'end' | 'active' | 'init'
+  sequence_description: string
 }
 
 export type ListSeriesResult = GetTableRowsResult<Series>

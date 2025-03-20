@@ -1,11 +1,28 @@
 import { GetTableRowsResult, Session } from './index'
 
+export type ListBadgeProps = {
+  scope?: string
+  lower_bound?: string
+  upper_bound?: string
+}
+
 export type Badge = {
-  id: string
-  symbol: string
-  ipfs: string
-  name: string
+  badge_symbol: string
   notify_accounts: string[]
+  offchain_lookup_data: {
+    user: {
+      ipfs_image: string
+    }
+  }
+  onchain_lookup_data: {
+    system: {
+      created_at: string
+    }
+    user: {
+      description: string
+      display_name: string
+    }
+  }
   rarity_counts: string
 }
 
@@ -38,8 +55,9 @@ export type ListBadgeStatusResult = GetTableRowsResult<BadgeStatus>
 export type CreateBadgeProps = {
   session: Session
   symbol: string
-  ipfs: string
-  name: string
+  display_name: string
+  ipfs_image: string
+  description: string
   lifetime_aggregate: boolean
   lifetime_stats: boolean
   memo: string
@@ -47,7 +65,7 @@ export type CreateBadgeProps = {
 
 export type SendBadgeProps = {
   session: Session
-  symbol: string
+  badge_symbol: string
   amount: number
   to: string
   memo: string

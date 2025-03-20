@@ -113,7 +113,7 @@ export default function AddSeriesPage() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <Label>Badges</Label>
+                  <Label>Additional Badges</Label>
                   <InputBadges value={field.value} onChange={field.onChange} />
                   <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
                 </Field>

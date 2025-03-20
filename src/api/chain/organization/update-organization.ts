@@ -1,5 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
 import { type UpdateOrganizationProps } from '@/api/model/organization'
+import { Contract } from '@/constants'
 
 export async function updateOrganization({
   session,
@@ -11,7 +12,7 @@ export async function updateOrganization({
 
   if (display_name) {
     actions.push({
-      account: 'organizayyyy',
+      account: Contract.ORGANIZATION,
       name: 'displayname',
       authorization: [session.permissionLevel],
       data: {
@@ -25,7 +26,7 @@ export async function updateOrganization({
 
   if (ipfs_image) {
     actions.push({
-      account: 'organizayyyy',
+      account: Contract.ORGANIZATION,
       name: 'image',
       authorization: [session.permissionLevel],
       data: {

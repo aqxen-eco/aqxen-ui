@@ -33,10 +33,11 @@ export function OrganizationProvider({
 
   const name = query.data?.rows[0]?.org ?? ''
   const symbol = query.data?.rows[0]?.org_code ?? ''
-  const ipfs = query.data?.rows[0]?.offchain_lookup_data?.ipfs ?? ''
+  const ipfs = query.data?.rows[0]?.offchain_lookup_data?.user.ipfs_image ?? ''
   const createdAt =
-    String(query.data?.rows[0]?.onchain_lookup_data?.created_at) ?? ''
-  const displayName = query.data?.rows[0]?.onchain_lookup_data?.name ?? ''
+    String(query.data?.rows[0]?.onchain_lookup_data?.system.created_at) ?? ''
+  const displayName =
+    query.data?.rows[0]?.onchain_lookup_data?.user.display_name ?? ''
 
   return (
     <OrganizationContext
@@ -58,6 +59,14 @@ export function useOrganization() {
   const { name, symbol, hasOrganization, ipfs, createdAt, displayName } =
     use(OrganizationContext)
 
+  function addOrganizationSymbol(value: string) {
+    return (symbol + value).toUpperCase()
+  }
+
+  function removeOrganizationSymbol(value: string) {
+    return value.split(',')[1].replace(symbol?.toUpperCase(), '')
+  }
+
   return {
     name,
     symbol,
@@ -65,5 +74,7 @@ export function useOrganization() {
     ipfs,
     createdAt,
     displayName,
+    addOrganizationSymbol,
+    removeOrganizationSymbol,
   }
 }

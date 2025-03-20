@@ -28,7 +28,7 @@ export function SeasonalBadgesSection({
 }: SeasonalBadgesSectionProps) {
   const [selectedSeries, setSelectedSeries] = useState(lastSeriesId)
 
-  const seriesValue = series.find((series) => series.id === selectedSeries)
+  const seriesValue = series.find((series) => series.seq_id === selectedSeries)
 
   return (
     <section className="py-8">
@@ -42,16 +42,16 @@ export function SeasonalBadgesSection({
           </span>
         </h3>
         {series.length > 0 && (
-          <DropdownRoot label={seriesValue?.name} align="end">
+          <DropdownRoot label={seriesValue?.sequence_description} align="end">
             {series.map((series) => (
               <DropdownItem
-                key={series.id}
-                isSelected={series.id === selectedSeries}
+                key={series.seq_id}
+                isSelected={series.seq_id === selectedSeries}
                 onClick={() => {
-                  setSelectedSeries(series.id)
+                  setSelectedSeries(series.seq_id)
                 }}
               >
-                {series.name}
+                {series.sequence_description}
               </DropdownItem>
             ))}
           </DropdownRoot>
@@ -61,11 +61,11 @@ export function SeasonalBadgesSection({
         <BadgeSwiper>
           <BadgeSwiperWrapper>
             {seriesValue.badges.map((badge) => (
-              <BadgeSwiperSlide key={badge.id}>
+              <BadgeSwiperSlide key={badge.badge_symbol}>
                 <Badge
-                  name={badge.name}
+                  name={badge.onchain_lookup_data.user.display_name}
                   balance={String(badge.balance)}
-                  ipfs={badge.ipfs}
+                  ipfs={badge.offchain_lookup_data.user.ipfs_image}
                 />
               </BadgeSwiperSlide>
             ))}

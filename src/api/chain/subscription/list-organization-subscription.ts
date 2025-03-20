@@ -2,6 +2,7 @@ import { Name } from '@wharfkit/antelope'
 
 import { jungleClient } from '@/api/chain/jungle-client'
 import type { ListOrganizationSubscriptionResult } from '@/api/model/subscription'
+import { Contract } from '@/constants'
 
 type ListOrganizationSubscriptionProps = {
   scope: string
@@ -15,7 +16,7 @@ export async function listOrganizationSubscription({
   upper_bound,
 }: ListOrganizationSubscriptionProps): Promise<ListOrganizationSubscriptionResult> {
   const { rows, more } = await jungleClient.v1.chain.get_table_rows({
-    code: 'subyyyyyyyyy',
+    code: Contract.SUBSCRIPTION,
     scope,
     table: 'orgpackage',
     lower_bound: lower_bound ? Name.from(lower_bound) : undefined,

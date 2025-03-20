@@ -1,5 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
 import { BuySubscriptionProps } from '@/api/model/subscription'
+import { Contract } from '@/constants'
 export async function buySubscription({
   session,
   quantity,
@@ -12,7 +13,7 @@ export async function buySubscription({
       authorization: [session.permissionLevel],
       data: {
         from: session.actor,
-        to: 'subyyyyyyyyy',
+        to: Contract.SUBSCRIPTION,
         quantity,
         memo,
       },

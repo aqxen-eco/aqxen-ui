@@ -1,5 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
 import { AddBadgeToSeriesProps } from '@/api/model/series'
+import { Contract } from '@/constants'
 
 export async function addBadgeToSeries({
   session,
@@ -9,7 +10,7 @@ export async function addBadgeToSeries({
 }: AddBadgeToSeriesProps) {
   await execute(session, [
     {
-      account: 'bamanageryyy',
+      account: Contract.BOUNDED_AGG_MANAGER,
       name: 'addbadge',
       authorization: [session.permissionLevel],
       data: {

@@ -14,7 +14,7 @@ import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
-// import { Input } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
 import { InputSearchBadges } from '@/components/ui/input-search-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { useChain } from '@/contexts/chain'
@@ -22,8 +22,8 @@ import { useOrganization } from '@/contexts/organization'
 import { numberMask } from '@/utils/masks'
 
 const newBadgeAutomationSchema = z.object({
-  // name: z.string().nonempty('Name is required'),
-  symbol: z.string().length(3, 'Symbol is required'),
+  display_name: z.string().nonempty('Name is required'),
+  emission_symbol: z.string().length(3, 'Symbol is required'),
   criteria: z
     .object({
       badge_symbol: z.string().nonempty('Badge is required'),
@@ -57,12 +57,12 @@ export default function NewBadgeAutomationPage() {
   const [badgesEmitted, setBadgesEmitted] = useState<Badge[]>([])
 
   const badgesCriteriaValue = badgesCriteria.reduce(
-    (acc: string[], crr) => [...acc, crr.id],
+    (acc: string[], crr) => [...acc, crr.badge_symbol],
     []
   )
 
   const badgesEmittedValue = badgesEmitted.reduce(
-    (acc: string[], crr) => [...acc, crr.id],
+    (acc: string[], crr) => [...acc, crr.badge_symbol],
     []
   )
 
@@ -76,13 +76,13 @@ export default function NewBadgeAutomationPage() {
   })
 
   async function onSubmit({
-    symbol,
+    display_name,
+    emission_symbol,
     criteria,
     emitted,
     cyclic,
   }: NewBadgeAutomationSchema) {
     try {
-      const emission_symbol = `0,${organizationSymbol}${symbol}`.toUpperCase()
       const emitter_criteria = criteria.map(
         (item) => `${item.quantity} ${item.badge_symbol.split(',')[1]}`
       )
@@ -92,7 +92,10 @@ export default function NewBadgeAutomationPage() {
 
       await createBadgeAutomation({
         session: session!,
-        emission_symbol,
+        display_name,
+        ipfs_description: '',
+        emission_symbol:
+          `0,${organizationSymbol}${emission_symbol}`.toUpperCase(),
         emitter_criteria,
         emit_badges,
         cyclic,
@@ -110,28 +113,28 @@ export default function NewBadgeAutomationPage() {
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-8 p-8 max-md:p-0"
       >
-        {/* <Field>
-          <Label htmlFor="name">Name</Label>
+        <Field>
+          <Label htmlFor="display_name">Name</Label>
           <Input
-            id="name"
-            {...register('name')}
-            aria-invalid={!!errors['name']}
+            id="display_name"
+            {...register('display_name')}
+            aria-invalid={!!errors['display_name']}
           />
-          <ErrorMessage>{errors['name']?.message}</ErrorMessage>
-        </Field> */}
+          <ErrorMessage>{errors['display_name']?.message}</ErrorMessage>
+        </Field>
         <Controller
-          name="symbol"
+          name="emission_symbol"
           control={control}
           render={({ field }) => (
             <Field>
-              <Label htmlFor="symbol">Symbol</Label>
+              <Label htmlFor="emission_symbol">Symbol</Label>
               <InputSymbol
-                id="symbol"
-                aria-invalid={!!errors['symbol']}
+                id="emission_symbol"
+                aria-invalid={!!errors['emission_symbol']}
                 maxLength={3}
                 {...field}
               />
-              <ErrorMessage>{errors['symbol']?.message}</ErrorMessage>
+              <ErrorMessage>{errors['emission_symbol']?.message}</ErrorMessage>
             </Field>
           )}
         />
@@ -141,18 +144,21 @@ export default function NewBadgeAutomationPage() {
           <ul>
             {badgesCriteria.map((badge, badgeIndex) => (
               <li
-                key={badge.id}
+                key={badge.badge_symbol}
                 className="border-gray-2 flex justify-center gap-4 border-b py-1"
               >
                 <div className="flex flex-1 items-center gap-2">
-                  <BadgeImage src={badge.ipfs} size="xs" />
+                  <BadgeImage
+                    src={badge.offchain_lookup_data.user.ipfs_image}
+                    size="xs"
+                  />
                   <input
                     type="hidden"
                     {...register(`criteria.${badgeIndex}.badge_symbol`)}
-                    value={badge.id}
+                    value={badge.badge_symbol}
                   />
                   <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                    {badge.name}
+                    {badge.onchain_lookup_data.user.display_name}
                   </span>
                 </div>
                 <div className="flex-1">
@@ -174,7 +180,9 @@ export default function NewBadgeAutomationPage() {
                     square
                     onClick={() => {
                       setBadgesCriteria((state) =>
-                        state.filter((b) => b.id !== badge.id)
+                        state.filter(
+                          (b) => b.badge_symbol !== badge.badge_symbol
+                        )
                       )
                     }}
                   >
@@ -198,18 +206,21 @@ export default function NewBadgeAutomationPage() {
           <ul>
             {badgesEmitted.map((badge, badgeIndex) => (
               <li
-                key={badge.id}
+                key={badge.badge_symbol}
                 className="border-gray-2 flex justify-center gap-4 border-b py-1"
               >
                 <div className="flex flex-1 items-center gap-2">
-                  <BadgeImage src={badge.ipfs} size="xs" />
+                  <BadgeImage
+                    src={badge.offchain_lookup_data.user.ipfs_image}
+                    size="xs"
+                  />
                   <input
                     type="hidden"
                     {...register(`emitted.${badgeIndex}.badge_symbol`)}
-                    value={badge.id}
+                    value={badge.badge_symbol}
                   />
                   <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                    {badge.name}
+                    {badge.onchain_lookup_data.user.display_name}
                   </span>
                 </div>
                 <div className="flex-1">
@@ -231,7 +242,9 @@ export default function NewBadgeAutomationPage() {
                     square
                     onClick={() => {
                       setBadgesEmitted((state) =>
-                        state.filter((b) => b.id !== badge.id)
+                        state.filter(
+                          (b) => b.badge_symbol !== badge.badge_symbol
+                        )
                       )
                     }}
                   >
