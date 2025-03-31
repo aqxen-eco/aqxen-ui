@@ -2,6 +2,7 @@
 
 import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 
 import { Avatar } from '@/components/ui/avatar'
@@ -11,7 +12,6 @@ import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 import { Link } from '@/components/ui/link'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { useState } from 'react'
 
 export function AppBar() {
   const [showMenu, setShowMenu] = useState(false)
