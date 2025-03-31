@@ -2,6 +2,7 @@
 
 import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { MdClose } from 'react-icons/md'
 
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
@@ -10,8 +11,10 @@ import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 import { Link } from '@/components/ui/link'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useState } from 'react'
 
 export function AppBar() {
+  const [showMenu, setShowMenu] = useState(false)
   const { isAuthenticated, login, logout, actor } = useChain()
   const { hasOrganization } = useOrganization()
   const pathname = usePathname()
@@ -38,22 +41,45 @@ export function AppBar() {
             {isAuthenticated ? (
               <>
                 {hasOrganization && (
-                  <div className="flex items-center justify-between">
-                    <Link
-                      href={`/profile/${actor}`}
-                      variant={
-                        pathname.includes('/profile') ? 'link' : 'default'
-                      }
+                  <>
+                    <Button
+                      variant="default"
+                      className="md:hidden"
+                      onClick={() => setShowMenu(!showMenu)}
                     >
-                      Profile
-                    </Link>
-                    <Link
-                      href="/admin/organization"
-                      variant={pathname.includes('/admin') ? 'link' : 'default'}
+                      Menu
+                    </Button>
+                    <div
+                      data-state={showMenu ? 'open' : 'closed'}
+                      className="max-md:bg-gray-1 flex items-center justify-between max-md:fixed max-md:inset-0 max-md:z-40 max-md:flex-col max-md:justify-center max-md:gap-2 data-[state=closed]:max-md:hidden"
                     >
-                      Admin
-                    </Link>
-                  </div>
+                      <Button
+                        variant="default"
+                        className="absolute top-4 right-4 md:hidden"
+                        onClick={() => setShowMenu(!showMenu)}
+                      >
+                        <MdClose className="size-6" />
+                      </Button>
+                      <Link
+                        href={`/profile/${actor}`}
+                        variant={
+                          pathname.includes('/profile') ? 'link' : 'default'
+                        }
+                        className="max-md:text-2xl"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href="/admin/organization"
+                        variant={
+                          pathname.includes('/admin') ? 'link' : 'default'
+                        }
+                        className="max-md:text-2xl"
+                      >
+                        Admin
+                      </Link>
+                    </div>
+                  </>
                 )}
 
                 <DropdownRoot
