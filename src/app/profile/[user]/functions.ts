@@ -56,13 +56,12 @@ export async function getUserBadges({
   ])
 
   const lifetimeBadgesBalanceSymbol = lifetimeBadges.map((userBadge) => {
-    const balance = Number(userBadge.balance.split(' ')[0])
-    const symbol = userBadge.balance.split(' ')[1]
+    const [balance, symbol] = userBadge.balance.split(' ')
     const badge_symbol = `0,${symbol}`
 
     return {
       badge_symbol,
-      balance,
+      balance: Number(balance),
       symbol,
     }
   })
@@ -84,7 +83,9 @@ export async function getUserBadges({
   }, [])
 
   const series = await Promise.all(
-    seasons.map((season) => listSeries({ scope: season.agg_symbol }))
+    seasons.map((season) =>
+      listSeries({ scope: season.agg_symbol.split(',')[1] })
+    )
   )
 
   const seasonsWithBadgesAndSeries = seasons.map((season, seasonIndex) => {
