@@ -70,6 +70,15 @@ export function AppBar() {
                         Profile
                       </Link>
                       <Link
+                        href="/feed"
+                        variant={
+                          pathname.includes('/feed') ? 'link' : 'default'
+                        }
+                        className="max-md:text-2xl"
+                      >
+                        Feed
+                      </Link>
+                      <Link
                         href="/admin/organization"
                         variant={
                           pathname.includes('/admin') ? 'link' : 'default'

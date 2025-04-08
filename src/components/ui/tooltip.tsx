@@ -12,17 +12,17 @@ import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 type TooltipProps = {
-  content: string
+  content: React.ReactNode
   arrowFill?: string
+  className?: string
   children: React.ReactNode
-} & React.ComponentProps<'div'>
+}
 
 export function Tooltip({
   content,
   arrowFill,
   children,
   className,
-  ...restProps
 }: TooltipProps) {
   const [open, setOpen] = useState(false)
 
@@ -39,7 +39,6 @@ export function Tooltip({
               className
             )}
             sideOffset={5}
-            {...restProps}
           >
             {content}
             <Arrow className="fill-gray-2" style={{ fill: arrowFill }} />
