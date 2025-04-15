@@ -17,6 +17,7 @@ export type AddSeriesProps = {
   badge_symbols?: string[] | null
   sequence_description: string
   start_right_away: boolean
+  seq_ids: number[]
 }
 
 export type AddBadgeToSeriesProps = {

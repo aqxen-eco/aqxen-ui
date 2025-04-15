@@ -73,6 +73,7 @@ export default function AddSeriesPage() {
         badge_symbols: badges ?? [],
         sequence_description: name,
         start_right_away,
+        seq_ids: [lastSeriesId ? Number(lastSeriesId) + 1 : 1],
       })
       router.push(`/admin/seasons/${params.season_id}`)
     } catch (error) {
