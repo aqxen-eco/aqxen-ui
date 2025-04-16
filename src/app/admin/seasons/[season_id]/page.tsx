@@ -46,12 +46,24 @@ export default function SeasonPage() {
       queries: [
         {
           queryKey: ['seasons', seasonId, name],
-          queryFn: async () =>
-            await listSeason({
+          queryFn: async (context) => {
+            if (context.meta && typeof context.meta.refetchCount === 'number') {
+              context.meta.refetchCount = context.meta.refetchCount + 1
+            }
+            return await listSeason({
               scope: name,
               lower_bound: seasonId,
               upper_bound: seasonId,
-            }),
+            })
+          },
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          refetchInterval: (query: any) => {
+            if (query.meta.refetchCount >= 4) return false
+            return 1000
+          },
+          meta: {
+            refetchCount: 0,
+          },
         },
         {
           queryKey: ['badges', name],
@@ -69,10 +81,22 @@ export default function SeasonPage() {
         },
         {
           queryKey: ['series', seasonId],
-          queryFn: async () =>
-            await listSeries({
+          queryFn: async (context) => {
+            if (context.meta && typeof context.meta.refetchCount === 'number') {
+              context.meta.refetchCount = context.meta.refetchCount + 1
+            }
+            return await listSeries({
               scope: seasonId,
-            }),
+            })
+          },
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          refetchInterval: (query: any) => {
+            if (query.meta.refetchCount >= 4) return false
+            return 1000
+          },
+          meta: {
+            refetchCount: 0,
+          },
         },
       ],
     }
@@ -302,7 +326,10 @@ export default function SeasonPage() {
                                       agg_symbol: seasonIdDecoded,
                                       seq_ids: [seriesItem.seq_id],
                                     })
-                                    seriesQuery.refetch()
+                                    setTimeout(() => {
+                                      seasonQuery.refetch()
+                                      seriesQuery.refetch()
+                                    }, 1000)
                                   }}
                                 >
                                   Start
@@ -321,14 +348,31 @@ export default function SeasonPage() {
                                       agg_symbol: seasonIdDecoded,
                                       seq_ids: [seriesItem.seq_id],
                                     })
-                                    seriesQuery.refetch()
+                                    setTimeout(() => {
+                                      seasonQuery.refetch()
+                                      seriesQuery.refetch()
+                                    }, 1000)
                                   }}
                                 >
                                   End
                                 </Button>
                               </>
                             ) : (
-                              <Button variant="secondary" size="md">
+                              <Button
+                                variant="secondary"
+                                size="md"
+                                onClick={async () => {
+                                  await startSeries({
+                                    session: session!,
+                                    agg_symbol: seasonIdDecoded,
+                                    seq_ids: [seriesItem.seq_id],
+                                  })
+                                  setTimeout(() => {
+                                    seasonQuery.refetch()
+                                    seriesQuery.refetch()
+                                  }, 1000)
+                                }}
+                              >
                                 Start
                               </Button>
                             )}

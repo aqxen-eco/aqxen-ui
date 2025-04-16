@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -29,8 +30,9 @@ export default function AddBadgesPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const series = searchParams.get('series')
-  const { symbol } = useOrganization()
+  const { name, symbol } = useOrganization()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const { session } = useChain()
 
@@ -55,11 +57,17 @@ export default function AddBadgesPage() {
           seq_ids: [Number(series)],
           badge_symbols: badges,
         })
+        queryClient.invalidateQueries({
+          queryKey: ['seasons', params.season_id, name],
+        })
       } else {
         await addBadgeToSeason({
           session: session!,
           agg_symbol: decodeURIComponent(params.season_id as string),
           badge_symbols: badges,
+        })
+        queryClient.invalidateQueries({
+          queryKey: ['series', params.season_id],
         })
       }
       router.push(`/admin/seasons/${params.season_id}`)
