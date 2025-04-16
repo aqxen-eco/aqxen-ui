@@ -1,16 +1,18 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
-import { useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Box } from '@/components/ui/box'
-import { Avatar } from '@/components/ui/avatar'
-import { BadgeImage } from '@/components/ui/badge-image'
-import { Tooltip } from '@/components/ui/tooltip'
-import { MdWorkspacePremium, MdMoreHoriz } from 'react-icons/md'
+
+import { Button } from '@/components/ui/button'
+import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
+import { useChain } from '@/contexts/chain'
+
+import { createPost, getPosts } from './actions'
+import { PostItem, PostItemComment } from './post-item'
 
 const sortList = [
   {
@@ -20,7 +22,7 @@ const sortList = [
 ]
 
 const postSchema = z.object({
-  postContent: z.string().nonempty('Post content is required'),
+  content: z.string().nonempty('Post content is required'),
 })
 
 type PostSchema = z.infer<typeof postSchema>
@@ -28,15 +30,51 @@ type PostSchema = z.infer<typeof postSchema>
 export default function FeedPage() {
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
   const [filter, setFilter] = useState('myRecognitions')
+  const { actor } = useChain()
 
-  const { register, handleSubmit, watch } = useForm<PostSchema>({
+  const loadMoreBtnRef = useRef(null)
+
+  const { register, handleSubmit, watch, reset } = useForm<PostSchema>({
     resolver: zodResolver(postSchema),
   })
 
-  const postContentWatched = watch('postContent')
+  const queryClient = useQueryClient()
 
-  const onSubmit = ({ postContent }: PostSchema) => {
-    console.log(postContent)
+  const query = useInfiniteQuery({
+    queryKey: ['posts'],
+    queryFn: async ({ pageParam }) => getPosts({ limit: 2, cursor: pageParam }),
+    initialPageParam: '',
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  })
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && query.hasNextPage) {
+            query.fetchNextPage()
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+
+    if (loadMoreBtnRef.current) {
+      observer.observe(loadMoreBtnRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [query])
+
+  const contentWatched = watch('content')
+
+  async function onSubmit({ content }: PostSchema) {
+    createPost({
+      actor: actor!,
+      content,
+    })
+    reset()
+    queryClient.invalidateQueries({ queryKey: ['posts'] })
   }
 
   return (
@@ -102,7 +140,7 @@ export default function FeedPage() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <label className="bg-gray-1 border-gray-2 mt-4 block space-y-4 rounded-2xl border p-4">
             <textarea
-              {...register('postContent')}
+              {...register('content')}
               placeholder="What do you consider is worth recognition?"
               className="text-body-1 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
               rows={1}
@@ -111,9 +149,7 @@ export default function FeedPage() {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={
-                  !postContentWatched || postContentWatched.length === 0
-                }
+                disabled={!contentWatched || contentWatched.length === 0}
               >
                 Post
               </Button>
@@ -121,85 +157,56 @@ export default function FeedPage() {
           </label>
         </form>
         <hr className="border-gray-2 border-t" />
-        <Box className="before:bg-gray-2 after:bg-gray-2 relative p-0 before:absolute before:top-4 before:left-10 before:h-[calc(100%-2rem)] before:w-0.5 before:content-[''] after:absolute after:bottom-4 after:left-9.25 after:size-2 after:rounded-full after:content-[''] md:p-4 md:before:top-8 md:before:left-14 md:before:h-[calc(100%-4rem)] md:after:bottom-8 md:after:left-13.25">
-          <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
-            <Avatar size="md" className="ring-gray-1 relative z-10 ring-8">
-              AZ
-            </Avatar>
-            <div className="max-md:space-y-2">
-              <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
-                <p className="text-body-2 text-gray-3 max-w-full">
-                  <span className="text-white">Adam Zientarski</span> received{' '}
-                  <span className="text-white">10 badges</span> by{' '}
-                  <span className="text-white">Karyne</span> and 3 others • Tue
-                  8 Aug
-                </p>
-                <div className="text-gray-3 flex gap-0.5">
-                  <MdWorkspacePremium className="size-6" />
-                  <span className="text-body-2">50</span>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {[2, 4, 2, 1, 1].map((value, index) => (
-                  <Tooltip
-                    key={index}
-                    className="text-gray-3 flex gap-0.5 p-1.5"
-                    content={
-                      <>
-                        <MdWorkspacePremium className="size-6" />
-                        <span className="text-body-2">3</span>
-                      </>
-                    }
-                  >
-                    <div className="flex min-w-16 gap-2">
-                      <BadgeImage src="" size="xs" />
-                      <span className="text-body-2 text-white">{value}</span>
-                    </div>
-                  </Tooltip>
+        {query.isSuccess &&
+          query.data.pages?.map((page) =>
+            page.posts?.map((post) => (
+              <PostItem
+                key={post.id}
+                id={post.id}
+                actor={post.user.actor}
+                createdAt={post.createdAt}
+                content={post.content}
+              >
+                {post.comments.map((comment) => (
+                  <PostItemComment
+                    key={comment.id}
+                    actor={comment.user.actor}
+                    createdAt={comment.createdAt}
+                    content={comment.content}
+                  />
                 ))}
-              </div>
-              <Button variant="secondary" className="mt-2">
-                +1 recognize
-              </Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
-            <Avatar size="md" className="ring-gray-1 relative z-10 ring-8">
-              AZ
-            </Avatar>
-            <div className="max-md:space-y-2">
-              <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
-                <div className="flex gap-2">
-                  <p className="text-body-2 max-w-full text-white">
-                    Karyne Mayer
-                  </p>
-                  <Avatar size="xs">AZ</Avatar>
-                  <span className="text-body-2 text-gray-3">
-                    Responsibility
-                  </span>
-                </div>
-                <div className="text-gray-3 flex gap-0.5">
-                  <MdWorkspacePremium className="size-6" />
-                  <span className="text-body-2">50</span>
-                </div>
-              </div>
-              <p className="text-body-2 text-gray-3">
-                Highly recommend him for his exceptional sense of
-                responsibility. Dependable and dedicated, he consistently goes
-                above and beyond, making them an invaluable asset to any team or
-                project.
+              </PostItem>
+            ))
+          )}
+
+        {query.isSuccess && (
+          <div className="flex items-center justify-center">
+            {query.data.pages[0].posts?.length === 0 ? (
+              <p className="text-body-2 text-gray-3 py-14">
+                No posts available. Be the first to create one!
               </p>
-            </div>
+            ) : (
+              <Button
+                ref={loadMoreBtnRef}
+                variant="secondary"
+                onClick={() => query.fetchNextPage()}
+                disabled={
+                  !query.hasNextPage ||
+                  query.isFetchingNextPage ||
+                  query.isFetching
+                }
+              >
+                {query.isFetchingNextPage
+                  ? 'Loading more...'
+                  : query.hasNextPage
+                    ? 'Load Newer'
+                    : query.isFetching
+                      ? 'Loading...'
+                      : 'Nothing more to load'}
+              </Button>
+            )}
           </div>
-          <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
-            <div className="border-gray-2 bg-gray-1 ring-gray-1 relative z-10 flex size-12 items-center justify-center rounded-full border ring-8">
-              <MdMoreHoriz className="size-6 text-white" />
-            </div>
-            <div className="flex items-center justify-start">
-              <Button variant="secondary">Show More</Button>
-            </div>
-          </div>
-        </Box>
+        )}
       </div>
     </div>
   )
