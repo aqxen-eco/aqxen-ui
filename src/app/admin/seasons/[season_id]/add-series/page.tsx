@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -48,6 +49,7 @@ export default function AddSeriesPage() {
   const { session } = useChain()
   const { symbol } = useOrganization()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const title = decodeURIComponent(params.season_id as string)
     .split(',')[1]
@@ -75,6 +77,7 @@ export default function AddSeriesPage() {
         start_right_away,
         seq_ids: [lastSeriesId ? Number(lastSeriesId) + 1 : 1],
       })
+      queryClient.invalidateQueries({ queryKey: ['series', params.season_id] })
       router.push(`/admin/seasons/${params.season_id}`)
     } catch (error) {
       console.log(error)
