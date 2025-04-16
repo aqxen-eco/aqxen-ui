@@ -20,11 +20,17 @@ export async function listBadge({
     limit: 1000,
   })
 
-  rows = rows.map((row) => ({
-    ...row,
-    offchain_lookup_data: safeParse(row.offchain_lookup_data),
-    onchain_lookup_data: safeParse(row.onchain_lookup_data),
-  }))
+  rows = rows
+    .map((row) => ({
+      ...row,
+      offchain_lookup_data: safeParse(row.offchain_lookup_data),
+      onchain_lookup_data: safeParse(row.onchain_lookup_data),
+    }))
+    .sort((a, b) => {
+      const dateA = a.onchain_lookup_data?.system?.created_at || 0
+      const dateB = b.onchain_lookup_data?.system?.created_at || 0
+      return dateB - dateA
+    })
 
   return {
     rows,
