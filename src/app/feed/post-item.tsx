@@ -14,7 +14,7 @@ import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { useChain } from '@/contexts/chain'
 
-import { createComment } from './actions'
+import { createPost } from './actions'
 // import { BadgeImage } from '@/components/ui/badge-image'
 // import { Tooltip } from '@/components/ui/tooltip'
 
@@ -55,8 +55,8 @@ export function PostItem({
   const contentWatched = watch('content')
 
   async function onSubmit({ content }: CommentSchema) {
-    createComment({
-      postId: id,
+    createPost({
+      parentId: id,
       actor: currentActor!,
       content,
     })
@@ -202,8 +202,8 @@ export function PostItemComment({
         <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
           <div className="flex gap-2">
             <p className="text-body-2 max-w-full text-white">{actor}</p>
-            <Avatar size="xs">AZ</Avatar>
-            <span className="text-body-2 text-gray-3">Responsibility</span>
+            {/* <Avatar size="xs">AZ</Avatar>
+            <span className="text-body-2 text-gray-3">Responsibility</span> */}
             <span className="text-gray-3">
               {' '}
               • {format(new Date(createdAt), 'EEE d MMM')}

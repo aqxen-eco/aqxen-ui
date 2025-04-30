@@ -12,6 +12,7 @@ import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 import { Link } from '@/components/ui/link'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { MutualRecognition } from '@/components/mutual-recognition'
 
 export function AppBar() {
   const [showMenu, setShowMenu] = useState(false)
@@ -90,30 +91,32 @@ export function AppBar() {
                     </div>
                   </>
                 )}
-
-                <DropdownRoot
-                  customTrigger={
-                    <button
-                      type="button"
-                      className="group/dropdown-button focus:outline-hidden"
-                    >
-                      <Avatar
-                        color="red"
-                        className="group-data-[state=open]/dropdown-button:border-white"
+                <div className="flex items-center gap-2">
+                  <MutualRecognition />
+                  <DropdownRoot
+                    customTrigger={
+                      <button
+                        type="button"
+                        className="group/dropdown-button focus:outline-hidden"
                       >
-                        {actor ? actor.slice(0, 2) : 'un'}
-                      </Avatar>
-                    </button>
-                  }
-                  align="end"
-                >
-                  <DropdownItem asChild>
-                    <NextLink href={`/profile/${actor}`}>Profile</NextLink>
-                  </DropdownItem>
-                  <DropdownItem onClick={logoutAndGoToHome}>
-                    Log out
-                  </DropdownItem>
-                </DropdownRoot>
+                        <Avatar
+                          color="red"
+                          className="group-data-[state=open]/dropdown-button:border-white"
+                        >
+                          {actor ? actor.slice(0, 2) : 'un'}
+                        </Avatar>
+                      </button>
+                    }
+                    align="end"
+                  >
+                    <DropdownItem asChild>
+                      <NextLink href={`/profile/${actor}`}>Profile</NextLink>
+                    </DropdownItem>
+                    <DropdownItem onClick={logoutAndGoToHome}>
+                      Log out
+                    </DropdownItem>
+                  </DropdownRoot>
+                </div>
               </>
             ) : (
               <Button onClick={login} variant="primary">

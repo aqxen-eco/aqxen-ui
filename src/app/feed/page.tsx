@@ -17,7 +17,11 @@ import { PostItem, PostItemComment } from './post-item'
 const sortList = [
   {
     description: 'Latest',
-    value: 'latest',
+    value: 'desc',
+  },
+  {
+    description: 'Oldest',
+    value: 'asc',
   },
 ]
 
@@ -41,8 +45,13 @@ export default function FeedPage() {
   const queryClient = useQueryClient()
 
   const query = useInfiniteQuery({
-    queryKey: ['posts'],
-    queryFn: async ({ pageParam }) => getPosts({ limit: 2, cursor: pageParam }),
+    queryKey: ['posts', sort.value],
+    queryFn: async ({ pageParam }) =>
+      getPosts({
+        limit: 2,
+        cursor: pageParam,
+        orderBy: sort.value as 'asc' | 'desc',
+      }),
     initialPageParam: '',
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   })
@@ -167,7 +176,7 @@ export default function FeedPage() {
                 createdAt={post.createdAt}
                 content={post.content}
               >
-                {post.comments.map((comment) => (
+                {post.children.map((comment) => (
                   <PostItemComment
                     key={comment.id}
                     actor={comment.user.actor}

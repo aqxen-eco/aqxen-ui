@@ -5,9 +5,14 @@ import { prisma } from '@/prisma-client'
 type CreatePostProps = {
   actor: string
   content: string
+  parentId?: string
 }
 
-export async function createPost({ actor, content }: CreatePostProps) {
+export async function createPost({
+  actor,
+  content,
+  parentId,
+}: CreatePostProps) {
   try {
     const user = await prisma.user.upsert({
       where: { actor },
@@ -17,7 +22,18 @@ export async function createPost({ actor, content }: CreatePostProps) {
       },
     })
 
-    const post = await prisma.post.create({
+    let relatedPosts = {}
+    if (parentId) {
+      relatedPosts = {
+        parent: {
+          connect: {
+            id: parentId,
+          },
+        },
+      }
+    }
+
+    await prisma.post.create({
       data: {
         content,
         user: {
@@ -25,6 +41,7 @@ export async function createPost({ actor, content }: CreatePostProps) {
             id: user.id,
           },
         },
+        ...relatedPosts,
       },
       include: {
         user: true,
@@ -33,7 +50,6 @@ export async function createPost({ actor, content }: CreatePostProps) {
 
     return {
       success: true,
-      post,
     }
   } catch (error) {
     console.error('Error creating post:', error)
@@ -44,74 +60,26 @@ export async function createPost({ actor, content }: CreatePostProps) {
   }
 }
 
-type CreateCommentProps = {
-  postId: string
-  actor: string
-  content: string
-}
-
-export async function createComment({
-  postId,
-  actor,
-  content,
-}: CreateCommentProps) {
-  try {
-    const user = await prisma.user.upsert({
-      where: { actor },
-      update: {},
-      create: {
-        actor,
-      },
-    })
-
-    const comment = await prisma.comment.create({
-      data: {
-        content,
-        post: {
-          connect: {
-            id: postId,
-          },
-        },
-        user: {
-          connect: {
-            id: user.id,
-          },
-        },
-      },
-      include: {
-        user: true,
-      },
-    })
-
-    return {
-      success: true,
-      comment,
-    }
-  } catch (error) {
-    console.error('Error creating comment:', error)
-    return {
-      success: false,
-      error: 'Failed to create comment',
-    }
-  }
-}
-
 type GetPostsProps = {
   cursor?: string
   limit: number
+  orderBy: 'asc' | 'desc'
 }
 
-export async function getPosts({ cursor, limit }: GetPostsProps) {
+export async function getPosts({ cursor, limit, orderBy }: GetPostsProps) {
   try {
     const posts = await prisma.post.findMany({
       take: limit,
       skip: cursor ? 1 : 0, // Skip the cursor if provided
       cursor: cursor ? { id: cursor } : undefined,
+      where: {
+        parentId: null, // Filters only posts that are not comments
+      },
       include: {
         user: true,
-        comments: {
+        children: {
           include: {
-            user: true,
+            user: true, // Includes the data of the user who created the child posts
           },
           orderBy: {
             createdAt: 'desc',
@@ -119,7 +87,7 @@ export async function getPosts({ cursor, limit }: GetPostsProps) {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: orderBy,
       },
     })
 

@@ -11,12 +11,11 @@ datasource db {
 
 model User {
   id        String   @id @default(uuid())
-  actor     String   @unique // Identificador da wallet EOS
+  actor     String   @unique
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  posts    Post[]
-  comments Comment[]
+  posts Post[]
 
   @@map("user")
 }
@@ -29,20 +28,9 @@ model Post {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  comments Comment[]
+  parent   Post?   @relation("PostToParent", fields: [parentId], references: [id])
+  parentId String? @map("parent_id")
+  children Post[]  @relation("PostToParent")
 
   @@map("post")
-}
-
-model Comment {
-  id        String   @id @default(uuid())
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId    String   @map("post_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String   @map("user_id")
-  content   String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("comment")
 }
