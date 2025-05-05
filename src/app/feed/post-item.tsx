@@ -13,6 +13,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { useChain } from '@/contexts/chain'
+import { listFormat } from '@/utils/intl-format'
 
 import { createPost } from './actions'
 // import { BadgeImage } from '@/components/ui/badge-image'
@@ -23,6 +24,7 @@ type PostItemProps = {
   actor: string
   createdAt: Date
   content: string
+  mentions?: string[]
   children: React.ReactNode
 }
 
@@ -37,6 +39,7 @@ export function PostItem({
   actor,
   createdAt,
   content,
+  mentions,
   children,
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
@@ -76,6 +79,13 @@ export function PostItem({
           <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
             <p className="text-body-2 text-white">
               {actor}
+              {mentions && mentions.length > 0 && (
+                <>
+                  {' '}
+                  <span className="text-gray-3">recognize</span>{' '}
+                  {listFormat.format(mentions)}
+                </>
+              )}
               <span className="text-gray-3">
                 {' '}
                 • {format(new Date(createdAt), 'EEE d MMM')}

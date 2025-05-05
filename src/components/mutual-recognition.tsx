@@ -1,18 +1,22 @@
-import { Button } from '@/components/ui/button'
-import * as Dialog from '@radix-ui/react-dialog'
-import { MdClose } from 'react-icons/md'
-import { useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import { ErrorMessage, Field, Label } from '@/components/ui/field'
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
-import { Controller, useForm } from 'react-hook-form'
-import { InputBadges } from '@/components/ui/input-badges'
 import { zodResolver } from '@hookform/resolvers/zod'
+import * as Dialog from '@radix-ui/react-dialog'
+import { useQueryClient } from '@tanstack/react-query'
+import { AnimatePresence, motion } from 'motion/react'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { MdClose } from 'react-icons/md'
 import z from 'zod'
 
+import { createPost } from '@/app/feed/actions'
+import { Button } from '@/components/ui/button'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
+import { InputBadges } from '@/components/ui/input-badges'
+import { InputOrganization } from '@/components/ui/input-organization'
+import { Textarea } from '@/components/ui/textarea'
+import { useChain } from '@/contexts/chain'
+
 const mutualRecognitionSchema = z.object({
-  members: z.string().nonempty('Members is required'),
+  mention: z.string().array().min(1, 'Members is required'),
   badges: z.string().array().min(1, 'Badges is required'),
   content: z.string().nonempty('Content is required'),
 })
@@ -20,7 +24,9 @@ const mutualRecognitionSchema = z.object({
 type MutualRecognitionSchema = z.infer<typeof mutualRecognitionSchema>
 
 export function MutualRecognition() {
+  const { actor } = useChain()
   const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   const {
     control,
@@ -32,8 +38,15 @@ export function MutualRecognition() {
     resolver: zodResolver(mutualRecognitionSchema),
   })
 
-  function onSubmit(data: MutualRecognitionSchema) {
-    console.log('data', data)
+  async function onSubmit({ content, mention }: MutualRecognitionSchema) {
+    createPost({
+      actor: actor!,
+      mention,
+      content,
+    })
+    reset()
+    queryClient.invalidateQueries({ queryKey: ['posts'] })
+    setOpen(false)
   }
 
   return (
@@ -86,18 +99,22 @@ export function MutualRecognition() {
                   onSubmit={handleSubmit(onSubmit)}
                   className="mt-8 space-y-8"
                 >
-                  <Field>
-                    <Label htmlFor="members">
-                      Who do you want to recognize?
-                    </Label>
-                    <Input
-                      {...register('members')}
-                      id="members"
-                      aria-invalid={!!errors['members']}
-                      placeholder="Write a member's name"
-                    />
-                    <ErrorMessage>{errors['members']?.message}</ErrorMessage>
-                  </Field>
+                  <Controller
+                    name="mention"
+                    control={control}
+                    render={({ field }) => (
+                      <Field>
+                        <Label>Who do you want to recognize?</Label>
+                        <InputOrganization
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                        <ErrorMessage>
+                          {errors['mention']?.message}
+                        </ErrorMessage>
+                      </Field>
+                    )}
+                  />
 
                   <Controller
                     name="badges"

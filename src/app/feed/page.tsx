@@ -175,6 +175,7 @@ export default function FeedPage() {
                 actor={post.user.actor}
                 createdAt={post.createdAt}
                 content={post.content}
+                mentions={post.mention.map((item) => item.user.actor)}
               >
                 {post.children.map((comment) => (
                   <PostItemComment
