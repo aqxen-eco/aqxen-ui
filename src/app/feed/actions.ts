@@ -7,6 +7,7 @@ import { prisma } from '@/prisma-client'
 type CreatePostProps = {
   actor: string
   content: string
+  badgeSymbol?: string[]
   mention?: string[]
   parentId?: string
 }
@@ -14,6 +15,7 @@ type CreatePostProps = {
 export async function createPost({
   actor,
   content,
+  badgeSymbol,
   mention,
   parentId,
 }: CreatePostProps) {
@@ -61,6 +63,7 @@ export async function createPost({
     await prisma.post.create({
       data: {
         content,
+        badgeSymbol,
         user: {
           connect: {
             id: user.id,

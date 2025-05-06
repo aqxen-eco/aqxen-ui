@@ -174,6 +174,7 @@ export default function FeedPage() {
                 id={post.id}
                 actor={post.user.actor}
                 createdAt={post.createdAt}
+                badgeSymbol={post.badgeSymbol}
                 content={post.content}
                 mentions={post.mention.map((item) => item.user.actor)}
               >

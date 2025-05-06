@@ -13,6 +13,7 @@ CREATE TABLE "post" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
+    "badge_symbol" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "parent_id" TEXT,

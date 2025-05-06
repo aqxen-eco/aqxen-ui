@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'motion/react'
 import { Children, useState } from 'react'
@@ -9,21 +9,24 @@ import { useForm } from 'react-hook-form'
 import { MdMoreHoriz, MdWorkspacePremium } from 'react-icons/md'
 import { z } from 'zod'
 
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { Avatar } from '@/components/ui/avatar'
+import { BadgeImage } from '@/components/ui/badge-image'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
+import { Tooltip } from '@/components/ui/tooltip'
 import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
 import { listFormat } from '@/utils/intl-format'
 
 import { createPost } from './actions'
-// import { BadgeImage } from '@/components/ui/badge-image'
-// import { Tooltip } from '@/components/ui/tooltip'
 
 type PostItemProps = {
   id: string
   actor: string
   createdAt: Date
   content: string
+  badgeSymbol: string[]
   mentions?: string[]
   children: React.ReactNode
 }
@@ -39,12 +42,19 @@ export function PostItem({
   actor,
   createdAt,
   content,
+  badgeSymbol,
   mentions,
   children,
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
+  const { name } = useOrganization()
   const [showMore, setShowMore] = useState(() => {
     return Children.count(children) > 1
+  })
+
+  const query = useQuery({
+    queryKey: ['badges', name],
+    queryFn: async () => await listBadge({ scope: name }),
   })
 
   const { actor: currentActor } = useChain()
@@ -96,25 +106,27 @@ export function PostItem({
               <span className="text-body-2">50</span>
             </div>
           </div>
-          {/* <div className="flex flex-wrap gap-1">
-            {[2, 4, 2, 1, 1].map((value, index) => (
-              <Tooltip
-                key={index}
-                className="text-gray-3 flex gap-0.5 p-1.5"
-                content={
-                  <>
-                    <MdWorkspacePremium className="size-6" />
-                    <span className="text-body-2">3</span>
-                  </>
-                }
-              >
-                <div className="flex min-w-16 gap-2">
-                  <BadgeImage src="" size="xs" />
-                  <span className="text-body-2 text-white">{value}</span>
-                </div>
-              </Tooltip>
-            ))}
-          </div> */}
+          {badgeSymbol.length > 0 && (
+            <div>
+              {query.isSuccess &&
+                query.data.rows.map(
+                  (row) =>
+                    badgeSymbol.includes(row.badge_symbol) && (
+                      <Tooltip
+                        key={row.badge_symbol}
+                        content={row.onchain_lookup_data.user.display_name}
+                      >
+                        <Button square>
+                          <BadgeImage
+                            src={row.offchain_lookup_data.user.ipfs_image}
+                            size="xs"
+                          />
+                        </Button>
+                      </Tooltip>
+                    )
+                )}
+            </div>
+          )}
           <p className="text-body-2 text-gray-3">{content}</p>
           <AnimatePresence>
             {!showRecognize && (

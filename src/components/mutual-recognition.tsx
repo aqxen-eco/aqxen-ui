@@ -38,9 +38,14 @@ export function MutualRecognition() {
     resolver: zodResolver(mutualRecognitionSchema),
   })
 
-  async function onSubmit({ content, mention }: MutualRecognitionSchema) {
+  async function onSubmit({
+    content,
+    badges,
+    mention,
+  }: MutualRecognitionSchema) {
     createPost({
       actor: actor!,
+      badgeSymbol: badges,
       mention,
       content,
     })
