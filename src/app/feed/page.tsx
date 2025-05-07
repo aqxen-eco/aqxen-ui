@@ -34,7 +34,7 @@ type PostSchema = z.infer<typeof postSchema>
 
 export default function FeedPage() {
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
-  const [filter, setFilter] = useState('myRecognitions')
+  // const [filter, setFilter] = useState('myRecognitions')
   const { actor } = useChain()
 
   const loadMoreBtnRef = useRef(null)
@@ -106,7 +106,7 @@ export default function FeedPage() {
           ))}
         </DropdownRoot>
       </header>
-      <div className="border-gray-2 overflow-x-auto border-b py-2">
+      {/* <div className="border-gray-2 overflow-x-auto border-b py-2">
         <ul className="flex gap-2">
           <li
             data-state={filter === 'myRecognitions' ? 'active' : 'idle'}
@@ -146,7 +146,7 @@ export default function FeedPage() {
             </Button>
           </li>
         </ul>
-      </div>
+      </div> */}
       <div className="space-y-4">
         <form onSubmit={handleSubmit(onSubmit)}>
           <label className="bg-gray-1 border-gray-2 mt-4 block space-y-4 rounded-2xl border p-4">
