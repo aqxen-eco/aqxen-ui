@@ -64,7 +64,7 @@ jobs:
           script: |
             cd /root/upscale
             tar -xzf build.tar.gz
-            echo "DATABASE_URL='${DATABASE_URL}'" > /root/upscale/.env
+            echo "WTF IS THIS" > .env
             export PATH="/root/.local/share/pnpm:$PATH"
             pnpm install --frozen-lockfile
             pnpm prisma migrate deploy
