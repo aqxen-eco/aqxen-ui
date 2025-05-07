@@ -54,7 +54,7 @@ jobs:
           target: "/root/upscale"
           overwrite: true
 
-      - name: Deploy new build
+      - name: Deploy build and run migrations
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -63,6 +63,8 @@ jobs:
           script: |
             cd /root/upscale
             tar -xzf build.tar.gz
+            pnpm install --frozen-lockfile
+            pnpm prisma migrate deploy
             systemctl restart upscale
             systemctl restart nginx
             systemctl status upscale --no-pager
