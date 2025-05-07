@@ -4,6 +4,8 @@ import { ChainProvider } from '@/contexts/chain'
 import { OrganizationProvider } from '@/contexts/organization'
 import { QueryProvider } from '@/contexts/query'
 
+import { ToastContainer } from 'react-toastify'
+
 type HomeTemplateProps = {
   children: React.ReactNode
 }
@@ -16,6 +18,7 @@ export default function HomeTemplate({ children }: HomeTemplateProps) {
           <AppBar />
           {children}
           <Footer />
+          <ToastContainer position="bottom-center" theme="dark" />
         </OrganizationProvider>
       </ChainProvider>
     </QueryProvider>

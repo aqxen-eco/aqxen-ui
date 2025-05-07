@@ -13,6 +13,7 @@ import { useChain } from '@/contexts/chain'
 
 import { createPost, getPosts } from './actions'
 import { PostItem, PostItemComment } from './post-item'
+import { toast } from 'react-toastify'
 
 const sortList = [
   {
@@ -83,6 +84,7 @@ export default function FeedPage() {
       content,
     })
     reset()
+    toast('Recognition published!')
     queryClient.invalidateQueries({ queryKey: ['posts'] })
   }
 

@@ -14,6 +14,7 @@ import { InputBadges } from '@/components/ui/input-badges'
 import { InputOrganization } from '@/components/ui/input-organization'
 import { Textarea } from '@/components/ui/textarea'
 import { useChain } from '@/contexts/chain'
+import { toast } from 'react-toastify'
 
 const mutualRecognitionSchema = z.object({
   mention: z.string().array().min(1, 'Members is required'),
@@ -50,6 +51,7 @@ export function MutualRecognition() {
       content,
     })
     reset()
+    toast('Recognition published!')
     queryClient.invalidateQueries({ queryKey: ['posts'] })
     setOpen(false)
   }

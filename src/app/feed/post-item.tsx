@@ -20,6 +20,7 @@ import { useOrganization } from '@/contexts/organization'
 import { listFormat } from '@/utils/intl-format'
 
 import { createPost } from './actions'
+import { toast } from 'react-toastify'
 
 type PostItemProps = {
   id: string
@@ -73,7 +74,7 @@ export function PostItem({
       actor: currentActor!,
       content,
     })
-
+    toast('Recognition published!')
     reset()
     queryClient.invalidateQueries({ queryKey: ['posts'] })
     setShowRecognize(false)
