@@ -63,6 +63,7 @@ jobs:
           script: |
             cd /root/upscale
             tar -xzf build.tar.gz
+            export PATH="/root/.local/share/pnpm:$PATH"
             pnpm install --frozen-lockfile
             pnpm prisma migrate deploy
             systemctl restart upscale
