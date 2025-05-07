@@ -60,6 +60,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DATABASE_URL
           script: |
             cd /root/upscale
             tar -xzf build.tar.gz
