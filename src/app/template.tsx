@@ -1,10 +1,10 @@
+import { ToastContainer } from 'react-toastify'
+
 import { AppBar } from '@/components/app-bar'
 import { Footer } from '@/components/footer'
 import { ChainProvider } from '@/contexts/chain'
 import { OrganizationProvider } from '@/contexts/organization'
 import { QueryProvider } from '@/contexts/query'
-
-import { ToastContainer } from 'react-toastify'
 
 type HomeTemplateProps = {
   children: React.ReactNode

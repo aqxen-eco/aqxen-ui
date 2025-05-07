@@ -5,6 +5,7 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,6 @@ import { useChain } from '@/contexts/chain'
 
 import { createPost, getPosts } from './actions'
 import { PostItem, PostItemComment } from './post-item'
-import { toast } from 'react-toastify'
 
 const sortList = [
   {

@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
+import { toast } from 'react-toastify'
 import z from 'zod'
 
 import { createPost } from '@/app/feed/actions'
@@ -14,7 +15,6 @@ import { InputBadges } from '@/components/ui/input-badges'
 import { InputOrganization } from '@/components/ui/input-organization'
 import { Textarea } from '@/components/ui/textarea'
 import { useChain } from '@/contexts/chain'
-import { toast } from 'react-toastify'
 
 const mutualRecognitionSchema = z.object({
   mention: z.string().array().min(1, 'Members is required'),

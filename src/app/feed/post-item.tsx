@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Children, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { MdMoreHoriz, MdWorkspacePremium } from 'react-icons/md'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
@@ -20,7 +21,6 @@ import { useOrganization } from '@/contexts/organization'
 import { listFormat } from '@/utils/intl-format'
 
 import { createPost } from './actions'
-import { toast } from 'react-toastify'
 
 type PostItemProps = {
   id: string
