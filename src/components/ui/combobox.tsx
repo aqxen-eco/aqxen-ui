@@ -28,7 +28,7 @@ export function Combobox({ title, children, ...props }: ComboboxProps) {
         <Popover.Content
           sideOffset={-47}
           alignOffset={-16}
-          className="w-[var(--radix-popover-trigger-width)]"
+          className="z-70 w-[var(--radix-popover-trigger-width)]"
         >
           <Command {...props}>
             <div className="bg-gray-1 flex items-center gap-2 max-md:bg-black">

@@ -11,9 +11,10 @@ export const avatar = tv({
       purple: 'bg-badge-purple',
     },
     size: {
-      sm: 'h-6 w-6 text-[0.625rem]',
-      md: 'text-body-2 h-10 w-10',
-      lg: 'text-title-1 h-24 w-24 border-4',
+      xs: 'size-6 text-[0.625rem]',
+      sm: 'text-body-2 size-10',
+      md: 'text-body-2 size-12',
+      lg: 'text-title-1 size-24 border-4',
     },
   },
   defaultVariants: {

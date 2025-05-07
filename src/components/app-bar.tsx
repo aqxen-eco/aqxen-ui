@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 
+import { MutualRecognition } from '@/components/mutual-recognition'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
@@ -70,6 +71,15 @@ export function AppBar() {
                         Profile
                       </Link>
                       <Link
+                        href="/feed"
+                        variant={
+                          pathname.includes('/feed') ? 'link' : 'default'
+                        }
+                        className="max-md:text-2xl"
+                      >
+                        Feed
+                      </Link>
+                      <Link
                         href="/admin/organization"
                         variant={
                           pathname.includes('/admin') ? 'link' : 'default'
@@ -81,30 +91,32 @@ export function AppBar() {
                     </div>
                   </>
                 )}
-
-                <DropdownRoot
-                  customTrigger={
-                    <button
-                      type="button"
-                      className="group/dropdown-button focus:outline-hidden"
-                    >
-                      <Avatar
-                        color="red"
-                        className="group-data-[state=open]/dropdown-button:border-white"
+                <div className="flex items-center gap-2">
+                  <MutualRecognition />
+                  <DropdownRoot
+                    customTrigger={
+                      <button
+                        type="button"
+                        className="group/dropdown-button focus:outline-hidden"
                       >
-                        {actor ? actor.slice(0, 2) : 'un'}
-                      </Avatar>
-                    </button>
-                  }
-                  align="end"
-                >
-                  <DropdownItem asChild>
-                    <NextLink href={`/profile/${actor}`}>Profile</NextLink>
-                  </DropdownItem>
-                  <DropdownItem onClick={logoutAndGoToHome}>
-                    Log out
-                  </DropdownItem>
-                </DropdownRoot>
+                        <Avatar
+                          color="red"
+                          className="group-data-[state=open]/dropdown-button:border-white"
+                        >
+                          {actor ? actor.slice(0, 2) : 'un'}
+                        </Avatar>
+                      </button>
+                    }
+                    align="end"
+                  >
+                    <DropdownItem asChild>
+                      <NextLink href={`/profile/${actor}`}>Profile</NextLink>
+                    </DropdownItem>
+                    <DropdownItem onClick={logoutAndGoToHome}>
+                      Log out
+                    </DropdownItem>
+                  </DropdownRoot>
+                </div>
               </>
             ) : (
               <Button onClick={login} variant="primary">

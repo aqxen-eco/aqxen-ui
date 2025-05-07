@@ -25,7 +25,7 @@ export function OrganizationProvider({
   const { actor } = useChain()
 
   const query = useQuery({
-    queryKey: ['organization_symbol', actor],
+    queryKey: ['organization', actor],
     queryFn: async () =>
       await listOrganization({ lower_bound: actor!, upper_bound: actor! }),
     enabled: !!actor,

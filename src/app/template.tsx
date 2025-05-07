@@ -1,3 +1,5 @@
+import { ToastContainer } from 'react-toastify'
+
 import { AppBar } from '@/components/app-bar'
 import { Footer } from '@/components/footer'
 import { ChainProvider } from '@/contexts/chain'
@@ -16,6 +18,7 @@ export default function HomeTemplate({ children }: HomeTemplateProps) {
           <AppBar />
           {children}
           <Footer />
+          <ToastContainer position="bottom-center" theme="dark" />
         </OrganizationProvider>
       </ChainProvider>
     </QueryProvider>

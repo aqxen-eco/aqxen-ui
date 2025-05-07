@@ -9,21 +9,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Organization {
-  id        Int      @id @default(autoincrement())
-  name      String?
-  logo      String?
+model User {
+  id        String   @id @default(uuid())
+  actor     String   @unique
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("organization")
+  posts   Post[]
+  mention Mention[]
+
+  @@map("user")
 }
 
-model Badges {
-  id           Int     @id @default(autoincrement())
-  symbol       String?
-  name         String?
-  rarityCounts String? @map("rarity_counts")
+model Post {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @map("user_id")
+  content     String
+  badgeSymbol String[] @default([]) @map("badge_symbol")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  @@map("badges")
+  parent   Post?     @relation("PostToParent", fields: [parentId], references: [id])
+  parentId String?   @map("parent_id")
+  children Post[]    @relation("PostToParent")
+  mention  Mention[]
+
+  @@map("post")
+}
+
+model Mention {
+  id     String @id @default(uuid())
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String @map("post_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@map("mention")
 }

@@ -21,7 +21,6 @@ export async function listOrganization({
     upper_bound: upper_bound ? Name.from(upper_bound) : undefined,
     table: 'orgs',
     json: true,
-    limit: 1,
   })
 
   rows = rows.map((row) => ({
