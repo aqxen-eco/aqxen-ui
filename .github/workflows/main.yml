@@ -42,7 +42,7 @@ jobs:
         run: pnpm build
 
       - name: Archive build
-        run: tar -czf build.tar.gz --exclude=.git --exclude=build.tar.gz .[!.]* *
+        run: tar -czf build.tar.gz --exclude=.env --exclude=.git --exclude=build.tar.gz .[!.]* *
 
       - name: Transfer build to host
         uses: appleboy/scp-action@v0.1.4
@@ -64,8 +64,6 @@ jobs:
           script: |
             cd /root/upscale
             tar -xzf build.tar.gz
-            echo 'DATABASE_URL="'"$DATABASE_URL"'"' > .env
-            export $(cat .env | xargs) 
             export PATH="/root/.local/share/pnpm:$PATH"
             pnpm install --frozen-lockfile
             pnpm prisma migrate deploy
