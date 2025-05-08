@@ -66,7 +66,11 @@ jobs:
             tar -xzf build.tar.gz
             export PATH="/root/.local/share/pnpm:$PATH"
             pnpm install --frozen-lockfile
-            pnpm prisma migrate deploy --url="$DATABASE_URL"
+            echo "DATABASE_URL='${DATABASE_URL}'" > .env
+            echo "DATABASE_URL='${DATABASE_URL}'" > wtf.debug
+            echo "WTF" > 2wtf.debug
+            export $(grep DATABASE_URL .env | xargs)
+            pnpm prisma migrate deploy
             systemctl restart upscale
             systemctl restart nginx
             systemctl status upscale --no-pager
