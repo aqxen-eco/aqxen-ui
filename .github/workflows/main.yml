@@ -69,8 +69,6 @@ jobs:
             export PATH="/root/.local/share/pnpm:$PATH"
             pnpm install --frozen-lockfile
             echo "DATABASE_URL='${DATABASE_URL}'" > .env
-            echo "DATABASE_URL='${DATABASE_URL}'" > wtf.debug
-            echo "WTF" > 2wtf.debug
             export $(grep DATABASE_URL .env | xargs)
             pnpm prisma migrate deploy
             systemctl restart upscale
