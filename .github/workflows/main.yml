@@ -42,7 +42,7 @@ jobs:
         run: pnpm build
 
       - name: Archive build
-        run: tar -czf build.tar.gz --exclude=.env --exclude=.git --exclude=build.tar.gz .[!.]* *
+        run: tar -czf build.tar.gz --exclude=.git --exclude=build.tar.gz .[!.]* *
 
       - name: Transfer build to host
         uses: appleboy/scp-action@v0.1.4
@@ -56,6 +56,8 @@ jobs:
 
       - name: Deploy build and run migrations
         uses: appleboy/ssh-action@v0.1.7
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
