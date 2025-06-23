@@ -1,11 +1,12 @@
-import {
-  HeaderAdmin,
-  navLinks,
-  HeaderAdminTitle,
-} from '@/components/header-admin'
-import { Box } from '@/components/ui/box'
 import NextLink from 'next/link'
 import { MdChevronRight } from 'react-icons/md'
+
+import {
+  HeaderAdmin,
+  HeaderAdminTitle,
+  navLinks,
+} from '@/components/header-admin'
+import { Box } from '@/components/ui/box'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -18,7 +19,7 @@ function getGreeting() {
   }
 }
 
-export default function () {
+export default function AdminPage() {
   return (
     <>
       <HeaderAdmin>
