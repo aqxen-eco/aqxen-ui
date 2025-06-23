@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
 import { Tooltip } from '@/components/ui/tooltip'
 
-const navLinks = [
+export const navLinks = [
   {
     label: 'Organization',
     href: '/admin/organization',
