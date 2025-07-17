@@ -241,7 +241,11 @@ export function PostItemComment({
       <div className="max-md:space-y-2">
         <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
           <div className="flex gap-2">
-            <p className="text-body-2 max-w-full text-white">{actor}</p>
+            <p className="text-body-2 max-w-full text-white">
+              <Link href={`/profile/${actor}`} className="hover:underline">
+                {actor}
+              </Link>
+            </p>
             {/* <Avatar size="xs">AZ</Avatar>
             <span className="text-body-2 text-gray-3">Responsibility</span> */}
             <span className="text-gray-3">
