@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'motion/react'
+import Link from 'next/link'
 import { Children, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { MdMoreHoriz, MdWorkspacePremium } from 'react-icons/md'
@@ -89,12 +90,28 @@ export function PostItem({
         <div className="max-md:space-y-2">
           <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
             <p className="text-body-2 text-white">
-              {actor}
+              <Link href={`/profile/${actor}`} className="hover:underline">
+                {actor}
+              </Link>
               {mentions && mentions.length > 0 && (
                 <>
                   {' '}
                   <span className="text-gray-3">recognize</span>{' '}
-                  {listFormat.format(mentions)}
+                  {listFormat.formatToParts(mentions).map(({ type, value }) =>
+                    type === 'element' ? (
+                      <Link
+                        key={value}
+                        href={`/profile/${value}`}
+                        className="hover:underline"
+                      >
+                        {value}
+                      </Link>
+                    ) : (
+                      <span key={value} className="text-gray-3">
+                        {value}
+                      </span>
+                    )
+                  )}
                 </>
               )}
               <span className="text-gray-3">
@@ -224,7 +241,11 @@ export function PostItemComment({
       <div className="max-md:space-y-2">
         <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
           <div className="flex gap-2">
-            <p className="text-body-2 max-w-full text-white">{actor}</p>
+            <p className="text-body-2 max-w-full text-white">
+              <Link href={`/profile/${actor}`} className="hover:underline">
+                {actor}
+              </Link>
+            </p>
             {/* <Avatar size="xs">AZ</Avatar>
             <span className="text-body-2 text-gray-3">Responsibility</span> */}
             <span className="text-gray-3">
