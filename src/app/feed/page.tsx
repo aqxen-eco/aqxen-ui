@@ -79,17 +79,26 @@ export default function FeedPage() {
   const contentWatched = watch('content')
 
   async function onSubmit({ content }: PostSchema) {
-    createPost({
-      actor: actor!,
-      content,
-    })
-    reset()
-    toast('Recognition published!')
-    queryClient.invalidateQueries({ queryKey: ['posts'] })
+    if (!actor) {
+      toast.error('You must be logged in to create a post')
+      return
+    }
+
+    try {
+      await createPost({
+        actor: actor!,
+        content,
+      })
+      reset()
+      toast('Recognition published!')
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    } catch {
+      toast.error('Failed to publish recognition')
+    }
   }
 
   return (
-    <div className="max-w-container-md mx-auto px-4 py-8">
+    <div className="max-w-container-md mx-auto space-y-4 px-4 py-8">
       <header className="flex items-center justify-between">
         <h1 className="text-title-1 text-white">Feed</h1>
         <DropdownRoot label={sort.description} align="end">
@@ -148,26 +157,30 @@ export default function FeedPage() {
         </ul>
       </div> */}
       <div className="space-y-4">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <label className="bg-gray-1 border-gray-2 mt-4 block space-y-4 rounded-2xl border p-4">
-            <textarea
-              {...register('content')}
-              placeholder="What do you consider is worth recognition?"
-              className="text-body-1 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
-              rows={1}
-            />
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={!contentWatched || contentWatched.length === 0}
-              >
-                Post
-              </Button>
-            </div>
-          </label>
-        </form>
-        <hr className="border-gray-2 border-t" />
+        {actor && (
+          <>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <label className="bg-gray-1 border-gray-2 block space-y-4 rounded-2xl border p-4">
+                <textarea
+                  {...register('content')}
+                  placeholder="What do you consider is worth recognition?"
+                  className="text-body-1 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
+                  rows={1}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={!contentWatched || contentWatched.length === 0}
+                  >
+                    Post
+                  </Button>
+                </div>
+              </label>
+            </form>
+            <hr className="border-gray-2 border-t" />
+          </>
+        )}
         {query.isSuccess &&
           query.data.pages?.map((page) =>
             page.posts?.map((post) => (

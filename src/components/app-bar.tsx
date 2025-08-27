@@ -11,13 +11,14 @@ import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 import { Link } from '@/components/ui/link'
+import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 
 export function AppBar() {
   const [showMenu, setShowMenu] = useState(false)
   const { isAuthenticated, login, logout, actor } = useChain()
-  const { hasOrganization } = useOrganization()
+  const { hasOrganization, displayName, ipfs } = useOrganization()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -33,10 +34,16 @@ export function AppBar() {
           <Box className="flex items-center justify-between rounded-full p-2 max-md:rounded-none max-md:border-0 max-md:border-b max-md:p-4">
             <NextLink
               href="/"
-              className="hover:bg-gray-2 flex cursor-pointer items-center gap-2 rounded-full pr-3 pl-2 text-2xl leading-10 text-white duration-150"
+              className="hover:bg-gray-2 flex cursor-pointer items-center gap-2 overflow-hidden rounded-full pr-3 pl-2 text-2xl leading-10 text-white duration-150"
             >
-              <img src="/img/logo.svg" alt="" />
-              UpScale
+              <div className="relative size-6 flex-none overflow-hidden rounded-full">
+                <img
+                  src={ipfs ? IPFS_IMAGE_SOURCE + ipfs : '/img/logo.svg'}
+                  alt=""
+                  className="absolute inset-0 size-full object-cover"
+                />
+              </div>
+              <span className="truncate">{displayName || 'UpScale'}</span>
             </NextLink>
 
             {isAuthenticated ? (
@@ -119,9 +126,18 @@ export function AppBar() {
                 </div>
               </>
             ) : (
-              <Button onClick={login} variant="primary">
-                Log in
-              </Button>
+              <>
+                <Link
+                  href="/feed"
+                  variant={pathname.includes('/feed') ? 'link' : 'default'}
+                  className="max-md:text-2xl"
+                >
+                  Feed
+                </Link>
+                <Button onClick={login} variant="primary">
+                  Log in
+                </Button>
+              </>
             )}
           </Box>
         </div>
