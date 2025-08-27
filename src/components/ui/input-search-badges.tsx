@@ -36,7 +36,7 @@ export function InputSearchBadges({
       )
       onChange(selectedBadges ?? [])
     }
-  }, [badgesQuery.isSuccess])
+  }, [badgesQuery.isSuccess, badgesQuery.data, value, onChange])
 
   function handleOnSelect(currentValue: string) {
     const newValue = value.includes(currentValue)
