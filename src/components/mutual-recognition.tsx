@@ -8,6 +8,7 @@ import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import z from 'zod'
 
+import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
 import { createPost } from '@/app/feed/actions'
 import { Button } from '@/components/ui/button'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
@@ -25,7 +26,7 @@ const mutualRecognitionSchema = z.object({
 type MutualRecognitionSchema = z.infer<typeof mutualRecognitionSchema>
 
 export function MutualRecognition() {
-  const { actor } = useChain()
+  const { session, actor } = useChain()
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
@@ -44,15 +45,29 @@ export function MutualRecognition() {
     badges,
     mention,
   }: MutualRecognitionSchema) {
-    createPost({
-      actor: actor!,
-      badgeSymbol: badges,
-      mention,
-      content,
-    })
-    reset()
-    toast('Recognition published!')
-    queryClient.invalidateQueries({ queryKey: ['posts'] })
+    try {
+      const data = badges.map((badge) => ({
+        session: session!,
+        badge_symbol: badge,
+        amount: 1,
+        to: mention[0],
+        memo: content,
+      }))
+
+      await sendMultiBadge(data)
+
+      await createPost({
+        actor: actor!,
+        badgeSymbol: badges,
+        mention,
+        content,
+      })
+      reset()
+      toast('Recognition published!')
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    } catch {
+      toast.error('Failed to send badge')
+    }
     setOpen(false)
   }
 
@@ -112,10 +127,28 @@ export function MutualRecognition() {
                     render={({ field }) => (
                       <Field>
                         <Label>Who do you want to recognize?</Label>
-                        <InputOrganization
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
+                        {field.value && field.value.length > 0 ? (
+                          <div className="border-gray-2 bg-gray-1 my-2 inline-flex h-10 items-center rounded-full border pl-2">
+                            <span className="text-body-2 ml-1 font-sans font-medium text-nowrap text-white">
+                              {field.value[0]}
+                            </span>
+                            <Button
+                              size="md"
+                              variant="link"
+                              square
+                              onClick={() => {
+                                field.onChange([])
+                              }}
+                            >
+                              <MdClose className="size-6" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <InputOrganization
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
                         <ErrorMessage>
                           {errors['mention']?.message}
                         </ErrorMessage>
