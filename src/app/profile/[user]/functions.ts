@@ -4,6 +4,7 @@ import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
 import { listLifetimeBadge } from '@/api/chain/badge/list-lifetime-badge'
 import { listSeasonalBadge } from '@/api/chain/badge/list-seasonal-badge'
+import { listOrganization } from '@/api/chain/organization/list-organization'
 import { listSeason } from '@/api/chain/season/list-season'
 import { listSeries } from '@/api/chain/series/list-series'
 import { type Badge } from '@/api/model/badge'
@@ -32,12 +33,14 @@ export async function getUserBadges({
   user,
 }: GetUserBadgesProps): Promise<GetUserBadges> {
   const [
+    { rows: organization },
     { rows: badges },
     { rows: seasons },
     { rows: lifetimeBadges },
     { rows: seasonalBadges },
     { rows: badgesStatus },
   ] = await Promise.all([
+    listOrganization({}),
     listBadge({
       scope: user,
     }),
@@ -54,6 +57,34 @@ export async function getUserBadges({
       scope: user,
     }),
   ])
+
+  const organizationThatNeedsToGetBadges = [] as string[]
+
+  organization.forEach((org) => {
+    lifetimeBadges.forEach((userBadge) => {
+      const symbol = userBadge.balance.split(' ')[1].toLowerCase()
+      const orgCode = org.org_code.toLowerCase()
+
+      if (symbol.startsWith(orgCode)) {
+        if (!organizationThatNeedsToGetBadges.includes(org.org)) {
+          organizationThatNeedsToGetBadges.push(org.org)
+        }
+      }
+    })
+  })
+
+  const badgesOfAnotherOrganization = await Promise.all(
+    organizationThatNeedsToGetBadges.map(async (org) => {
+      const { rows: badgesOfAnotherOrganization } = await listBadge({
+        scope: org,
+      })
+      return badgesOfAnotherOrganization
+    })
+  )
+
+  const badgesOfAnotherOrganizationFlatted = badgesOfAnotherOrganization.flat()
+
+  badges.push(...badgesOfAnotherOrganizationFlatted)
 
   const lifetimeBadgesBalanceSymbol = lifetimeBadges.map((userBadge) => {
     const [balance, symbol] = userBadge.balance.split(' ')
