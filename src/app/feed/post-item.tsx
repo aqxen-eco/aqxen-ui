@@ -146,58 +146,60 @@ export function PostItem({
             </div>
           )}
           <p className="text-body-2 text-gray-3">{content}</p>
-          <AnimatePresence>
-            {!showRecognize && (
-              <motion.div
-                initial={{ opacity: 0, y: -16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Button
-                  variant="secondary"
-                  className="mt-2"
-                  onClick={() => setShowRecognize(true)}
+          {currentActor && (
+            <AnimatePresence>
+              {!showRecognize && (
+                <motion.div
+                  initial={{ opacity: 0, y: -16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  +1 recognize
-                </Button>
-              </motion.div>
-            )}
-            {showRecognize && (
-              <motion.form
-                onSubmit={handleSubmit(onSubmit)}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 16 }}
-                transition={{ duration: 0.2 }}
-              >
-                <label className="bg-gray-1 border-gray-2 mt-2 block rounded-xl border p-4">
-                  <textarea
-                    {...register('content')}
-                    placeholder="Recognize your colleague for their hard work and dedication."
-                    className="text-body-2 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
-                    rows={1}
-                  />
-                </label>
-                <div className="mt-2 flex justify-end">
                   <Button
                     variant="secondary"
-                    className="mr-2"
-                    onClick={() => setShowRecognize(false)}
+                    className="mt-2"
+                    onClick={() => setShowRecognize(true)}
                   >
-                    Cancel
+                    +1 recognize
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={!contentWatched || contentWatched.length === 0}
-                  >
-                    Post
-                  </Button>
-                </div>
-              </motion.form>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+              {showRecognize && (
+                <motion.form
+                  onSubmit={handleSubmit(onSubmit)}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 16 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label className="bg-gray-1 border-gray-2 mt-2 block rounded-xl border p-4">
+                    <textarea
+                      {...register('content')}
+                      placeholder="Recognize your colleague for their hard work and dedication."
+                      className="text-body-2 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
+                      rows={1}
+                    />
+                  </label>
+                  <div className="mt-2 flex justify-end">
+                    <Button
+                      variant="secondary"
+                      className="mr-2"
+                      onClick={() => setShowRecognize(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      disabled={!contentWatched || contentWatched.length === 0}
+                    >
+                      Post
+                    </Button>
+                  </div>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          )}
         </div>
       </div>
       <div
