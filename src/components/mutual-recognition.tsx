@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Dialog from '@radix-ui/react-dialog'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -8,6 +8,7 @@ import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import z from 'zod'
 
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
 import { createPost } from '@/app/feed/actions'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ import { InputBadges } from '@/components/ui/input-badges'
 import { InputOrganization } from '@/components/ui/input-organization'
 import { Textarea } from '@/components/ui/textarea'
 import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
 
 const mutualRecognitionSchema = z.object({
   mention: z.string().array().min(1, 'Members is required'),
@@ -29,6 +31,15 @@ export function MutualRecognition() {
   const { session, actor } = useChain()
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
+  const { name } = useOrganization()
+
+  const badgesQuery = useQuery({
+    queryKey: ['badges', name],
+    queryFn: async () =>
+      await listBadge({
+        scope: name,
+      }),
+  })
 
   const {
     control,
@@ -74,7 +85,12 @@ export function MutualRecognition() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <Button variant="primary">Recognize</Button>
+        <Button
+          variant="primary"
+          disabled={badgesQuery.data?.rows.length === 0}
+        >
+          Recognize
+        </Button>
       </Dialog.Trigger>
       <AnimatePresence>
         {open && (

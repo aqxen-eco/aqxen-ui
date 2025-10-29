@@ -13,6 +13,7 @@ type OrganizationContext = {
   createdAt: string
   displayName: string
   hasOrganization: boolean
+  isPending: boolean
 }
 
 const OrganizationContext = createContext({} as OrganizationContext)
@@ -48,6 +49,7 @@ export function OrganizationProvider({
         ipfs,
         createdAt,
         displayName,
+        isPending: query.isPending,
       }}
     >
       {children}
@@ -56,8 +58,15 @@ export function OrganizationProvider({
 }
 
 export function useOrganization() {
-  const { name, symbol, hasOrganization, ipfs, createdAt, displayName } =
-    use(OrganizationContext)
+  const {
+    name,
+    symbol,
+    hasOrganization,
+    ipfs,
+    createdAt,
+    displayName,
+    isPending,
+  } = use(OrganizationContext)
 
   function addOrganizationSymbol(value: string) {
     return (symbol + value).toUpperCase()
@@ -76,5 +85,6 @@ export function useOrganization() {
     displayName,
     addOrganizationSymbol,
     removeOrganizationSymbol,
+    isPending,
   }
 }
