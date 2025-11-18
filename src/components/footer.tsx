@@ -12,7 +12,7 @@ export function Footer() {
           className="text-gray-3 flex cursor-pointer items-center gap-1.5 hover:text-white"
         >
           <img src="/img/logo.svg" alt="" className="size-6" />
-          <span className="text-body-1">UpScale © {year}</span>
+          <span className="text-body-1">AqXen © {year}</span>
         </NextLink>
         <a
           href="https://detroitledger.tech/"

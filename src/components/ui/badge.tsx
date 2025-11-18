@@ -35,7 +35,9 @@ export function Badge({ ipfs, name, balance }: BadgeProps) {
       <BadgeImage src={ipfs} className="mx-auto" />
       <p className="text-body-2 mt-2 font-medium text-white">{name}</p>
       {/* <p className="font-medium text-white">{symbol}</p> */}
-      <p className="text-body-2 text-gray-3">{balance}</p>
+      <p className="text-body-2 text-gray-3">
+        {balance} badge{Number(balance) === 1 ? '' : 's'}
+      </p>
     </div>
   )
 }
