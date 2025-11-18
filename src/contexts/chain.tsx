@@ -3,7 +3,6 @@
 import { Chains } from '@wharfkit/common'
 import SessionKit, { type Session } from '@wharfkit/session'
 import { WalletPluginAnchor } from '@wharfkit/wallet-plugin-anchor'
-import { WalletPluginCloudWallet } from '@wharfkit/wallet-plugin-cloudwallet'
 import WebRenderer from '@wharfkit/web-renderer'
 import { createContext, use, useCallback, useEffect, useState } from 'react'
 
@@ -22,7 +21,7 @@ const sessionKit = new SessionKit({
   appName,
   chains: [Chains.Jungle4],
   ui: new WebRenderer(),
-  walletPlugins: [new WalletPluginAnchor(), new WalletPluginCloudWallet()],
+  walletPlugins: [new WalletPluginAnchor()],
 })
 
 const localStorageSessionKey = `wharf-${sessionKit.appName}-session`

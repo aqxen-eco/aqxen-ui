@@ -43,7 +43,7 @@ export function AppBar() {
                   className="absolute inset-0 size-full object-cover"
                 />
               </div>
-              <span className="truncate">{displayName || 'UpScale'}</span>
+              <span className="truncate">{displayName || 'AqXen'}</span>
             </NextLink>
 
             <Button
