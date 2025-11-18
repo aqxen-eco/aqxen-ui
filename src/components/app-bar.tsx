@@ -46,98 +46,100 @@ export function AppBar() {
               <span className="truncate">{displayName || 'UpScale'}</span>
             </NextLink>
 
-            {isAuthenticated ? (
-              <>
-                {hasOrganization && (
-                  <>
-                    <Button
-                      variant="default"
-                      className="md:hidden"
-                      onClick={() => setShowMenu(!showMenu)}
-                    >
-                      Menu
-                    </Button>
-                    <div
-                      data-state={showMenu ? 'open' : 'closed'}
-                      className="max-md:bg-gray-1 flex items-center justify-between max-md:fixed max-md:inset-0 max-md:z-40 max-md:flex-col max-md:justify-center max-md:gap-2 data-[state=closed]:max-md:hidden"
-                    >
-                      <Button
-                        variant="default"
-                        className="absolute top-4 right-4 md:hidden"
-                        onClick={() => setShowMenu(!showMenu)}
-                      >
-                        <MdClose className="size-6" />
-                      </Button>
-                      <Link
-                        href={`/profile/${actor}`}
-                        variant={
-                          pathname.includes('/profile') ? 'link' : 'default'
-                        }
-                        className="max-md:text-2xl"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        href="/feed"
-                        variant={
-                          pathname.includes('/feed') ? 'link' : 'default'
-                        }
-                        className="max-md:text-2xl"
-                      >
-                        Feed
-                      </Link>
-                      <Link
-                        href="/admin/organization"
-                        variant={
-                          pathname.includes('/admin') ? 'link' : 'default'
-                        }
-                        className="max-md:text-2xl"
-                      >
-                        Admin
-                      </Link>
-                    </div>
-                  </>
-                )}
-                <div className="flex items-center gap-2">
-                  <MutualRecognition />
-                  <DropdownRoot
-                    customTrigger={
-                      <button
-                        type="button"
-                        className="group/dropdown-button focus:outline-hidden"
-                      >
-                        <Avatar
-                          color="red"
-                          className="group-data-[state=open]/dropdown-button:border-white"
-                        >
-                          {actor ? actor.slice(0, 2) : 'un'}
-                        </Avatar>
-                      </button>
-                    }
-                    align="end"
-                  >
-                    <DropdownItem asChild>
-                      <NextLink href={`/profile/${actor}`}>Profile</NextLink>
-                    </DropdownItem>
-                    <DropdownItem onClick={logoutAndGoToHome}>
-                      Log out
-                    </DropdownItem>
-                  </DropdownRoot>
-                </div>
-              </>
-            ) : (
-              <>
+            <Button
+              variant="default"
+              className="md:hidden"
+              onClick={() => setShowMenu(!showMenu)}
+            >
+              Menu
+            </Button>
+            <div
+              data-state={showMenu ? 'open' : 'closed'}
+              className="max-md:bg-gray-1 flex items-center justify-between max-md:fixed max-md:inset-0 max-md:z-40 max-md:flex-col max-md:justify-center max-md:gap-2 data-[state=closed]:max-md:hidden"
+            >
+              <Link
+                href="/"
+                variant={pathname === '/' ? 'link' : 'default'}
+                className="max-md:text-2xl"
+              >
+                Home
+              </Link>
+              {isAuthenticated && (
                 <Link
-                  href="/feed"
-                  variant={pathname.includes('/feed') ? 'link' : 'default'}
+                  href={`/profile/${actor}`}
+                  variant={pathname.includes('/profile') ? 'link' : 'default'}
                   className="max-md:text-2xl"
                 >
-                  Feed
+                  Profile
                 </Link>
-                <Button onClick={login} variant="primary">
-                  Log in
-                </Button>
-              </>
+              )}
+              {hasOrganization ? (
+                <>
+                  <Button
+                    variant="default"
+                    className="absolute top-4 right-4 md:hidden"
+                    onClick={() => setShowMenu(!showMenu)}
+                  >
+                    <MdClose className="size-6" />
+                  </Button>
+                  <Link
+                    href="/feed"
+                    variant={pathname.includes('/feed') ? 'link' : 'default'}
+                    className="max-md:text-2xl"
+                  >
+                    Feed
+                  </Link>
+                  <Link
+                    href="/admin/organization"
+                    variant={pathname.includes('/admin') ? 'link' : 'default'}
+                    className="max-md:text-2xl"
+                  >
+                    Admin
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href="/subscriptions"
+                  variant={
+                    pathname.includes('/subscriptions') ? 'link' : 'default'
+                  }
+                  className="max-md:text-2xl"
+                >
+                  Subscriptions
+                </Link>
+              )}
+            </div>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                {hasOrganization && <MutualRecognition />}
+                <DropdownRoot
+                  customTrigger={
+                    <button
+                      type="button"
+                      className="group/dropdown-button focus:outline-hidden"
+                    >
+                      <Avatar
+                        color="red"
+                        className="group-data-[state=open]/dropdown-button:border-white"
+                      >
+                        {actor ? actor.slice(0, 2) : 'un'}
+                      </Avatar>
+                    </button>
+                  }
+                  align="end"
+                >
+                  <DropdownItem asChild>
+                    <NextLink href={`/profile/${actor}`}>Profile</NextLink>
+                  </DropdownItem>
+                  <DropdownItem onClick={logoutAndGoToHome}>
+                    Log out
+                  </DropdownItem>
+                </DropdownRoot>
+              </div>
+            ) : (
+              <Button onClick={login} variant="primary">
+                Log in
+              </Button>
             )}
           </Box>
         </div>
