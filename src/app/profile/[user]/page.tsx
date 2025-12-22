@@ -1,5 +1,6 @@
-import { MdOutlineModeEdit } from 'react-icons/md'
+import { MdOutlineInterests, MdOutlineLocationOn } from 'react-icons/md'
 
+import { ProfileForm } from '@/components/profile-form'
 import { Avatar } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -8,9 +9,8 @@ import {
   BadgeSwiperWrapper,
 } from '@/components/ui/badge-swiper'
 import { Box } from '@/components/ui/box'
-import { Button } from '@/components/ui/button'
 
-import { getUserBadges } from './functions'
+import { getUserBadges, getUserProfile } from './functions'
 import { SeasonalBadgesSection } from './seasonal-badges-section'
 
 type ProfilePageProps = {
@@ -22,9 +22,12 @@ type ProfilePageProps = {
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { user } = await params
 
-  const { badges, seasons } = await getUserBadges({
-    user,
-  })
+  const [profile, { badges, seasons }] = await Promise.all([
+    getUserProfile({ actor: user }),
+    getUserBadges({
+      user,
+    }),
+  ])
 
   if (!user) {
     return null
@@ -35,21 +38,49 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       <Box className="divide-gray-2 divide-y overflow-hidden p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
         <div className="relative h-52 w-full bg-linear-(--gradient)">
           {/* Later control disabled based on the logged in account vs profile link */}
-          <Button
-            variant="secondary"
-            className="absolute top-4 right-4 z-10"
-            disabled
-          >
-            <MdOutlineModeEdit className="h-6 w-6" />
-          </Button>
+          <ProfileForm />
         </div>
 
         <div className="flex flex-wrap items-center gap-4 p-8 max-md:px-4">
           <Avatar size="lg" className="flex-none">
             {user.slice(0, 2)}
           </Avatar>
-          <h1 className="text-title-2 text-white">{user}</h1>
+          <div className="space-y-1">
+            <h1 className="text-title-2 text-white">
+              {profile?.name ? (
+                <>
+                  {profile.name}
+                  <span className="text-body-2 text-gray-3 ml-1">({user})</span>
+                </>
+              ) : (
+                user
+              )}
+            </h1>
+            <div className="flex max-md:flex-col md:flex-wrap md:items-center md:gap-4">
+              {profile?.location && (
+                <p className="text-body-2 text-gray-3 flex items-center gap-1">
+                  <MdOutlineLocationOn className="size-4" /> {profile.location}
+                </p>
+              )}
+              {profile?.interests && (
+                <p className="text-body-2 text-gray-3 flex items-center gap-1">
+                  <MdOutlineInterests className="size-4" /> {profile.interests}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
+
+        {profile?.about && (
+          <section className="py-8">
+            <header className="mb-4 px-8 max-md:px-4">
+              <h3 className="text-title-2 text-white">About</h3>
+            </header>
+            <p className="text-gray-3 text-body-2 px-8 max-md:px-4">
+              {profile.about}
+            </p>
+          </section>
+        )}
 
         {badges.length > 0 && (
           <section className="py-8">

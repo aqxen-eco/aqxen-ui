@@ -11,6 +11,7 @@ import { type Badge } from '@/api/model/badge'
 import { BadgeStatus } from '@/api/model/badge'
 import { type Season } from '@/api/model/season'
 import { type Series } from '@/api/model/series'
+import { prisma } from '@/prisma-client'
 
 type GetUserBadgesProps = {
   user: string
@@ -166,4 +167,14 @@ export async function getUserBadges({
     badges: lifeTimeBadges as LifetimeBadges[],
     seasons: seasonsWithBadgesAndSeries as SeasonSeriesBadges[],
   }
+}
+
+export async function getUserProfile({ actor }: { actor: string }) {
+  const user = await prisma.user.findUnique({
+    where: {
+      actor,
+    },
+  })
+
+  return user
 }
