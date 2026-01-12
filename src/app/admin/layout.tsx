@@ -1,12 +1,11 @@
 'use client'
 
-import { differenceInMinutes, parseISO } from 'date-fns'
 import { redirect } from 'next/navigation'
 
 import { BuySubscriptionTable } from '@/components/buy-subscription-table'
 import { HeaderAdmin, HeaderAdminTitle } from '@/components/header-admin'
 import { useOrganization } from '@/contexts/organization'
-import { useGetSubscription } from '@/hooks/query/use-get-subscription'
+// import { useGetCycle } from '@/hooks/query/use-get-cycle'
 
 export default function AdminLayout({
   children,
@@ -14,9 +13,11 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const { hasOrganization, isPending } = useOrganization()
-  const { data, query } = useGetSubscription()
+  // const { data, query } = useGetSubscription()
 
-  if (isPending || query.isPending) {
+  // const { data: cycleData } = useGetCycle()
+
+  if (isPending) {
     return (
       <div className="flex h-screen items-center justify-center">
         <img src={'/img/logo.svg'} alt="" className="size-14 animate-pulse" />
@@ -24,14 +25,16 @@ export default function AdminLayout({
     )
   }
 
-  const today = new Date()
-  const expiryTime = parseISO(data?.active?.[0].expiry_time as string)
-  const resultInMinutes = differenceInMinutes(expiryTime, today)
-  const expired = resultInMinutes <= 0
+  // const today = new Date()
+  // const expiryTime = parseISO(data?.active?.[0].expiry_time as string)
+  // const resultInMinutes = differenceInMinutes(expiryTime, today)
+  // const expired = resultInMinutes <= 0
 
   if (!hasOrganization) {
     return redirect('/')
   }
+
+  return children
 
   if (expired && data?.upcoming.length === 0) {
     return (

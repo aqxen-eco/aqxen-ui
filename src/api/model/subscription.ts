@@ -1,3 +1,5 @@
+import type { UInt64 } from '@wharfkit/antelope'
+
 import { GetTableRowsResult, Session } from './index'
 
 export type Subscription = {
@@ -31,5 +33,5 @@ export type ListOrganizationSubscriptionResult =
 export type BuySubscriptionProps = {
   session: Session
   quantity: string
-  memo: string
+  currentCycleId: UInt64
 }

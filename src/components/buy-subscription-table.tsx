@@ -1,12 +1,12 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { secondsToMinutes } from 'date-fns'
 import { useRouter } from 'next/navigation'
 
-import { createOrganizationAndBuySubscription } from '@/api/chain/organization/create-organization-and-buy-subscription'
+// import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
+import { listFees } from '@/api/chain/billing/list-fees'
+import { createOrganization } from '@/api/chain/organization/create-organization'
 import { buySubscription } from '@/api/chain/subscription/buy-subscription'
-import { listSubscription } from '@/api/chain/subscription/list-subscription'
 import { TableSkeleton } from '@/components/skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,43 +19,53 @@ import {
 } from '@/components/ui/table'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useGetCycle } from '@/hooks/query/use-get-cycle'
 
 export function BuySubscriptionTable() {
   const { session } = useChain()
-  const { name, hasOrganization } = useOrganization()
+  const { hasOrganization } = useOrganization()
   const router = useRouter()
 
   const query = useQuery({
-    queryKey: ['subscription'],
-    queryFn: async () => await listSubscription(),
+    queryKey: ['fees'],
+    queryFn: async () => await listFees(),
   })
 
+  // const getCurrentCycleQuery = useQuery({
+  //   queryKey: ['current-cycle'],
+  //   queryFn: async () => await getCurrentCycle(),
+  // })
+
+  const cycleQuery = useGetCycle()
+
   async function handleBuyPackage({
-    subPackage,
-    quantity,
+    org_creation_fee,
+    member_fee,
   }: {
-    subPackage: string
-    quantity: string
+    org_creation_fee: string
+    member_fee: string
   }) {
+    const currentCycleId = cycleQuery.data?.rows[0].bill_cycle_id!
     try {
       if (hasOrganization) {
         await buySubscription({
           session: session!,
-          quantity,
-          memo: `${name}:${subPackage}`,
+          quantity: member_fee,
+          currentCycleId,
         })
       } else {
-        await createOrganizationAndBuySubscription({
+        await createOrganization({
           session: session!,
-          quantity,
-          subPackage,
+          org_creation_fee,
+          member_fee,
+          currentCycleId,
         })
       }
       router.push('/admin/subscription')
     } catch {}
   }
 
-  if (query.isLoading) {
+  if (query.isLoading || cycleQuery.isLoading) {
     return <TableSkeleton rows={3} columns={4} />
   }
 
@@ -67,39 +77,24 @@ export function BuySubscriptionTable() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Tier</TableHead>
-          <TableHead className="text-center">Actions</TableHead>
-          <TableHead className="text-center">Term</TableHead>
-          <TableHead className="text-center">Investment</TableHead>
-          <TableHead className="text-center">Recommended for</TableHead>
-          <TableHead className="w-24"></TableHead>
+          <TableHead>Organization creation fee</TableHead>
+          <TableHead>Member fee</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {query.data.rows.map((item) => (
-          <TableRow key={item.package}>
-            <TableCell className="py-6">{item.descriptive_name}</TableCell>
-            <TableCell className="py-6 text-center">
-              {item.action_size}
-            </TableCell>
-            <TableCell className="py-6 text-center">
-              {secondsToMinutes(item.expiry_duration_in_secs)} minutes
-            </TableCell>
-            <TableCell className="py-6 text-center">
-              {item.cost.quantity}
-            </TableCell>
-            <TableCell className="py-6 text-center">
-              {item.action_size / 10} members
-            </TableCell>
-            <TableCell>
+          <TableRow key={item.id}>
+            <TableCell className="py-6">{item.org_creation_fee}</TableCell>
+            <TableCell className="py-6">{item.member_fee}</TableCell>
+            <TableCell className="text-right">
               {session && (
                 <Button
                   variant="secondary"
                   size="md"
                   onClick={() =>
                     handleBuyPackage({
-                      quantity: item.cost.quantity,
-                      subPackage: item.package,
+                      org_creation_fee: item.org_creation_fee,
+                      member_fee: item.member_fee,
                     })
                   }
                 >

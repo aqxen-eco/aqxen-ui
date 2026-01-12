@@ -15,10 +15,14 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tooltip } from '@/components/ui/tooltip'
+import { useGetBillingDetail } from '@/hooks/query/use-get-billing-detail'
 import { useGetSubscription } from '@/hooks/query/use-get-subscription'
 
 export function SubscriptionContent() {
   const { query, data, showEndsIn } = useGetSubscription()
+  const { data: billingDetail } = useGetBillingDetail()
+
+  console.log(billingDetail)
 
   return (
     <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
