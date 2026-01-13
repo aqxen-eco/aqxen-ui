@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 
-// import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
+import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
 import { listFees } from '@/api/chain/billing/list-fees'
 import { createOrganization } from '@/api/chain/organization/create-organization'
 import { buySubscription } from '@/api/chain/subscription/buy-subscription'
@@ -31,10 +31,10 @@ export function BuySubscriptionTable() {
     queryFn: async () => await listFees(),
   })
 
-  // const getCurrentCycleQuery = useQuery({
-  //   queryKey: ['current-cycle'],
-  //   queryFn: async () => await getCurrentCycle(),
-  // })
+  const getCurrentCycleQuery = useQuery({
+    queryKey: ['current-cycle'],
+    queryFn: async () => await getCurrentCycle(),
+  })
 
   const cycleQuery = useGetCycle()
 
@@ -45,15 +45,16 @@ export function BuySubscriptionTable() {
     org_creation_fee: string
     member_fee: string
   }) {
-    const currentCycleId = cycleQuery.data?.rows[0].bill_cycle_id!
     try {
       if (hasOrganization) {
+        const currentCycleId = getCurrentCycleQuery.data?.rows[0].bill_cycle_id!
         await buySubscription({
           session: session!,
           quantity: member_fee,
           currentCycleId,
         })
       } else {
+        const currentCycleId = cycleQuery.data?.rows[0].bill_cycle_id!
         await createOrganization({
           session: session!,
           org_creation_fee,
