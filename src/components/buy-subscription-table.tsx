@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 
 import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
 import { listFees } from '@/api/chain/billing/list-fees'
+import { transferToken } from '@/api/chain/billing/transfer-token'
 import { createOrganization } from '@/api/chain/organization/create-organization'
-import { buySubscription } from '@/api/chain/subscription/buy-subscription'
 import { TableSkeleton } from '@/components/skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -48,7 +48,7 @@ export function BuySubscriptionTable() {
     try {
       if (hasOrganization) {
         const currentCycleId = getCurrentCycleQuery.data?.rows[0].bill_cycle_id!
-        await buySubscription({
+        await transferToken({
           session: session!,
           quantity: member_fee,
           currentCycleId,

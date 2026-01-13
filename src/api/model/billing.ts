@@ -31,3 +31,9 @@ export type GetBillingDetailProps = {
   session: Session
 }
 export type GetBillingDetailResult = GetTableRowsResult<BillingDetail>
+
+export type TransferTokenProps = {
+  session: Session
+  quantity: string
+  currentCycleId: UInt64
+}
