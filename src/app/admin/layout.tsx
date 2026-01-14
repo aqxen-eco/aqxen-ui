@@ -2,8 +2,8 @@
 
 import { redirect } from 'next/navigation'
 
-import { BuySubscriptionTable } from '@/components/buy-subscription-table'
-import { HeaderAdmin, HeaderAdminTitle } from '@/components/header-admin'
+// import { BuySubscriptionTable } from '@/components/buy-subscription-table'
+// import { HeaderAdmin, HeaderAdminTitle } from '@/components/header-admin'
 import { useOrganization } from '@/contexts/organization'
 // import { useGetCycle } from '@/hooks/query/use-get-cycle'
 
@@ -34,23 +34,21 @@ export default function AdminLayout({
     return redirect('/')
   }
 
-  return children
-
-  if (expired && data?.upcoming.length === 0) {
-    return (
-      <>
-        <HeaderAdmin>
-          <HeaderAdminTitle
-            title="Subscription"
-            tooltip="Lorem ipsum dolor sit amed"
-          />
-        </HeaderAdmin>
-        <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
-          <BuySubscriptionTable />
-        </div>
-      </>
-    )
-  }
+  // if (expired && data?.upcoming.length === 0) {
+  //   return (
+  //     <>
+  //       <HeaderAdmin>
+  //         <HeaderAdminTitle
+  //           title="Subscription"
+  //           tooltip="Lorem ipsum dolor sit amed"
+  //         />
+  //       </HeaderAdmin>
+  //       <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
+  //         <BuySubscriptionTable />
+  //       </div>
+  //     </>
+  //   )
+  // }
 
   return children
 }

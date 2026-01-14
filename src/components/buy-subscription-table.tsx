@@ -47,20 +47,24 @@ export function BuySubscriptionTable() {
   }) {
     try {
       if (hasOrganization) {
-        const currentCycleId = getCurrentCycleQuery.data?.rows[0].bill_cycle_id!
-        await transferToken({
-          session: session!,
-          quantity: member_fee,
-          currentCycleId,
-        })
+        const currentCycleId = getCurrentCycleQuery.data?.rows[0]?.bill_cycle_id
+        if (currentCycleId) {
+          await transferToken({
+            session: session!,
+            quantity: member_fee,
+            currentCycleId,
+          })
+        }
       } else {
-        const currentCycleId = cycleQuery.data?.rows[0].bill_cycle_id!
-        await createOrganization({
-          session: session!,
-          org_creation_fee,
-          member_fee,
-          currentCycleId,
-        })
+        const currentCycleId = cycleQuery.data?.rows[0]?.bill_cycle_id
+        if (currentCycleId) {
+          await createOrganization({
+            session: session!,
+            org_creation_fee,
+            member_fee,
+            currentCycleId,
+          })
+        }
       }
       router.push('/admin/subscription')
     } catch {}
