@@ -1,3 +1,5 @@
+import type { UInt64 } from '@wharfkit/antelope'
+
 import { GetTableRowsResult, Session } from './index'
 
 export type Organization = {
@@ -21,10 +23,11 @@ export type Organization = {
 
 export type ListOrganizationResult = GetTableRowsResult<Organization>
 
-export type CreateOrganizationAndBuySubscriptionProps = {
+export type CreateOrganizationProps = {
   session: Session
-  quantity: string
-  subPackage: string
+  org_creation_fee: string
+  member_fee: string
+  currentCycleId: UInt64
 }
 
 export type UpdateOrganizationProps = {

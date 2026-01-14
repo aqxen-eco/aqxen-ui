@@ -1,12 +1,12 @@
 import { execute } from '@/api/chain/execute-action'
-import { BuySubscriptionProps } from '@/api/model/subscription'
+import { TransferTokenProps } from '@/api/model/billing'
 import { Contract } from '@/constants'
 
-export async function buySubscription({
+export async function transferToken({
   session,
   quantity,
   currentCycleId,
-}: BuySubscriptionProps) {
+}: TransferTokenProps) {
   const organizationName = session.actor.toString()
 
   const eosValue = await fetch(
