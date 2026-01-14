@@ -12,6 +12,7 @@ export const I64 = 'i64'
 export enum Contract {
   ORGANIZATION = 'organizatdev',
   SUBSCRIPTION = 'subscribedev',
+  BILLING = 'billingdevde',
 
   SIMPLE_MANAGER = 'simmanagedev',
   ANDEMITTER_MANAGER = 'aemanagerdev',
