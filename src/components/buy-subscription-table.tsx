@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/table'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { useGetCycle } from '@/hooks/query/use-get-cycle'
 
 export function BuySubscriptionTable() {
   const { session } = useChain()
@@ -31,12 +30,11 @@ export function BuySubscriptionTable() {
     queryFn: async () => await listFees(),
   })
 
-  const getCurrentCycleQuery = useQuery({
+  const currentCycleQuery = useQuery({
     queryKey: ['current-cycle'],
     queryFn: async () => await getCurrentCycle(),
   })
-
-  const cycleQuery = useGetCycle()
+  const currentCycleId = currentCycleQuery.data?.rows[0]?.bill_cycle_id ?? null
 
   async function handleBuyPackage({
     org_creation_fee,
@@ -45,32 +43,28 @@ export function BuySubscriptionTable() {
     org_creation_fee: string
     member_fee: string
   }) {
+    if (!currentCycleId) return
+
     try {
       if (hasOrganization) {
-        const currentCycleId = getCurrentCycleQuery.data?.rows[0]?.bill_cycle_id
-        if (currentCycleId) {
-          await transferToken({
-            session: session!,
-            quantity: member_fee,
-            currentCycleId,
-          })
-        }
+        await transferToken({
+          session: session!,
+          quantity: member_fee,
+          currentCycleId,
+        })
       } else {
-        const currentCycleId = cycleQuery.data?.rows[0]?.bill_cycle_id
-        if (currentCycleId) {
-          await createOrganization({
-            session: session!,
-            org_creation_fee,
-            member_fee,
-            currentCycleId,
-          })
-        }
+        await createOrganization({
+          session: session!,
+          org_creation_fee,
+          member_fee,
+          currentCycleId,
+        })
       }
       router.push('/admin/subscription')
     } catch {}
   }
 
-  if (query.isLoading || cycleQuery.isLoading) {
+  if (query.isLoading || currentCycleQuery.isLoading) {
     return <TableSkeleton rows={3} columns={4} />
   }
 
@@ -84,6 +78,7 @@ export function BuySubscriptionTable() {
         <TableRow>
           <TableHead>Organization creation fee</TableHead>
           <TableHead>Member fee</TableHead>
+          <TableHead>Cycle</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -91,6 +86,7 @@ export function BuySubscriptionTable() {
           <TableRow key={item.id}>
             <TableCell className="py-6">{item.org_creation_fee}</TableCell>
             <TableCell className="py-6">{item.member_fee}</TableCell>
+            <TableCell className="py-6">{String(currentCycleId)}</TableCell>
             <TableCell className="text-right">
               {session && (
                 <Button
