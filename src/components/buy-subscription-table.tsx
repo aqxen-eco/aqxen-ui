@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/table'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { useGetCycle } from '@/hooks/query/use-get-cycle'
 
 export function BuySubscriptionTable() {
   const { session } = useChain()
@@ -35,7 +34,7 @@ export function BuySubscriptionTable() {
     queryKey: ['current-cycle'],
     queryFn: async () => await getCurrentCycle(),
   })
-  const currentCycleId = currentCycleQuery.data?.rows[0]?.bill_cycle_id!
+  const currentCycleId = currentCycleQuery.data?.rows[0]?.bill_cycle_id ?? null
 
   async function handleBuyPackage({
     org_creation_fee,
@@ -44,6 +43,8 @@ export function BuySubscriptionTable() {
     org_creation_fee: string
     member_fee: string
   }) {
+    if (!currentCycleId) return
+
     try {
       if (hasOrganization) {
         await transferToken({
