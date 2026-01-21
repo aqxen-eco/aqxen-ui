@@ -64,6 +64,13 @@ export function AppBar() {
               >
                 Home
               </Link>
+              <Link
+                href="/faq"
+                variant={pathname === '/faq' ? 'link' : 'default'}
+                className="max-md:text-2xl"
+              >
+                FAQ
+              </Link>
               {isAuthenticated && (
                 <Link
                   href={`/profile/${actor}`}
