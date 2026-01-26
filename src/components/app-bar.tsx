@@ -65,6 +65,13 @@ export function AppBar() {
                 Home
               </Link>
               <Link
+                href="/about-us"
+                variant={pathname === '/about-us' ? 'link' : 'default'}
+                className="max-md:text-2xl"
+              >
+                About Us
+              </Link>
+              <Link
                 href="/faq"
                 variant={pathname === '/faq' ? 'link' : 'default'}
                 className="max-md:text-2xl"
