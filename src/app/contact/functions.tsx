@@ -1,7 +1,8 @@
 'use server'
 
-import { ContactSchema } from './page'
 import { Resend } from 'resend'
+
+import { ContactSchema } from './page'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
