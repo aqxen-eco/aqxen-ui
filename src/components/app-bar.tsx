@@ -72,6 +72,13 @@ export function AppBar() {
                 About Us
               </Link>
               <Link
+                href="/stream"
+                variant={pathname === '/stream' ? 'link' : 'default'}
+                className="max-md:text-2xl"
+              >
+                Stream
+              </Link>
+              <Link
                 href="/contact"
                 variant={pathname === '/contact' ? 'link' : 'default'}
                 className="max-md:text-2xl"
