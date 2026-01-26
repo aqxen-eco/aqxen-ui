@@ -2,14 +2,15 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import z from 'zod'
 
+import { Button } from '@/components/ui/button'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+
 import { sendContactEmail } from './functions'
-import { toast } from 'react-toastify'
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -56,13 +57,13 @@ export default function Contact() {
       <header className="max-w-container-md relative mx-auto overflow-hidden px-4 py-16">
         <div className="space-y-6 md:text-center">
           <h1 className="text-display-1 max-md:text-display-2 text-white">
-            Let's Connect
+            Let&apos;s Connect
           </h1>
           <p className="text-body-1 text-gray-3">
-            We’re here to help you understand how AqXen Socials can transform
-            your community's productivity and positivity. Reach out with any
-            questions about unlocking access, features, or partnership
-            opportunities.
+            We&apos;re here to help you understand how AqXen Socials can
+            transform your community&apos;s productivity and positivity. Reach
+            out with any questions about unlocking access, features, or
+            partnership opportunities.
           </p>
         </div>
       </header>
