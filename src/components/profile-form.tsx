@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import z from 'zod'
@@ -15,6 +15,7 @@ import { updateProfile } from '@/app/profile/[user]/actions'
 import { getUserProfile } from '@/app/profile/[user]/functions'
 import { Button } from '@/components/ui/button'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useChain } from '@/contexts/chain'
@@ -24,6 +25,8 @@ const profileSchema = z.object({
   about: z.string().optional(),
   location: z.string().optional(),
   interests: z.string().optional(),
+  avatarIpfs: z.string().optional(),
+  coverIpfs: z.string().optional(),
 })
 
 type ProfileSchema = z.infer<typeof profileSchema>
@@ -39,6 +42,7 @@ export function ProfileForm() {
     handleSubmit,
     register,
     reset,
+    control,
     formState: { errors, isSubmitting, isLoading },
   } = useForm<ProfileSchema>({
     resolver: zodResolver(profileSchema),
@@ -53,13 +57,22 @@ export function ProfileForm() {
           about: user?.about ?? '',
           location: user?.location ?? '',
           interests: user?.interests ?? '',
+          avatarIpfs: user?.avatarIpfs ?? '',
+          coverIpfs: user?.coverIpfs ?? '',
         })
       }
       loadProfile()
     }
   }, [actor, reset])
 
-  async function onSubmit({ name, about, location, interests }: ProfileSchema) {
+  async function onSubmit({
+    name,
+    about,
+    location,
+    interests,
+    avatarIpfs,
+    coverIpfs,
+  }: ProfileSchema) {
     try {
       await updateProfile({
         actor: actor!,
@@ -67,12 +80,16 @@ export function ProfileForm() {
         about,
         location,
         interests,
+        avatarIpfs,
+        coverIpfs,
       })
       reset({
         name,
         about,
         location,
         interests,
+        avatarIpfs,
+        coverIpfs,
       })
       toast('Profile updated!')
       queryClient.invalidateQueries({ queryKey: ['users'] })
@@ -139,6 +156,42 @@ export function ProfileForm() {
                   onSubmit={handleSubmit(onSubmit)}
                   className="mt-8 space-y-8"
                 >
+                  <Field>
+                    <Label>Cover Photo</Label>
+                    <Controller
+                      name="coverIpfs"
+                      control={control}
+                      render={({ field }) => (
+                        <ImageUpload
+                          variant="cover"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                    <span className="text-body-3 text-gray-3 mt-1 block">
+                      Recommended: 1200 x 480px
+                    </span>
+                  </Field>
+
+                  <Field>
+                    <Label>Avatar</Label>
+                    <Controller
+                      name="avatarIpfs"
+                      control={control}
+                      render={({ field }) => (
+                        <ImageUpload
+                          variant="avatar"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                    <span className="text-body-3 text-gray-3 mt-1 block">
+                      Recommended: 400 x 400px
+                    </span>
+                  </Field>
+
                   <Field>
                     <Label htmlFor="name">Name</Label>
                     <Input

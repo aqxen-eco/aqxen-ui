@@ -8,6 +8,8 @@ type UpdateProfileProps = {
   about?: string
   location?: string
   interests?: string
+  avatarIpfs?: string
+  coverIpfs?: string
 }
 
 export async function updateProfile({
@@ -16,6 +18,8 @@ export async function updateProfile({
   about,
   location,
   interests,
+  avatarIpfs,
+  coverIpfs,
 }: UpdateProfileProps) {
   return await prisma.user.upsert({
     where: { actor },
@@ -24,6 +28,8 @@ export async function updateProfile({
       about,
       location,
       interests,
+      avatarIpfs,
+      coverIpfs,
     },
     create: {
       actor,
@@ -31,6 +37,8 @@ export async function updateProfile({
       about,
       location,
       interests,
+      avatarIpfs,
+      coverIpfs,
     },
   })
 }

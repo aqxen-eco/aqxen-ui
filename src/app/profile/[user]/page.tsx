@@ -9,6 +9,7 @@ import {
   BadgeSwiperWrapper,
 } from '@/components/ui/badge-swiper'
 import { Box } from '@/components/ui/box'
+import { IPFS_IMAGE_SOURCE } from '@/constants'
 
 import { getUserBadges, getUserProfile } from './functions'
 import { SeasonalBadgesSection } from './seasonal-badges-section'
@@ -36,13 +37,27 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   return (
     <div className="max-w-container-md mx-auto space-y-8 py-8 max-md:pt-0 md:px-4">
       <Box className="divide-gray-2 divide-y overflow-hidden p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
-        <div className="relative h-52 w-full bg-linear-(--gradient)">
-          {/* Later control disabled based on the logged in account vs profile link */}
+        <div className="relative h-52 w-full overflow-hidden bg-linear-(--gradient)">
+          {profile?.coverIpfs && (
+            <img
+              src={IPFS_IMAGE_SOURCE + profile.coverIpfs}
+              alt=""
+              className="absolute inset-0 size-full object-cover"
+            />
+          )}
           <ProfileForm />
         </div>
 
         <div className="flex flex-wrap items-center gap-4 p-8 max-md:px-4">
-          <Avatar size="lg" className="flex-none">
+          <Avatar
+            size="lg"
+            className="flex-none"
+            src={
+              profile?.avatarIpfs
+                ? IPFS_IMAGE_SOURCE + profile.avatarIpfs
+                : undefined
+            }
+          >
             {user.slice(0, 2)}
           </Avatar>
           <div className="space-y-1">
