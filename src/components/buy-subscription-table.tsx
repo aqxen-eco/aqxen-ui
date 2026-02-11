@@ -34,7 +34,7 @@ export function BuySubscriptionTable() {
     queryKey: ['current-cycle'],
     queryFn: async () => await getCurrentCycle(),
   })
-  const currentCycleId = currentCycleQuery.data?.rows[0]?.bill_cycle_id ?? null
+  const currentCycleId = currentCycleQuery.data ?? null
 
   async function handleBuyPackage({
     org_creation_fee,
