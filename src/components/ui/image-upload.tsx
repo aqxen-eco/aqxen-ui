@@ -8,41 +8,27 @@ import { IPFS_IMAGE_SOURCE } from '@/constants'
 type ImageUploadProps = {
   variant: 'avatar' | 'cover'
   value?: string
-  onChange: (hash: string) => void
+  onFileSelect: (file: File) => void
+  isUploading?: boolean
 }
 
-export function ImageUpload({ variant, value, onChange }: ImageUploadProps) {
+export function ImageUpload({
+  variant,
+  value,
+  onFileSelect,
+  isUploading,
+}: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
 
   const imageUrl = preview || (value ? IPFS_IMAGE_SOURCE + value : null)
 
-  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
     setPreview(URL.createObjectURL(file))
-    setIsUploading(true)
-
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) throw new Error('Upload failed')
-
-      const { ipfsHash } = await response.json()
-      onChange(ipfsHash)
-    } catch {
-      setPreview(null)
-    } finally {
-      setIsUploading(false)
-    }
+    onFileSelect(file)
   }
 
   if (variant === 'avatar') {
@@ -51,7 +37,7 @@ export function ImageUpload({ variant, value, onChange }: ImageUploadProps) {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="border-gray-2 bg-gray-1 relative size-24 overflow-hidden rounded-full border-4"
+          className={`border-gray-2 relative size-24 overflow-hidden rounded-full border-4 ${imageUrl ? 'bg-white' : 'bg-gray-1'}`}
         >
           {imageUrl ? (
             <img
@@ -86,7 +72,7 @@ export function ImageUpload({ variant, value, onChange }: ImageUploadProps) {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="border-gray-2 relative h-36 w-full overflow-hidden rounded-xl border bg-linear-(--gradient)"
+        className={`border-gray-2 relative h-36 w-full overflow-hidden rounded-xl border ${imageUrl ? 'bg-white' : 'bg-linear-(--gradient)'}`}
       >
         {imageUrl ? (
           <img

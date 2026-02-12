@@ -47,7 +47,7 @@ export function Avatar({ color, size, className, children, src }: AvatarProps) {
   if (src) {
     return (
       <AvatarPrimitive.Root
-        className={avatar({ size, color, class: className })}
+        className={avatar({ size, color, class: `bg-white ${className ?? ''}` })}
       >
         <AvatarPrimitive.Image
           src={src}
