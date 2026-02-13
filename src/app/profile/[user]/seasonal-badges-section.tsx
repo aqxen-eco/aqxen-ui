@@ -16,6 +16,7 @@ import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 type SeasonalBadgesSectionProps = {
   lastSeriesId?: number
   name: string
+  orgDisplayName?: string
   series: (Series & {
     badges: ({ balance: number } & BadgeType)[]
   })[]
@@ -23,6 +24,7 @@ type SeasonalBadgesSectionProps = {
 
 export function SeasonalBadgesSection({
   name,
+  orgDisplayName,
   lastSeriesId,
   series,
 }: SeasonalBadgesSectionProps) {
@@ -34,7 +36,10 @@ export function SeasonalBadgesSection({
     <section className="py-8">
       <header className="mb-4 flex items-center justify-between gap-4 px-8 max-md:px-4">
         <h3 className="text-title-2 text-white">
-          {name}{' '}
+          {name}
+          {orgDisplayName && (
+            <span className="text-gray-3"> — {orgDisplayName}</span>
+          )}{' '}
           <span className="text-gray-3">
             {seriesValue?.badges && seriesValue?.badges.length > 0
               ? `(${seriesValue?.badges.length})`
