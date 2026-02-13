@@ -17,6 +17,7 @@ import { BadgeImage } from '@/components/ui/badge-image'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
+import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { listFormat } from '@/utils/intl-format'
@@ -26,6 +27,7 @@ import { createPost } from './actions'
 type PostItemProps = {
   id: string
   actor: string
+  avatarIpfs?: string | null
   createdAt: Date
   content: string
   badgeSymbol: string[]
@@ -42,6 +44,7 @@ type CommentSchema = z.infer<typeof commentSchema>
 export function PostItem({
   id,
   actor,
+  avatarIpfs,
   createdAt,
   content,
   badgeSymbol,
@@ -84,7 +87,11 @@ export function PostItem({
   return (
     <Box className="before:bg-gray-2 after:bg-gray-2 relative p-0 before:absolute before:top-4 before:left-10 before:h-[calc(100%-2rem)] before:w-0.5 before:content-[''] after:absolute after:bottom-4 after:left-9.25 after:size-2 after:rounded-full after:content-[''] md:p-4 md:before:top-8 md:before:left-14 md:before:h-[calc(100%-4rem)] md:after:bottom-8 md:after:left-13.25">
       <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
-        <Avatar size="md" className="ring-gray-1 relative z-10 ring-8">
+        <Avatar
+          size="md"
+          className="ring-gray-1 relative z-10 ring-8"
+          src={avatarIpfs ? IPFS_IMAGE_SOURCE + avatarIpfs : undefined}
+        >
           {actor.slice(0, 2)}
         </Avatar>
         <div className="max-md:space-y-2">
@@ -226,18 +233,24 @@ export function PostItem({
 
 type PostItemCommentProps = {
   actor: string
+  avatarIpfs?: string | null
   createdAt: Date
   content: string
 }
 
 export function PostItemComment({
   actor,
+  avatarIpfs,
   createdAt,
   content,
 }: PostItemCommentProps) {
   return (
     <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
-      <Avatar size="md" className="ring-gray-1 relative z-10 ring-8">
+      <Avatar
+        size="md"
+        className="ring-gray-1 relative z-10 ring-8"
+        src={avatarIpfs ? IPFS_IMAGE_SOURCE + avatarIpfs : undefined}
+      >
         {actor.slice(0, 2)}
       </Avatar>
       <div className="max-md:space-y-2">

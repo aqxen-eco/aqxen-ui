@@ -3,7 +3,7 @@ export const ORG_SYMBOL = 'NEWO'
 
 export const CHAIN_API_URL = 'https://jungle.eosusa.io/'
 
-export const IPFS_IMAGE_SOURCE = 'https://facings.mypinata.cloud/ipfs/'
+export const IPFS_IMAGE_SOURCE = `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY}/ipfs/`
 
 export const I64 = 'i64'
 

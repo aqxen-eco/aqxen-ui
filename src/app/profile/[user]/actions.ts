@@ -1,5 +1,6 @@
 'use server'
 
+import { ensurePinataGroup } from '@/api/pinata/create-group'
 import { prisma } from '@/prisma-client'
 
 type UpdateProfileProps = {
@@ -8,6 +9,12 @@ type UpdateProfileProps = {
   about?: string
   location?: string
   interests?: string
+  avatarIpfs?: string
+  coverIpfs?: string
+}
+
+export async function ensureProfilePinataGroup(actor: string) {
+  return await ensurePinataGroup(actor)
 }
 
 export async function updateProfile({
@@ -16,7 +23,11 @@ export async function updateProfile({
   about,
   location,
   interests,
+  avatarIpfs,
+  coverIpfs,
 }: UpdateProfileProps) {
+  const pinataGroupId = await ensurePinataGroup(actor)
+
   return await prisma.user.upsert({
     where: { actor },
     update: {
@@ -24,6 +35,9 @@ export async function updateProfile({
       about,
       location,
       interests,
+      avatarIpfs,
+      coverIpfs,
+      ...(pinataGroupId ? { pinataGroupId } : {}),
     },
     create: {
       actor,
@@ -31,6 +45,9 @@ export async function updateProfile({
       about,
       location,
       interests,
+      avatarIpfs,
+      coverIpfs,
+      pinataGroupId,
     },
   })
 }

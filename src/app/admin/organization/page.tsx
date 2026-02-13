@@ -1,8 +1,9 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import z from 'zod'
 
 import { updateOrganization } from '@/api/chain/organization/update-organization'
@@ -10,13 +11,15 @@ import { Badge } from '@/components/ui/badge'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { uploadFile } from '@/lib/upload-file'
 
 const organizationSchema = z.object({
   displayName: z.string().min(1, 'Name is required'),
-  ipfs: z.string().min(1, 'Logo is required'),
+  ipfs: z.string().optional(),
 })
 
 type OrganizationSchema = z.infer<typeof organizationSchema>
@@ -25,11 +28,15 @@ export default function OrganizationPage() {
   const { session } = useChain()
   const { name, symbol, displayName, ipfs } = useOrganization()
 
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+
   const {
     register,
     handleSubmit,
     reset,
     watch,
+    setError,
     formState: { errors, isSubmitting, isLoading },
   } = useForm<OrganizationSchema>({
     resolver: zodResolver(organizationSchema),
@@ -42,12 +49,35 @@ export default function OrganizationPage() {
   const logo = watch('ipfs')
 
   async function onSubmit({ displayName, ipfs }: OrganizationSchema) {
-    await updateOrganization({
-      session: session!,
-      org: name,
-      display_name: displayName,
-      ipfs_image: ipfs,
-    })
+    if (!pendingFile && !ipfs) {
+      setError('ipfs', { message: 'Logo is required' })
+      return
+    }
+
+    try {
+      let imageHash = ipfs ?? ''
+
+      if (pendingFile) {
+        setIsUploading(true)
+        try {
+          imageHash = await uploadFile(pendingFile, {
+            groupName: `org-${name}`,
+          })
+        } finally {
+          setIsUploading(false)
+        }
+      }
+
+      await updateOrganization({
+        session: session!,
+        org: name,
+        display_name: displayName,
+        ipfs_image: imageHash,
+      })
+      setPendingFile(null)
+    } catch {
+      toast.error('Failed to save organization')
+    }
   }
 
   useEffect(() => {
@@ -74,22 +104,25 @@ export default function OrganizationPage() {
           <ErrorMessage>{errors['displayName']?.message}</ErrorMessage>
         </Field>
         <Field>
-          <Label htmlFor="ipfs">Logo IPFS Image hash</Label>
-          <Input
-            id="ipfs"
-            {...register('ipfs')}
-            aria-invalid={!!errors['ipfs']}
-            disabled={isLoading}
+          <Label>Logo</Label>
+          <ImageUpload
+            variant="avatar"
+            value={logo}
+            onFileSelect={(file) => setPendingFile(file)}
+            isUploading={isUploading}
           />
           <ErrorMessage>{errors['ipfs']?.message}</ErrorMessage>
+          <span className="text-body-3 text-gray-3 mt-1 block">
+            Recommended: 400 x 400px
+          </span>
         </Field>
         <Button
           type="submit"
           variant="primary"
           size="lg"
-          disabled={isSubmitting || isLoading}
+          disabled={isSubmitting || isLoading || isUploading}
         >
-          {isSubmitting ? 'Saving...' : 'Save'}
+          {isSubmitting || isUploading ? 'Saving...' : 'Save'}
         </Button>
       </form>
       <div className="border-gray-2 max-md:bg-gray-1 space-y-4 border-l p-8 max-md:rounded-2xl max-md:border max-md:p-4 md:col-span-2">
@@ -99,11 +132,6 @@ export default function OrganizationPage() {
           name={displayName ?? name}
           balance={symbol.toUpperCase()}
         />
-        {/* <hr className="border-gray-2 border-t" />
-        <div className="flex justify-between py-2">
-          <p className="text-body-2 text-white">Active users</p>
-          <p className="text-body-2 text-white">48</p>
-        </div> */}
       </div>
     </Box>
   )

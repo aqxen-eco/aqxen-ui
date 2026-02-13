@@ -7,6 +7,10 @@ import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
 import { listFees } from '@/api/chain/billing/list-fees'
 import { transferToken } from '@/api/chain/billing/transfer-token'
 import { createOrganization } from '@/api/chain/organization/create-organization'
+import {
+  ensureOrgBadgePinataGroup,
+  ensureOrgPinataGroup,
+} from '@/app/admin/organization/actions'
 import { TableSkeleton } from '@/components/skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,7 +38,7 @@ export function BuySubscriptionTable() {
     queryKey: ['current-cycle'],
     queryFn: async () => await getCurrentCycle(),
   })
-  const currentCycleId = currentCycleQuery.data?.rows[0]?.bill_cycle_id ?? null
+  const currentCycleId = currentCycleQuery.data ?? null
 
   async function handleBuyPackage({
     org_creation_fee,
@@ -59,6 +63,8 @@ export function BuySubscriptionTable() {
           member_fee,
           currentCycleId,
         })
+        await ensureOrgPinataGroup(session!.actor.toString())
+        await ensureOrgBadgePinataGroup(session!.actor.toString())
       }
       router.push('/admin/subscription')
     } catch {}

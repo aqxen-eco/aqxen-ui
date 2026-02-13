@@ -10,13 +10,6 @@ export type Fee = {
 
 export type ListFeesResult = GetTableRowsResult<Fee>
 
-export type CurrentCycle = {
-  id: UInt64
-  bill_cycle_id: UInt64
-}
-
-export type GetCurrentCycleResult = GetTableRowsResult<CurrentCycle>
-
 export type BillingDetail = {
   bill_cycle_id: UInt64
   amount_paid: string

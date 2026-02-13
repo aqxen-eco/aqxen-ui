@@ -15,8 +15,13 @@ model User {
   name      String?  @map("name")
   location  String?  @map("location")
   interests String?  @map("interests")
-  about     String?  @map("about")
-  createdAt DateTime @default(now()) @map("created_at")
+  about      String?  @map("about")
+  avatarIpfs String?  @map("avatar_ipfs")
+  coverIpfs      String?  @map("cover_ipfs")
+  pinataGroupId    String?  @map("pinata_group_id")
+  avatarUploadCount Int     @default(0) @map("avatar_upload_count")
+  coverUploadCount  Int     @default(0) @map("cover_upload_count")
+  createdAt         DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   posts   Post[]
@@ -50,4 +55,14 @@ model Mention {
   userId String @map("user_id")
 
   @@map("mention")
+}
+
+model PinataGroup {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  pinataGroupId String   @map("pinata_group_id")
+  uploadCount   Int      @default(0) @map("upload_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("pinata_group")
 }

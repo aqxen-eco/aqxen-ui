@@ -188,6 +188,7 @@ export default function FeedPage() {
                 key={post.id}
                 id={post.id}
                 actor={post.user.actor}
+                avatarIpfs={post.user.avatarIpfs}
                 createdAt={post.createdAt}
                 badgeSymbol={post.badgeSymbol}
                 content={post.content}
@@ -197,6 +198,7 @@ export default function FeedPage() {
                   <PostItemComment
                     key={comment.id}
                     actor={comment.user.actor}
+                    avatarIpfs={comment.user.avatarIpfs}
                     createdAt={comment.createdAt}
                     content={comment.content}
                   />

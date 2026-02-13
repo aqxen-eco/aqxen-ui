@@ -11,19 +11,26 @@ import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import z from 'zod'
 
-import { updateProfile } from '@/app/profile/[user]/actions'
+import {
+  ensureProfilePinataGroup,
+  updateProfile,
+} from '@/app/profile/[user]/actions'
 import { getUserProfile } from '@/app/profile/[user]/functions'
 import { Button } from '@/components/ui/button'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useChain } from '@/contexts/chain'
+import { uploadFile } from '@/lib/upload-file'
 
 const profileSchema = z.object({
   name: z.string().optional(),
   about: z.string().optional(),
   location: z.string().optional(),
   interests: z.string().optional(),
+  avatarIpfs: z.string().optional(),
+  coverIpfs: z.string().optional(),
 })
 
 type ProfileSchema = z.infer<typeof profileSchema>
@@ -33,47 +40,101 @@ export function ProfileForm() {
   const params = useParams()
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [pinataGroupId, setPinataGroupId] = useState<string>()
+  const [pendingAvatar, setPendingAvatar] = useState<File | null>(null)
+  const [pendingCover, setPendingCover] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const queryClient = useQueryClient()
 
   const {
     handleSubmit,
     register,
     reset,
+    watch,
     formState: { errors, isSubmitting, isLoading },
   } = useForm<ProfileSchema>({
     resolver: zodResolver(profileSchema),
   })
 
+  const avatarIpfs = watch('avatarIpfs')
+  const coverIpfs = watch('coverIpfs')
+
   useEffect(() => {
     if (actor) {
       async function loadProfile() {
         const user = await getUserProfile({ actor: actor! })
+        if (user?.pinataGroupId) {
+          setPinataGroupId(user.pinataGroupId)
+        } else {
+          const groupId = await ensureProfilePinataGroup(actor!)
+          setPinataGroupId(groupId ?? undefined)
+        }
         reset({
           name: user?.name ?? '',
           about: user?.about ?? '',
           location: user?.location ?? '',
           interests: user?.interests ?? '',
+          avatarIpfs: user?.avatarIpfs ?? '',
+          coverIpfs: user?.coverIpfs ?? '',
         })
       }
       loadProfile()
     }
   }, [actor, reset])
 
-  async function onSubmit({ name, about, location, interests }: ProfileSchema) {
+  async function onSubmit({
+    name,
+    about,
+    location,
+    interests,
+    avatarIpfs,
+    coverIpfs,
+  }: ProfileSchema) {
     try {
+      let finalAvatar = avatarIpfs
+      let finalCover = coverIpfs
+
+      if (pendingAvatar || pendingCover) {
+        setIsUploading(true)
+        try {
+          if (pendingAvatar) {
+            finalAvatar = await uploadFile(pendingAvatar, {
+              groupId: pinataGroupId,
+              actor: actor!,
+              variant: 'avatar',
+            })
+          }
+          if (pendingCover) {
+            finalCover = await uploadFile(pendingCover, {
+              groupId: pinataGroupId,
+              actor: actor!,
+              variant: 'cover',
+            })
+          }
+        } finally {
+          setIsUploading(false)
+        }
+      }
+
       await updateProfile({
         actor: actor!,
         name,
         about,
         location,
         interests,
+        avatarIpfs: finalAvatar,
+        coverIpfs: finalCover,
       })
       reset({
         name,
         about,
         location,
         interests,
+        avatarIpfs: finalAvatar,
+        coverIpfs: finalCover,
       })
+      setPendingAvatar(null)
+      setPendingCover(null)
       toast('Profile updated!')
       queryClient.invalidateQueries({ queryKey: ['users'] })
       router.refresh()
@@ -140,6 +201,32 @@ export function ProfileForm() {
                   className="mt-8 space-y-8"
                 >
                   <Field>
+                    <Label>Cover Photo</Label>
+                    <ImageUpload
+                      variant="cover"
+                      value={coverIpfs}
+                      onFileSelect={(file) => setPendingCover(file)}
+                      isUploading={isUploading}
+                    />
+                    <span className="text-body-3 text-gray-3 mt-1 block">
+                      Recommended: 1200 x 480px
+                    </span>
+                  </Field>
+
+                  <Field>
+                    <Label>Avatar</Label>
+                    <ImageUpload
+                      variant="avatar"
+                      value={avatarIpfs}
+                      onFileSelect={(file) => setPendingAvatar(file)}
+                      isUploading={isUploading}
+                    />
+                    <span className="text-body-3 text-gray-3 mt-1 block">
+                      Recommended: 400 x 400px
+                    </span>
+                  </Field>
+
+                  <Field>
                     <Label htmlFor="name">Name</Label>
                     <Input
                       {...register('name')}
@@ -191,9 +278,9 @@ export function ProfileForm() {
                     type="submit"
                     variant="primary"
                     size="lg"
-                    disabled={isLoading || isSubmitting}
+                    disabled={isLoading || isSubmitting || isUploading}
                   >
-                    {isSubmitting ? 'Saving...' : 'Save'}
+                    {isSubmitting || isUploading ? 'Saving...' : 'Save'}
                   </Button>
                 </form>
               </motion.div>

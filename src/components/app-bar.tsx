@@ -14,11 +14,13 @@ import { Link } from '@/components/ui/link'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useGetUserProfile } from '@/hooks/query/use-get-user-profile'
 
 export function AppBar() {
   const [showMenu, setShowMenu] = useState(false)
   const { isAuthenticated, login, logout, actor } = useChain()
   const { hasOrganization, displayName, ipfs } = useOrganization()
+  const { data: userProfile } = useGetUserProfile(actor ?? null)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -149,6 +151,11 @@ export function AppBar() {
                       <Avatar
                         color="red"
                         className="group-data-[state=open]/dropdown-button:border-white"
+                        src={
+                          userProfile?.avatarIpfs
+                            ? IPFS_IMAGE_SOURCE + userProfile.avatarIpfs
+                            : undefined
+                        }
                       >
                         {actor ? actor.slice(0, 2) : 'un'}
                       </Avatar>
