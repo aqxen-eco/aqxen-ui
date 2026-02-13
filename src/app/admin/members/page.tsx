@@ -1,8 +1,12 @@
 'use client'
 
+import * as Dialog from '@radix-ui/react-dialog'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
+import { AnimatePresence, motion } from 'motion/react'
+import Link from 'next/link'
 import { useState } from 'react'
+import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
 
 import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
@@ -56,7 +60,6 @@ export default function MembersPage() {
   const [pendingAction, setPendingAction] =
     useState<PendingMemberAction>(null)
   const [isPurchasing, setIsPurchasing] = useState(false)
-  const [purchaseComplete, setPurchaseComplete] = useState(false)
 
   const membersQuery = useQuery({
     queryKey: ['members', name],
@@ -69,6 +72,11 @@ export default function MembersPage() {
   })
 
   const billingQuery = useGetBillingDetail()
+
+  const feesQuery = useQuery({
+    queryKey: ['fees'],
+    queryFn: async () => await listFees(),
+  })
 
   const currentCycleQuery = useQuery({
     queryKey: ['current-cycle'],
@@ -84,9 +92,16 @@ export default function MembersPage() {
     ? Number(currentBillingDetail.members_paid_for)
     : undefined
 
-  function invalidateQueries() {
-    queryClient.invalidateQueries({ queryKey: ['members', name] })
-    queryClient.invalidateQueries({ queryKey: ['member-requests', name] })
+  const slotsAreFull =
+    memberCount !== undefined &&
+    maxMembers !== undefined &&
+    memberCount >= maxMembers
+
+  async function refetchAfterChainAction(queryKeys: string[][]) {
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await Promise.all(
+      queryKeys.map((key) => queryClient.refetchQueries({ queryKey: key }))
+    )
   }
 
   function isMemberFeeError(error: unknown): boolean {
@@ -94,34 +109,30 @@ export default function MembersPage() {
     return msg.includes(MEMBER_FEE_ERROR)
   }
 
-  function handleMemberError(
-    error: unknown,
-    action: PendingMemberAction
-  ) {
-    if (isMemberFeeError(error)) {
-      setPendingAction(action)
-      setPurchaseComplete(false)
-    } else {
-      toast.error('Failed to update member')
-    }
-  }
-
   async function handleAddMember(e: React.FormEvent) {
     e.preventDefault()
     if (!session || !account.trim()) return
+
+    if (slotsAreFull) {
+      setPendingAction({ type: 'add', user: account.trim(), memo })
+      return
+    }
+
     setIsSubmitting(true)
     try {
       await addMember({ session, org: name, user: account.trim(), memo })
       setAccount('')
       setMemo('')
       setShowAddForm(false)
-      invalidateQueries()
+      await refetchAfterChainAction([['members', name], ['member-requests', name]])
+      toast.success(`${account.trim()} has been added as a member.`)
     } catch (error) {
-      handleMemberError(error, {
-        type: 'add',
-        user: account.trim(),
-        memo,
-      })
+      if (isMemberFeeError(error)) {
+        toast.error('Member limit reached. Please purchase an additional seat.')
+        await refetchAfterChainAction([['members', name], ['member-requests', name]])
+      } else {
+        toast.error('Failed to update member')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -129,11 +140,23 @@ export default function MembersPage() {
 
   async function handleAccept(user: string) {
     if (!session) return
+
+    if (slotsAreFull) {
+      setPendingAction({ type: 'accept', user, memo: '' })
+      return
+    }
+
     try {
       await acceptMember({ session, org: name, user, memo: '' })
-      invalidateQueries()
+      await refetchAfterChainAction([['members', name], ['member-requests', name]])
+      toast.success(`${user} has been accepted.`)
     } catch (error) {
-      handleMemberError(error, { type: 'accept', user, memo: '' })
+      if (isMemberFeeError(error)) {
+        toast.error('Member limit reached. Please purchase an additional seat.')
+        await refetchAfterChainAction([['members', name], ['member-requests', name]])
+      } else {
+        toast.error('Failed to update member')
+      }
     }
   }
 
@@ -141,7 +164,8 @@ export default function MembersPage() {
     if (!session) return
     try {
       await rejectMember({ session, org: name, user, memo: '' })
-      invalidateQueries()
+      await refetchAfterChainAction([['members', name], ['member-requests', name]])
+      toast.success(`${user} has been rejected.`)
     } catch {
       toast.error('Failed to reject member')
     }
@@ -151,29 +175,26 @@ export default function MembersPage() {
     if (!session) return
     try {
       await removeMember({ session, org: name, user, memo: '' })
-      invalidateQueries()
+      await refetchAfterChainAction([['members', name], ['member-requests', name]])
+      toast.success(`${user} has been removed.`)
     } catch {
       toast.error('Failed to remove member')
     }
   }
 
   async function handleBuySlot() {
-    if (!session || !currentCycleId) return
+    const fee = feesQuery.data?.rows[0]
+    if (!session || !currentCycleId || !fee) return
     setIsPurchasing(true)
     try {
-      const fees = await listFees()
-      const fee = fees.rows[0]
-      if (!fee) {
-        toast.error('Could not load member fee')
-        return
-      }
       await transferToken({
         session,
         quantity: fee.member_fee,
         currentCycleId,
       })
-      queryClient.invalidateQueries({ queryKey: ['billing-detail'] })
-      setPurchaseComplete(true)
+      await refetchAfterChainAction([['billing-detail']])
+      setPendingAction(null)
+      toast.success('Member slot purchased! You can now retry the action.')
     } catch {
       toast.error('Failed to purchase member slot')
     } finally {
@@ -181,41 +202,7 @@ export default function MembersPage() {
     }
   }
 
-  async function handleRetry() {
-    if (!session || !pendingAction) return
-    setIsSubmitting(true)
-    try {
-      if (pendingAction.type === 'add') {
-        await addMember({
-          session,
-          org: name,
-          user: pendingAction.user,
-          memo: pendingAction.memo,
-        })
-        setAccount('')
-        setMemo('')
-        setShowAddForm(false)
-      } else {
-        await acceptMember({
-          session,
-          org: name,
-          user: pendingAction.user,
-          memo: pendingAction.memo,
-        })
-      }
-      setPendingAction(null)
-      setPurchaseComplete(false)
-      invalidateQueries()
-    } catch (error) {
-      if (isMemberFeeError(error)) {
-        setPurchaseComplete(false)
-      } else {
-        toast.error('Failed to update member')
-      }
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const memberFee = feesQuery.data?.rows[0]?.member_fee
 
   return (
     <>
@@ -232,62 +219,6 @@ export default function MembersPage() {
         </HeaderAdminTitle>
       </HeaderAdmin>
       <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
-        {pendingAction && (
-          <div className="border-gray-2 bg-gray-1 mb-8 rounded-2xl border p-6">
-            <h2 className="text-title-2 mb-2 text-white">
-              Member limit reached
-            </h2>
-            <p className="text-body-2 text-gray-3 mb-4">
-              {`Your organization has used all ${maxMembers ?? '?'} paid member slot${maxMembers === 1 ? '' : 's'}. Purchase an additional slot to ${pendingAction.type === 'add' ? 'add' : 'accept'} ${pendingAction.user}.`}
-            </p>
-            {!purchaseComplete ? (
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="primary"
-                  size="md"
-                  disabled={isPurchasing || !currentCycleId}
-                  onClick={handleBuySlot}
-                >
-                  {isPurchasing ? 'Purchasing...' : 'Buy Member Slot'}
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={() => {
-                    setPendingAction(null)
-                    setPurchaseComplete(false)
-                  }}
-                >
-                  Dismiss
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="primary"
-                  size="md"
-                  disabled={isSubmitting}
-                  onClick={handleRetry}
-                >
-                  {isSubmitting
-                    ? 'Retrying...'
-                    : `Retry ${pendingAction.type === 'add' ? 'adding' : 'accepting'} ${pendingAction.user}`}
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={() => {
-                    setPendingAction(null)
-                    setPurchaseComplete(false)
-                  }}
-                >
-                  Dismiss
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
         {showAddForm && (
           <form
             onSubmit={handleAddMember}
@@ -378,11 +309,22 @@ export default function MembersPage() {
         </section>
 
         <section>
-          <h2 className="text-title-2 mb-4 text-white">
-            {memberCount !== undefined && maxMembers !== undefined
-              ? `Members (${memberCount} / ${maxMembers})`
-              : 'Members'}
-          </h2>
+          <div className="mb-4 flex items-center gap-4">
+            <h2 className="text-title-2 text-white">
+              {memberCount !== undefined && maxMembers !== undefined
+                ? `Members (${memberCount} / ${maxMembers})`
+                : 'Members'}
+            </h2>
+            {memberCount !== undefined &&
+              maxMembers !== undefined &&
+              memberCount >= maxMembers && (
+                <Button asChild variant="primary" size="md">
+                  <Link href="/admin/buy-subscription">
+                    Buy Additional Seats
+                  </Link>
+                </Button>
+              )}
+          </div>
           {membersQuery.isLoading && <TableSkeleton columns={3} rows={6} />}
           {membersQuery.isSuccess &&
             membersQuery.data.rows.length === 0 && (
@@ -421,6 +363,71 @@ export default function MembersPage() {
             )}
         </section>
       </div>
+
+      <Dialog.Root
+        open={!!pendingAction}
+        onOpenChange={(open) => {
+          if (!open) setPendingAction(null)
+        }}
+      >
+        <AnimatePresence>
+          {pendingAction && (
+            <Dialog.Portal forceMount>
+              <Dialog.Overlay forceMount asChild>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 bg-black/50"
+                />
+              </Dialog.Overlay>
+              <Dialog.Content forceMount asChild>
+                <motion.div
+                  initial={{ opacity: 0, y: 32 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 32 }}
+                  className="border-gray-2 bg-gray-1 fixed top-1/2 left-1/2 z-60 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border p-8 shadow-lg"
+                >
+                  <Dialog.Close asChild>
+                    <Button
+                      size="md"
+                      variant="link"
+                      square
+                      className="absolute top-4 right-4"
+                    >
+                      <MdClose className="size-6" />
+                    </Button>
+                  </Dialog.Close>
+                  <Dialog.Title className="text-title-1 text-white">
+                    Member limit reached
+                  </Dialog.Title>
+                  <Dialog.Description className="text-body-2 text-gray-3 mt-2">
+                    {`Your organization has used all ${maxMembers ?? '?'} paid member slot${maxMembers === 1 ? '' : 's'}. Purchase an additional seat to ${pendingAction.type === 'add' ? 'add' : 'accept'} ${pendingAction.user}.`}
+                  </Dialog.Description>
+                  {memberFee && (
+                    <p className="text-body-2 mt-4 text-white">
+                      Monthly member fee:{' '}
+                      <span className="font-semibold">{memberFee}</span>
+                    </p>
+                  )}
+                  <div className="mt-6">
+                    <Button
+                      variant="primary"
+                      size="md"
+                      disabled={isPurchasing || !currentCycleId || !memberFee}
+                      onClick={handleBuySlot}
+                    >
+                      {isPurchasing
+                        ? 'Purchasing...'
+                        : 'Buy Additional Seat'}
+                    </Button>
+                  </div>
+                </motion.div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          )}
+        </AnimatePresence>
+      </Dialog.Root>
     </>
   )
 }
