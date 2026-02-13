@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 
-import { MutualRecognition } from '@/components/mutual-recognition'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
@@ -113,13 +112,6 @@ export function AppBar() {
                     <MdClose className="size-6" />
                   </Button>
                   <Link
-                    href="/feed"
-                    variant={pathname.includes('/feed') ? 'link' : 'default'}
-                    className="max-md:text-2xl"
-                  >
-                    Feed
-                  </Link>
-                  <Link
                     href="/admin/organization"
                     variant={pathname.includes('/admin') ? 'link' : 'default'}
                     className="max-md:text-2xl"
@@ -141,7 +133,14 @@ export function AppBar() {
             </div>
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {hasOrganization && <MutualRecognition />}
+                {hasOrganization && (
+                  <Link
+                    href="/feed"
+                    variant="primary"
+                  >
+                    Feed
+                  </Link>
+                )}
                 <DropdownRoot
                   customTrigger={
                     <button

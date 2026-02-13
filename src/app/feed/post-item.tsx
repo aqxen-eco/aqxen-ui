@@ -6,16 +6,18 @@ import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import { Children, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { MdMoreHoriz, MdWorkspacePremium } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
+import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
 import { Avatar } from '@/components/ui/avatar'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
+import { InputBadges } from '@/components/ui/input-badges'
 import { Tooltip } from '@/components/ui/tooltip'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
@@ -37,6 +39,7 @@ type PostItemProps = {
 
 const commentSchema = z.object({
   content: z.string().nonempty('Comment content is required'),
+  badges: z.string().array().min(1, 'Select at least one badge'),
 })
 
 type CommentSchema = z.infer<typeof commentSchema>
@@ -62,26 +65,45 @@ export function PostItem({
     queryFn: async () => await listBadge({ scope: name }),
   })
 
-  const { actor: currentActor } = useChain()
+  const { actor: currentActor, session } = useChain()
 
-  const { register, handleSubmit, watch, reset } = useForm<CommentSchema>({
-    resolver: zodResolver(commentSchema),
-  })
+  const { control, register, handleSubmit, watch, reset } =
+    useForm<CommentSchema>({
+      resolver: zodResolver(commentSchema),
+    })
 
   const queryClient = useQueryClient()
 
   const contentWatched = watch('content')
+  const badgesWatched = watch('badges')
 
-  async function onSubmit({ content }: CommentSchema) {
-    createPost({
-      parentId: id,
-      actor: currentActor!,
-      content,
-    })
-    toast('Recognition published!')
-    reset()
-    queryClient.invalidateQueries({ queryKey: ['posts'] })
-    setShowRecognize(false)
+  async function onSubmit({ content, badges }: CommentSchema) {
+    try {
+      const data = badges.map((badge) => ({
+        session: session!,
+        badge_symbol: badge,
+        amount: 1,
+        to: actor,
+        memo: content,
+      }))
+
+      await sendMultiBadge(data)
+
+      await createPost({
+        parentId: id,
+        actor: currentActor!,
+        content,
+        badgeSymbol: badges,
+        mention: [actor],
+      })
+
+      toast('Recognition published!')
+      reset()
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      setShowRecognize(false)
+    } catch {
+      toast.error('Failed to send badge')
+    }
   }
 
   return (
@@ -153,7 +175,7 @@ export function PostItem({
             </div>
           )}
           <p className="text-body-2 text-gray-3">{content}</p>
-          {currentActor && (
+          {currentActor && currentActor !== actor && (
             <AnimatePresence>
               {!showRecognize && (
                 <motion.div
@@ -178,16 +200,37 @@ export function PostItem({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 16 }}
                   transition={{ duration: 0.2 }}
+                  className="border-gray-2 mt-4 space-y-4 border-t pt-4"
                 >
-                  <label className="bg-gray-1 border-gray-2 mt-2 block rounded-xl border p-4">
-                    <textarea
-                      {...register('content')}
-                      placeholder="Recognize your colleague for their hard work and dedication."
-                      className="text-body-2 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
-                      rows={1}
+                  <div>
+                    <span className="text-body-2 mb-1 block font-medium text-white">
+                      Badges
+                    </span>
+                    <Controller
+                      name="badges"
+                      control={control}
+                      render={({ field }) => (
+                        <InputBadges
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
                     />
-                  </label>
-                  <div className="mt-2 flex justify-end">
+                  </div>
+                  <div>
+                    <span className="text-body-2 mb-1 block font-medium text-white">
+                      Message
+                    </span>
+                    <label className="bg-gray-1 border-gray-2 block rounded-xl border p-4">
+                      <textarea
+                        {...register('content')}
+                        placeholder="Recognize your colleague for their hard work and dedication."
+                        className="text-body-2 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
+                        rows={1}
+                      />
+                    </label>
+                  </div>
+                  <div className="flex justify-end">
                     <Button
                       variant="secondary"
                       className="mr-2"
@@ -198,7 +241,12 @@ export function PostItem({
                     <Button
                       type="submit"
                       variant="primary"
-                      disabled={!contentWatched || contentWatched.length === 0}
+                      disabled={
+                        !contentWatched ||
+                        contentWatched.length === 0 ||
+                        !badgesWatched ||
+                        badgesWatched.length === 0
+                      }
                     >
                       Post
                     </Button>
