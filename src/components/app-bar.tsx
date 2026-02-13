@@ -80,11 +80,11 @@ export function AppBar() {
                 Stream
               </Link>
               <Link
-                href="/contact"
-                variant={pathname === '/contact' ? 'link' : 'default'}
+                href="/organizations"
+                variant={pathname.startsWith('/organizations') ? 'link' : 'default'}
                 className="max-md:text-2xl"
               >
-                Contact
+                Organizations
               </Link>
               <Link
                 href="/faq"
@@ -93,33 +93,14 @@ export function AppBar() {
               >
                 FAQ
               </Link>
-              {isAuthenticated && (
-                <Link
-                  href={`/profile/${actor}`}
-                  variant={pathname.includes('/profile') ? 'link' : 'default'}
-                  className="max-md:text-2xl"
-                >
-                  Profile
-                </Link>
-              )}
-              {hasOrganization ? (
-                <>
-                  <Button
-                    variant="default"
-                    className="absolute top-4 right-4 md:hidden"
-                    onClick={() => setShowMenu(!showMenu)}
-                  >
-                    <MdClose className="size-6" />
-                  </Button>
-                  <Link
-                    href="/admin/organization"
-                    variant={pathname.includes('/admin') ? 'link' : 'default'}
-                    className="max-md:text-2xl"
-                  >
-                    Admin
-                  </Link>
-                </>
-              ) : (
+              <Link
+                href="/contact"
+                variant={pathname === '/contact' ? 'link' : 'default'}
+                className="max-md:text-2xl"
+              >
+                Contact
+              </Link>
+              {!hasOrganization && (
                 <Link
                   href="/subscriptions"
                   variant={
@@ -130,6 +111,13 @@ export function AppBar() {
                   Subscriptions
                 </Link>
               )}
+              <Button
+                variant="default"
+                className="absolute top-4 right-4 md:hidden"
+                onClick={() => setShowMenu(!showMenu)}
+              >
+                <MdClose className="size-6" />
+              </Button>
             </div>
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
@@ -165,6 +153,13 @@ export function AppBar() {
                   <DropdownItem asChild>
                     <NextLink href={`/profile/${actor}`}>Profile</NextLink>
                   </DropdownItem>
+                  {hasOrganization && (
+                    <DropdownItem asChild>
+                      <NextLink href="/admin/organization">
+                        Org Admin
+                      </NextLink>
+                    </DropdownItem>
+                  )}
                   <DropdownItem onClick={logoutAndGoToHome}>
                     Log out
                   </DropdownItem>

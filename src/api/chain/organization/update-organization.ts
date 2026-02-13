@@ -7,6 +7,9 @@ export async function updateOrganization({
   org,
   ipfs_image,
   display_name,
+  short_description,
+  about,
+  purpose,
 }: UpdateOrganizationProps) {
   const actions = []
 
@@ -34,6 +37,45 @@ export async function updateOrganization({
         ipfs_image,
         permission: session.permission.toString(),
         actor: session.actor.toString(),
+      },
+    })
+  }
+
+  if (short_description) {
+    actions.push({
+      account: Contract.ORGANIZATION,
+      name: 'onckeyvalue',
+      authorization: [session.permissionLevel],
+      data: {
+        org,
+        key: 'short_description',
+        value: short_description,
+      },
+    })
+  }
+
+  if (about) {
+    actions.push({
+      account: Contract.ORGANIZATION,
+      name: 'onckeyvalue',
+      authorization: [session.permissionLevel],
+      data: {
+        org,
+        key: 'about',
+        value: about,
+      },
+    })
+  }
+
+  if (purpose) {
+    actions.push({
+      account: Contract.ORGANIZATION,
+      name: 'onckeyvalue',
+      authorization: [session.permissionLevel],
+      data: {
+        org,
+        key: 'purpose',
+        value: purpose,
       },
     })
   }

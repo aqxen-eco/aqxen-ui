@@ -17,6 +17,9 @@ export type Organization = {
     }
     user: {
       display_name: string
+      short_description: string
+      about: string
+      purpose: string
     }
   }
 }
@@ -35,6 +38,9 @@ export type UpdateOrganizationProps = {
   org: string
   ipfs_image?: string
   display_name?: string
+  short_description?: string
+  about?: string
+  purpose?: string
 }
 
 export type Member = {

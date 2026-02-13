@@ -12,6 +12,9 @@ type OrganizationContext = {
   ipfs: string
   createdAt: string
   displayName: string
+  shortDescription: string
+  about: string
+  purpose: string
   hasOrganization: boolean
   isPending: boolean
 }
@@ -39,6 +42,10 @@ export function OrganizationProvider({
     String(query.data?.rows[0]?.onchain_lookup_data?.system.created_at) ?? ''
   const displayName =
     query.data?.rows[0]?.onchain_lookup_data?.user.display_name ?? ''
+  const shortDescription =
+    query.data?.rows[0]?.onchain_lookup_data?.user.short_description ?? ''
+  const about = query.data?.rows[0]?.onchain_lookup_data?.user.about ?? ''
+  const purpose = query.data?.rows[0]?.onchain_lookup_data?.user.purpose ?? ''
 
   return (
     <OrganizationContext
@@ -49,6 +56,9 @@ export function OrganizationProvider({
         ipfs,
         createdAt,
         displayName,
+        shortDescription,
+        about,
+        purpose,
         isPending: query.isPending,
       }}
     >
@@ -65,6 +75,9 @@ export function useOrganization() {
     ipfs,
     createdAt,
     displayName,
+    shortDescription,
+    about,
+    purpose,
     isPending,
   } = use(OrganizationContext)
 
@@ -83,6 +96,9 @@ export function useOrganization() {
     ipfs,
     createdAt,
     displayName,
+    shortDescription,
+    about,
+    purpose,
     addOrganizationSymbol,
     removeOrganizationSymbol,
     isPending,
