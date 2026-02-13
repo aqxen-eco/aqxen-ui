@@ -44,13 +44,12 @@ export async function updateOrganization({
   if (short_description) {
     actions.push({
       account: Contract.ORGANIZATION,
-      name: 'shortdesc',
+      name: 'onckeyvalue',
       authorization: [session.permissionLevel],
       data: {
         org,
-        short_description,
-        permission: session.permission.toString(),
-        actor: session.actor.toString(),
+        key: 'short_description',
+        value: short_description,
       },
     })
   }
@@ -58,13 +57,12 @@ export async function updateOrganization({
   if (about) {
     actions.push({
       account: Contract.ORGANIZATION,
-      name: 'about',
+      name: 'onckeyvalue',
       authorization: [session.permissionLevel],
       data: {
         org,
-        about,
-        permission: session.permission.toString(),
-        actor: session.actor.toString(),
+        key: 'about',
+        value: about,
       },
     })
   }
@@ -72,13 +70,12 @@ export async function updateOrganization({
   if (purpose) {
     actions.push({
       account: Contract.ORGANIZATION,
-      name: 'purpose',
+      name: 'onckeyvalue',
       authorization: [session.permissionLevel],
       data: {
         org,
-        purpose,
-        permission: session.permission.toString(),
-        actor: session.actor.toString(),
+        key: 'purpose',
+        value: purpose,
       },
     })
   }
