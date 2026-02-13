@@ -80,6 +80,13 @@ export function AppBar() {
                 Stream
               </Link>
               <Link
+                href="/organizations"
+                variant={pathname.startsWith('/organizations') ? 'link' : 'default'}
+                className="max-md:text-2xl"
+              >
+                Organizations
+              </Link>
+              <Link
                 href="/contact"
                 variant={pathname === '/contact' ? 'link' : 'default'}
                 className="max-md:text-2xl"

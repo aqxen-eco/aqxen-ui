@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { uploadFile } from '@/lib/upload-file'
@@ -20,13 +21,24 @@ import { uploadFile } from '@/lib/upload-file'
 const organizationSchema = z.object({
   displayName: z.string().min(1, 'Name is required'),
   ipfs: z.string().optional(),
+  shortDescription: z.string().optional(),
+  about: z.string().optional(),
+  purpose: z.string().optional(),
 })
 
 type OrganizationSchema = z.infer<typeof organizationSchema>
 
 export default function OrganizationPage() {
   const { session } = useChain()
-  const { name, symbol, displayName, ipfs } = useOrganization()
+  const {
+    name,
+    symbol,
+    displayName,
+    ipfs,
+    shortDescription,
+    about,
+    purpose,
+  } = useOrganization()
 
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -43,12 +55,21 @@ export default function OrganizationPage() {
     defaultValues: {
       displayName: displayName,
       ipfs: ipfs,
+      shortDescription: shortDescription,
+      about: about,
+      purpose: purpose,
     },
   })
 
   const logo = watch('ipfs')
 
-  async function onSubmit({ displayName, ipfs }: OrganizationSchema) {
+  async function onSubmit({
+    displayName,
+    ipfs,
+    shortDescription,
+    about,
+    purpose,
+  }: OrganizationSchema) {
     if (!pendingFile && !ipfs) {
       setError('ipfs', { message: 'Logo is required' })
       return
@@ -73,6 +94,9 @@ export default function OrganizationPage() {
         org: name,
         display_name: displayName,
         ipfs_image: imageHash,
+        short_description: shortDescription,
+        about,
+        purpose,
       })
       setPendingFile(null)
     } catch {
@@ -84,8 +108,11 @@ export default function OrganizationPage() {
     reset({
       displayName,
       ipfs,
+      shortDescription,
+      about,
+      purpose,
     })
-  }, [displayName, ipfs, reset])
+  }, [displayName, ipfs, shortDescription, about, purpose, reset])
 
   return (
     <Box className="p-0 max-md:space-y-8 max-md:rounded-none max-md:border-0 max-md:bg-black md:grid md:grid-cols-6">
@@ -115,6 +142,33 @@ export default function OrganizationPage() {
           <span className="text-body-3 text-gray-3 mt-1 block">
             Recommended: 400 x 400px
           </span>
+        </Field>
+        <Field>
+          <Label htmlFor="shortDescription">Short Description</Label>
+          <Input
+            id="shortDescription"
+            {...register('shortDescription')}
+            placeholder="A brief tagline for your organization"
+            disabled={isLoading}
+          />
+        </Field>
+        <Field>
+          <Label htmlFor="about">About Organization</Label>
+          <Textarea
+            id="about"
+            {...register('about')}
+            placeholder="Tell people about your organization"
+            disabled={isLoading}
+          />
+        </Field>
+        <Field>
+          <Label htmlFor="purpose">Organization Purpose</Label>
+          <Textarea
+            id="purpose"
+            {...register('purpose')}
+            placeholder="What is your organization's purpose?"
+            disabled={isLoading}
+          />
         </Field>
         <Button
           type="submit"
