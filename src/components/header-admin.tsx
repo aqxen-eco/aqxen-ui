@@ -28,6 +28,10 @@ export const navLinks = [
     label: 'Badges automation',
     href: '/admin/badges-automation',
   },
+  {
+    label: 'Members',
+    href: '/admin/members',
+  },
 ] as const
 
 type HeaderAdminProps = {
