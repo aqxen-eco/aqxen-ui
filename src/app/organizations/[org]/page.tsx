@@ -1,12 +1,13 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 
+import { listMemberRequests } from '@/api/chain/organization/list-member-requests'
 import { listMembers } from '@/api/chain/organization/list-members'
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { requestJoin } from '@/api/chain/organization/request-join'
@@ -27,6 +28,7 @@ import { useChain } from '@/contexts/chain'
 export default function OrganizationPage() {
   const { org } = useParams<{ org: string }>()
   const { session, isAuthenticated, actor } = useChain()
+  const queryClient = useQueryClient()
   const [isRequesting, setIsRequesting] = useState(false)
 
   const orgQuery = useQuery({
@@ -39,6 +41,16 @@ export default function OrganizationPage() {
     queryKey: ['members', org],
     queryFn: async () => await listMembers({ scope: org }),
   })
+
+  const requestsQuery = useQuery({
+    queryKey: ['member-requests', org],
+    queryFn: async () => await listMemberRequests({ scope: org }),
+    enabled: isAuthenticated,
+  })
+
+  const hasPendingRequest = requestsQuery.data?.rows.some(
+    (row) => row.account === actor
+  )
 
   const orgData = orgQuery.data?.rows[0]
   const ipfsImage = orgData?.offchain_lookup_data?.user?.ipfs_image
@@ -56,6 +68,8 @@ export default function OrganizationPage() {
     setIsRequesting(true)
     try {
       await requestJoin({ session, org, memo: '' })
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await queryClient.refetchQueries({ queryKey: ['member-requests', org] })
       toast.success(`Request to join ${org} has been sent.`)
     } catch {
       toast.error('Failed to send join request.')
@@ -101,14 +115,25 @@ export default function OrganizationPage() {
                 </Button>
               )}
               {isAuthenticated && actor !== org && (
-                <Button
-                  variant="primary"
-                  size="lg"
-                  disabled={isRequesting}
-                  onClick={handleRequestJoin}
-                >
-                  {isRequesting ? 'Requesting...' : 'Request to Join'}
-                </Button>
+                hasPendingRequest ? (
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    disabled
+                    className="border-gray-3 text-gray-3 opacity-100"
+                  >
+                    Request Pending
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    disabled={isRequesting}
+                    onClick={handleRequestJoin}
+                  >
+                    {isRequesting ? 'Requesting...' : 'Request to Join'}
+                  </Button>
+                )
               )}
             </div>
           </>

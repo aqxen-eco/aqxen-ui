@@ -1,10 +1,11 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 
+import { listMemberRequests } from '@/api/chain/organization/list-member-requests'
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { requestJoin } from '@/api/chain/organization/request-join'
 import { Avatar } from '@/components/ui/avatar'
@@ -15,6 +16,7 @@ import { useChain } from '@/contexts/chain'
 
 export default function OrganizationsPage() {
   const { session, isAuthenticated, actor } = useChain()
+  const queryClient = useQueryClient()
   const [requestingOrg, setRequestingOrg] = useState<string | null>(null)
 
   const orgsQuery = useQuery({
@@ -22,11 +24,39 @@ export default function OrganizationsPage() {
     queryFn: async () => await listOrganization({}),
   })
 
+  const orgs = orgsQuery.data?.rows ?? []
+
+  const requestQueries = useQueries({
+    queries: isAuthenticated
+      ? orgs
+          .filter((org) => org.org !== actor)
+          .map((org) => ({
+            queryKey: ['member-requests', org.org],
+            queryFn: async () => await listMemberRequests({ scope: org.org }),
+          }))
+      : [],
+  })
+
+  const pendingOrgNames = new Set<string>()
+  orgs
+    .filter((org) => org.org !== actor)
+    .forEach((org, i) => {
+      const query = requestQueries[i]
+      if (
+        query?.isSuccess &&
+        query.data.rows.some((row) => row.account === actor)
+      ) {
+        pendingOrgNames.add(org.org)
+      }
+    })
+
   async function handleRequestJoin(org: string) {
     if (!session) return
     setRequestingOrg(org)
     try {
       await requestJoin({ session, org, memo: '' })
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await queryClient.refetchQueries({ queryKey: ['member-requests', org] })
       toast.success(`Request to join ${org} has been sent.`)
     } catch {
       toast.error('Failed to send join request.')
@@ -104,16 +134,27 @@ export default function OrganizationsPage() {
                     <Link href={`/organizations/${org.org}`}>View</Link>
                   </Button>
                   {isAuthenticated && actor !== org.org && (
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      disabled={requestingOrg === org.org}
-                      onClick={() => handleRequestJoin(org.org)}
-                    >
-                      {requestingOrg === org.org
-                        ? 'Requesting...'
-                        : 'Request to Join'}
-                    </Button>
+                    pendingOrgNames.has(org.org) ? (
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        disabled
+                        className="border-gray-3 text-gray-3 opacity-100"
+                      >
+                        Request Pending
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        disabled={requestingOrg === org.org}
+                        onClick={() => handleRequestJoin(org.org)}
+                      >
+                        {requestingOrg === org.org
+                          ? 'Requesting...'
+                          : 'Request to Join'}
+                      </Button>
+                    )
                   )}
                 </div>
               </Box>
