@@ -121,14 +121,6 @@ export function AppBar() {
             </div>
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {hasOrganization && (
-                  <Link
-                    href="/feed"
-                    variant="primary"
-                  >
-                    Feed
-                  </Link>
-                )}
                 <DropdownRoot
                   customTrigger={
                     <button
