@@ -36,3 +36,25 @@ export type UpdateOrganizationProps = {
   ipfs_image?: string
   display_name?: string
 }
+
+export type Member = {
+  account: string
+  joined_at: string
+}
+
+export type MemberRequest = {
+  account: string
+  requested_at: string
+  memo: string
+}
+
+export type ListMembersResult = GetTableRowsResult<Member>
+
+export type ListMemberRequestsResult = GetTableRowsResult<MemberRequest>
+
+export type MemberActionProps = {
+  session: Session
+  org: string
+  user: string
+  memo: string
+}
