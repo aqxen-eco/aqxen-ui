@@ -175,7 +175,7 @@ export function PostItem({
             </div>
           )}
           <p className="text-body-2 text-gray-3">{content}</p>
-          {currentActor && (
+          {currentActor && currentActor !== actor && (
             <AnimatePresence>
               {!showRecognize && (
                 <motion.div
