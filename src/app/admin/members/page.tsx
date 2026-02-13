@@ -337,7 +337,7 @@ export default function MembersPage() {
                   <TableRow>
                     <TableHead>Account</TableHead>
                     <TableHead>Joined at</TableHead>
-                    <TableHead className="w-28" />
+                    <TableHead className="w-44" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -348,13 +348,20 @@ export default function MembersPage() {
                         {format(new Date(row.joined_at), 'EEE d MMM yyyy')}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="secondary"
-                          size="md"
-                          onClick={() => handleRemove(row.account)}
-                        >
-                          Remove
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button asChild variant="primary" size="md">
+                            <Link href={`/profile/${row.account}`}>
+                              View Profile
+                            </Link>
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="md"
+                            onClick={() => handleRemove(row.account)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
