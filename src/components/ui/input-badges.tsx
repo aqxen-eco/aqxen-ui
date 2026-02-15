@@ -14,6 +14,7 @@ type InputBadgesProps = {
   onChange: (value: string[]) => void
   hideSearch?: boolean
   hideRemoveBadgeButton?: boolean
+  scope?: string
 }
 
 export function InputBadges({
@@ -21,15 +22,18 @@ export function InputBadges({
   onChange,
   hideSearch = false,
   hideRemoveBadgeButton = false,
+  scope,
 }: InputBadgesProps) {
   const { name } = useOrganization()
+  const badgeScope = scope ?? name
 
   const badgesQuery = useQuery({
-    queryKey: ['badges', name],
+    queryKey: ['badges', badgeScope],
     queryFn: async () =>
       await listBadge({
-        scope: name,
+        scope: badgeScope,
       }),
+    enabled: !!badgeScope,
   })
 
   if (!badgesQuery.isSuccess) {
@@ -40,59 +44,58 @@ export function InputBadges({
     )
   }
 
+  const selectedBadgeChips =
+    value && value.length > 0
+      ? value.map((badgeSymbolSelected) => {
+          const badge = badgesQuery?.data?.rows.find(
+            (b) => b.badge_symbol === badgeSymbolSelected
+          )
+          if (!badge) return null
+          return (
+            <div
+              key={badge.badge_symbol}
+              className="border-gray-2 bg-gray-2 inline-flex h-7 items-center rounded-full border pl-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <BadgeImage
+                src={badge.offchain_lookup_data.user.ipfs_image}
+                size="xs"
+              />
+              <span
+                className={twMerge(
+                  'text-body-2 ml-1 font-sans font-medium text-nowrap text-white',
+                  hideRemoveBadgeButton && 'mr-3'
+                )}
+              >
+                {badge.onchain_lookup_data.user.display_name}
+              </span>
+              {!hideRemoveBadgeButton && (
+                <Button
+                  size="md"
+                  variant="link"
+                  square
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const newValue = value.filter(
+                      (i) => i !== badgeSymbolSelected
+                    )
+                    onChange(newValue)
+                  }}
+                >
+                  <MdClose className="size-4" />
+                </Button>
+              )}
+            </div>
+          )
+        })
+      : null
+
   return (
-    <div className="mt-2 space-y-2">
-      {value && value.length > 0 && (
-        <ul className="flex flex-wrap items-start justify-start gap-2">
-          {value.map((badgeSymbolSelected) => {
-            const badge = badgesQuery?.data?.rows.find(
-              (b) => b.badge_symbol === badgeSymbolSelected
-            )
-
-            if (!badge) {
-              return null
-            }
-
-            return (
-              <li key={badge.badge_symbol}>
-                <div className="border-gray-2 bg-gray-1 inline-flex h-10 items-center rounded-full border pl-2">
-                  <BadgeImage
-                    src={badge.offchain_lookup_data.user.ipfs_image}
-                    size="xs"
-                  />
-                  <span
-                    className={twMerge(
-                      'text-body-2 ml-1 font-sans font-medium text-nowrap text-white',
-                      hideRemoveBadgeButton && 'mr-4'
-                    )}
-                  >
-                    {badge.onchain_lookup_data.user.display_name}
-                  </span>
-                  {!hideRemoveBadgeButton && (
-                    <Button
-                      size="md"
-                      variant="link"
-                      square
-                      onClick={() => {
-                        const newValue = value.filter(
-                          (i) => i !== badgeSymbolSelected
-                        )
-                        onChange(newValue)
-                      }}
-                    >
-                      <MdClose className="size-6" />
-                    </Button>
-                  )}
-                </div>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-
+    <div className="mt-2">
       {!hideSearch && (
         <Combobox
           title="Search badges"
+          triggerContent={selectedBadgeChips}
           filter={(value, search) => {
             const badge = badgesQuery?.data?.rows.find(
               (b) => b.badge_symbol === value

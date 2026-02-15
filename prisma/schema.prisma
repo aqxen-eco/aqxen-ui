@@ -35,9 +35,10 @@ model Post {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String   @map("user_id")
   content     String
-  badgeSymbol String[] @default([]) @map("badge_symbol")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  badgeSymbol  String[] @default([]) @map("badge_symbol")
+  organization String?  @map("organization")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   parent   Post?     @relation("PostToParent", fields: [parentId], references: [id])
   parentId String?   @map("parent_id")

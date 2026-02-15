@@ -22,6 +22,7 @@ import { Tooltip } from '@/components/ui/tooltip'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useGetOrganization } from '@/hooks/query/use-get-organization'
 import { listFormat } from '@/utils/intl-format'
 
 import { createPost } from './actions'
@@ -34,6 +35,7 @@ type PostItemProps = {
   content: string
   badgeSymbol: string[]
   mentions?: string[]
+  organization?: string | null
   children: React.ReactNode
 }
 
@@ -52,10 +54,17 @@ export function PostItem({
   content,
   badgeSymbol,
   mentions,
+  organization,
   children,
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
   const { name } = useOrganization()
+
+  const orgQuery = useGetOrganization(organization)
+  const orgAvatar =
+    orgQuery.data?.rows[0]?.offchain_lookup_data?.user.ipfs_image
+  const orgDisplayName =
+    orgQuery.data?.rows[0]?.onchain_lookup_data?.user.display_name
   const [showMore, setShowMore] = useState(() => {
     return Children.count(children) > 1
   })
@@ -109,13 +118,28 @@ export function PostItem({
   return (
     <Box className="before:bg-gray-2 after:bg-gray-2 relative p-0 before:absolute before:top-4 before:left-10 before:h-[calc(100%-2rem)] before:w-0.5 before:content-[''] after:absolute after:bottom-4 after:left-9.25 after:size-2 after:rounded-full after:content-[''] md:p-4 md:before:top-8 md:before:left-14 md:before:h-[calc(100%-4rem)] md:after:bottom-8 md:after:left-13.25">
       <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
-        <Avatar
-          size="md"
-          className="ring-gray-1 relative z-10 ring-8"
-          src={avatarIpfs ? IPFS_IMAGE_SOURCE + avatarIpfs : undefined}
-        >
-          {actor.slice(0, 2)}
-        </Avatar>
+        <div className="relative">
+          <Avatar
+            size="md"
+            className="ring-gray-1 relative z-10 ring-8"
+            src={avatarIpfs ? IPFS_IMAGE_SOURCE + avatarIpfs : undefined}
+          >
+            {actor.slice(0, 2)}
+          </Avatar>
+          {organization && orgAvatar && (
+            <Tooltip content={orgDisplayName || organization}>
+              <button className="absolute -right-1 -bottom-1 z-20">
+                <Avatar
+                  size="xs"
+                  src={IPFS_IMAGE_SOURCE + orgAvatar}
+                  className="ring-gray-1 ring-2"
+                >
+                  {organization.slice(0, 2)}
+                </Avatar>
+              </button>
+            </Tooltip>
+          )}
+        </div>
         <div className="max-md:space-y-2">
           <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
             <p className="text-body-2 text-white">

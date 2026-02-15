@@ -42,7 +42,7 @@ export function Select({
         <PrimitiveSelect.Content
           position="popper"
           sideOffset={8}
-          className="border-gray-2 bg-gray-1 w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border"
+          className="border-gray-2 bg-gray-1 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border"
         >
           <PrimitiveSelect.ScrollUpButton className="cursor-default items-center justify-center">
             <MdKeyboardArrowUp className="size-6" />
