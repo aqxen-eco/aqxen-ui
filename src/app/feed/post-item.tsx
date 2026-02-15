@@ -14,6 +14,7 @@ import { z } from 'zod'
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
 import { Avatar } from '@/components/ui/avatar'
+import { BadgeDetailModal } from '@/components/ui/badge-detail-modal'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
@@ -58,6 +59,7 @@ export function PostItem({
   children,
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
+  const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
   const { name } = useOrganization()
 
   const orgQuery = useGetOrganization(organization)
@@ -171,6 +173,17 @@ export function PostItem({
                 {' '}
                 • {format(new Date(createdAt), 'EEE d MMM')}
               </span>
+              {organization && orgDisplayName && (
+                <>
+                  <span className="text-gray-3"> • </span>
+                  <Link
+                    href={`/organizations/${organization}`}
+                    className="text-gray-3 hover:text-white hover:underline"
+                  >
+                    {orgDisplayName}
+                  </Link>
+                </>
+              )}
             </p>
             <div className="text-gray-3 flex gap-0.5">
               <MdWorkspacePremium className="size-6" />
@@ -187,7 +200,12 @@ export function PostItem({
                         key={row.badge_symbol}
                         content={row.onchain_lookup_data.user.display_name}
                       >
-                        <Button square>
+                        <Button
+                          square
+                          onClick={() =>
+                            setSelectedBadge(row.badge_symbol)
+                          }
+                        >
                           <BadgeImage
                             src={row.offchain_lookup_data.user.ipfs_image}
                             size="xs"
@@ -196,6 +214,14 @@ export function PostItem({
                       </Tooltip>
                     )
                 )}
+              <BadgeDetailModal
+                open={!!selectedBadge}
+                onOpenChange={(open) => {
+                  if (!open) setSelectedBadge(null)
+                }}
+                badgeSymbol={selectedBadge ?? ''}
+                scope={organization ?? name}
+              />
             </div>
           )}
           <p className="text-body-2 text-gray-3">{content}</p>

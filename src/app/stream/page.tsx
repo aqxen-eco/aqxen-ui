@@ -7,7 +7,8 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
@@ -137,9 +138,28 @@ export default function Stream() {
 
 function AuthenticatedStream({ actor }: { actor: string | undefined }) {
   const { session } = useChain()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
-  const [activeTab, setActiveTab] = useState<string>('all')
+  const [activeTab, setActiveTab] = useState<string>(
+    () => searchParams.get('tab') || 'all'
+  )
   const loadMoreBtnRef = useRef(null)
+
+  const handleTabChange = useCallback(
+    (tab: string) => {
+      setActiveTab(tab)
+      const params = new URLSearchParams(searchParams.toString())
+      if (tab === 'all') {
+        params.delete('tab')
+      } else {
+        params.set('tab', tab)
+      }
+      const query = params.toString()
+      router.replace(query ? `?${query}` : '/stream', { scroll: false })
+    },
+    [router, searchParams]
+  )
 
   const showOrgSelector = activeTab === 'all' || activeTab === 'my-posts'
   const isOrgTab = !showOrgSelector
@@ -324,7 +344,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
           type="button"
           data-state={activeTab === 'all' ? 'active' : 'idle'}
           className={tabClass}
-          onClick={() => setActiveTab('all')}
+          onClick={() => handleTabChange('all')}
         >
           All
         </button>
@@ -340,7 +360,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
               type="button"
               data-state={activeTab === org.org ? 'active' : 'idle'}
               className={tabClass}
-              onClick={() => setActiveTab(org.org)}
+              onClick={() => handleTabChange(org.org)}
             >
               <Avatar size="xs" src={avatarSrc}>
                 {displayName.charAt(0)}
@@ -353,7 +373,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
           type="button"
           data-state={activeTab === 'my-posts' ? 'active' : 'idle'}
           className={tabClass}
-          onClick={() => setActiveTab('my-posts')}
+          onClick={() => handleTabChange('my-posts')}
         >
           My Posts
         </button>

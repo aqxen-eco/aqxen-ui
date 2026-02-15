@@ -115,6 +115,40 @@ export async function createPost({
   }
 }
 
+type GetPostsByBadgeProps = {
+  badgeSymbol: string
+  limit?: number
+}
+
+export async function getPostsByBadge({
+  badgeSymbol,
+  limit = 10,
+}: GetPostsByBadgeProps) {
+  const posts = await prisma.post.findMany({
+    take: limit,
+    where: {
+      badgeSymbol: { has: badgeSymbol },
+    },
+    include: {
+      user: true,
+      mention: {
+        include: {
+          user: {
+            select: {
+              actor: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+
+  return posts
+}
+
 type GetPostsProps = {
   cursor?: string
   limit: number

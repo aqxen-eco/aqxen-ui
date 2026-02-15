@@ -3,12 +3,6 @@ import { MdOutlineInterests, MdOutlineLocationOn, MdStar } from 'react-icons/md'
 
 import { ProfileForm } from '@/components/profile-form'
 import { Avatar } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import {
-  BadgeSwiper,
-  BadgeSwiperSlide,
-  BadgeSwiperWrapper,
-} from '@/components/ui/badge-swiper'
 import { Box } from '@/components/ui/box'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 
@@ -18,6 +12,7 @@ import {
   getUserPosts,
   getUserProfile,
 } from './functions'
+import { LifetimeBadgesSection } from './lifetime-badges-section'
 import { ProfileFeed } from './profile-feed'
 import { ProfileTabs } from './profile-tabs'
 import { SeasonalBadgesSection } from './seasonal-badges-section'
@@ -46,29 +41,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const badgesContent = (
     <>
-      {badges.length > 0 && (
-        <section className="py-8">
-          <header className="mb-4 px-8 max-md:px-4">
-            <h3 className="text-title-2 text-white">
-              Lifetime Badges{' '}
-              <span className="text-gray-3">({badges.length})</span>
-            </h3>
-          </header>
-          <BadgeSwiper>
-            <BadgeSwiperWrapper>
-              {badges.map((badge, index) => (
-                <BadgeSwiperSlide key={index}>
-                  <Badge
-                    name={badge.onchain_lookup_data.user.display_name}
-                    balance={String(badge.balance)}
-                    ipfs={badge.offchain_lookup_data.user.ipfs_image}
-                  />
-                </BadgeSwiperSlide>
-              ))}
-            </BadgeSwiperWrapper>
-          </BadgeSwiper>
-        </section>
-      )}
+      {badges.length > 0 && <LifetimeBadgesSection badges={badges} />}
 
       {seasons.map((season) => (
         <SeasonalBadgesSection
