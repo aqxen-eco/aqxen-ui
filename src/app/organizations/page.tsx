@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 
+import { cancelRequest } from '@/api/chain/organization/cancel-request'
 import { listMemberRequests } from '@/api/chain/organization/list-member-requests'
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { requestJoin } from '@/api/chain/organization/request-join'
@@ -18,6 +19,7 @@ export default function OrganizationsPage() {
   const { session, isAuthenticated, actor } = useChain()
   const queryClient = useQueryClient()
   const [requestingOrg, setRequestingOrg] = useState<string | null>(null)
+  const [cancellingOrg, setCancellingOrg] = useState<string | null>(null)
 
   const orgsQuery = useQuery({
     queryKey: ['organizations'],
@@ -49,6 +51,21 @@ export default function OrganizationsPage() {
         pendingOrgNames.add(org.org)
       }
     })
+
+  async function handleCancelRequest(org: string) {
+    if (!session) return
+    setCancellingOrg(org)
+    try {
+      await cancelRequest({ session, org })
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await queryClient.refetchQueries({ queryKey: ['member-requests', org] })
+      toast.success('Request cancelled.')
+    } catch {
+      toast.error('Failed to cancel request.')
+    } finally {
+      setCancellingOrg(null)
+    }
+  }
 
   async function handleRequestJoin(org: string) {
     if (!session) return
@@ -138,10 +155,12 @@ export default function OrganizationsPage() {
                       <Button
                         variant="secondary"
                         size="md"
-                        disabled
-                        className="border-gray-3 text-gray-3 opacity-100"
+                        disabled={cancellingOrg === org.org}
+                        onClick={() => handleCancelRequest(org.org)}
                       >
-                        Request Pending
+                        {cancellingOrg === org.org
+                          ? 'Cancelling...'
+                          : 'Cancel Request'}
                       </Button>
                     ) : (
                       <Button

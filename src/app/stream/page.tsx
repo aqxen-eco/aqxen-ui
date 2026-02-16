@@ -68,7 +68,11 @@ const tabClass =
   'text-body-2 text-gray-3 relative flex shrink-0 cursor-pointer items-center gap-2 pb-4 font-medium data-[state=active]:text-white data-[state=active]:before:absolute data-[state=active]:before:bottom-0 data-[state=active]:before:left-0 data-[state=active]:before:h-0.5 data-[state=active]:before:w-full data-[state=active]:before:bg-white'
 
 export default function Stream() {
-  const { isAuthenticated, actor, login } = useChain()
+  const { isAuthenticated, isInitializing, actor, login } = useChain()
+
+  if (isInitializing) {
+    return null
+  }
 
   if (isAuthenticated) {
     return <AuthenticatedStream actor={actor} />
@@ -413,6 +417,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                             render={({ field }) => (
                               <Combobox
                                 title="Search members"
+                                closeOnSelect
                                 triggerContent={
                                   field.value ? (
                                     <div

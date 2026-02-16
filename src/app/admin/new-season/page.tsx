@@ -1,8 +1,10 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import z from 'zod'
 
 import { createSeason } from '@/api/chain/season/create-season'
@@ -25,9 +27,10 @@ const newSeasonSchema = z.object({
 type NewSeasonSchema = z.infer<typeof newSeasonSchema>
 
 export default function NewSeasonPage() {
-  const { addOrganizationSymbol } = useOrganization()
+  const { addOrganizationSymbol, name: orgName } = useOrganization()
   const { session } = useChain()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const {
     control,
@@ -49,8 +52,13 @@ export default function NewSeasonPage() {
         display_name: name,
         description: '',
       })
+      toast.success('Season created successfully')
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await queryClient.refetchQueries({ queryKey: ['seasons', orgName] })
       router.push('/admin/seasons')
-    } catch {}
+    } catch {
+      toast.error('Failed to create season')
+    }
   }
 
   return (

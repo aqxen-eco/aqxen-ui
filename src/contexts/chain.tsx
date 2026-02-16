@@ -11,6 +11,7 @@ type ChainContext = {
   logout: () => Promise<void>
   session?: Session
   isAuthenticated: boolean
+  isInitializing: boolean
 }
 
 const ChainContext = createContext({} as ChainContext)
@@ -28,6 +29,7 @@ const localStorageSessionKey = `wharf-${sessionKit.appName}-session`
 
 export function ChainProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session>()
+  const [isInitializing, setIsInitializing] = useState(true)
   const isAuthenticated = session != null ? !!session?.actor.toString() : false
 
   async function logout() {
@@ -46,6 +48,8 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
       setSession(restoredSession)
     } catch {
       setSession(undefined)
+    } finally {
+      setIsInitializing(false)
     }
   }, [])
 
@@ -82,6 +86,7 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
         logout,
         session,
         isAuthenticated,
+        isInitializing,
       }}
     >
       {children}
@@ -90,13 +95,15 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useChain() {
-  const { login, logout, isAuthenticated, session } = use(ChainContext)
+  const { login, logout, isAuthenticated, isInitializing, session } =
+    use(ChainContext)
 
   return {
     login,
     logout,
     session,
     isAuthenticated,
+    isInitializing,
     actor: session?.actor?.toString(),
     permission: session?.permission?.toString(),
   }

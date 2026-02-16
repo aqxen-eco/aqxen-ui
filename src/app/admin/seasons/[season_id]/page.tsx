@@ -3,13 +3,16 @@
 import { useQueries } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
 import { MdOutlineAdd, MdOutlineInfo } from 'react-icons/md'
+import { toast } from 'react-toastify'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
+import { jungleClient } from '@/api/chain/jungle-client'
 import { listSeason } from '@/api/chain/season/list-season'
 import { endSeries } from '@/api/chain/series/end-series'
 import { listSeries } from '@/api/chain/series/list-series'
 import { startSeries } from '@/api/chain/series/start-series'
+import type { BoundedBadgeCounts } from '@/api/chain/statistics/list-bounded-badge-counts'
 import type { Badge } from '@/api/model/badge'
 import { BadgeStatus } from '@/api/model/badge'
 import {
@@ -31,6 +34,7 @@ import {
 } from '@/components/ui/table'
 import { Tag } from '@/components/ui/tag'
 import { Tooltip } from '@/components/ui/tooltip'
+import { Contract } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 
@@ -41,9 +45,14 @@ export default function SeasonPage() {
   const seasonIdDecoded = decodeURIComponent(season_id as string)
   const seasonId = seasonIdDecoded.split(',')[1]
 
-  const [seasonQuery, badgesQuery, badgesStatusQuery, seriesQuery] = useQueries(
-    {
-      queries: [
+  const [
+    seasonQuery,
+    badgesQuery,
+    badgesStatusQuery,
+    seriesQuery,
+    boundedCountsQuery,
+  ] = useQueries({
+    queries: [
         {
           queryKey: ['seasons', seasonId, name],
           queryFn: async (context) => {
@@ -98,6 +107,19 @@ export default function SeasonPage() {
             refetchCount: 0,
           },
         },
+        {
+          queryKey: ['bounded-counts', name],
+          queryFn: async () => {
+            const result = await jungleClient.v1.chain.get_table_rows({
+              code: Contract.BOUNDED_STATS,
+              scope: name,
+              table: 'counts',
+              json: true,
+              limit: 1000,
+            })
+            return result.rows as BoundedBadgeCounts[]
+          },
+        },
       ],
     }
   )
@@ -115,6 +137,20 @@ export default function SeasonPage() {
   const seasonBadges = badgesQuery?.data?.rows.filter((badge) =>
     season?.init_badge_symbols.includes(badge.badge_symbol)
   )
+
+  const allCounts = boundedCountsQuery.data ?? []
+  const seasonStatuses = badgesStatusQuery.data?.rows.filter(
+    (s) => s.agg_symbol === seasonIdDecoded
+  ) ?? []
+
+  function getSeasonalTotal(badgeSymbol: string) {
+    const ids = seasonStatuses
+      .filter((s) => s.badge_symbol === badgeSymbol)
+      .map((s) => s.badge_agg_seq_id)
+    return allCounts
+      .filter((c) => ids.includes(c.badge_agg_seq_id))
+      .reduce((sum, c) => sum + c.total_issued, 0)
+  }
 
   const series = seriesQuery?.data?.rows.map((series) => {
     const seriesBadge = badgesStatusQuery.data?.rows.reduce<Badge[]>(
@@ -186,7 +222,7 @@ export default function SeasonPage() {
                       <TableHead className="w-10">Sym</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead className="w-32 text-center">
-                        Rarity counts
+                        Total awarded
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -208,7 +244,7 @@ export default function SeasonPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
-                          {badge.rarity_counts}
+                          {getSeasonalTotal(badge.badge_symbol)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -321,15 +357,20 @@ export default function SeasonPage() {
                                   variant="secondary"
                                   size="md"
                                   onClick={async () => {
-                                    await startSeries({
-                                      session: session!,
-                                      agg_symbol: seasonIdDecoded,
-                                      seq_ids: [seriesItem.seq_id],
-                                    })
-                                    setTimeout(() => {
-                                      seasonQuery.refetch()
-                                      seriesQuery.refetch()
-                                    }, 1000)
+                                    try {
+                                      await startSeries({
+                                        session: session!,
+                                        agg_symbol: seasonIdDecoded,
+                                        seq_ids: [seriesItem.seq_id],
+                                      })
+                                      toast.success('Series started successfully')
+                                      setTimeout(() => {
+                                        seasonQuery.refetch()
+                                        seriesQuery.refetch()
+                                      }, 1000)
+                                    } catch {
+                                      toast.error('Failed to start series')
+                                    }
                                   }}
                                 >
                                   Start
@@ -342,16 +383,21 @@ export default function SeasonPage() {
                                 <Button
                                   variant="secondary"
                                   size="md"
-                                  onClick={() => {
-                                    endSeries({
-                                      session: session!,
-                                      agg_symbol: seasonIdDecoded,
-                                      seq_ids: [seriesItem.seq_id],
-                                    })
-                                    setTimeout(() => {
-                                      seasonQuery.refetch()
-                                      seriesQuery.refetch()
-                                    }, 1000)
+                                  onClick={async () => {
+                                    try {
+                                      await endSeries({
+                                        session: session!,
+                                        agg_symbol: seasonIdDecoded,
+                                        seq_ids: [seriesItem.seq_id],
+                                      })
+                                      toast.success('Series ended successfully')
+                                      setTimeout(() => {
+                                        seasonQuery.refetch()
+                                        seriesQuery.refetch()
+                                      }, 1000)
+                                    } catch {
+                                      toast.error('Failed to end series')
+                                    }
                                   }}
                                 >
                                   End
@@ -362,15 +408,20 @@ export default function SeasonPage() {
                                 variant="secondary"
                                 size="md"
                                 onClick={async () => {
-                                  await startSeries({
-                                    session: session!,
-                                    agg_symbol: seasonIdDecoded,
-                                    seq_ids: [seriesItem.seq_id],
-                                  })
-                                  setTimeout(() => {
-                                    seasonQuery.refetch()
-                                    seriesQuery.refetch()
-                                  }, 1000)
+                                  try {
+                                    await startSeries({
+                                      session: session!,
+                                      agg_symbol: seasonIdDecoded,
+                                      seq_ids: [seriesItem.seq_id],
+                                    })
+                                    toast.success('Series started successfully')
+                                    setTimeout(() => {
+                                      seasonQuery.refetch()
+                                      seriesQuery.refetch()
+                                    }, 1000)
+                                  } catch {
+                                    toast.error('Failed to start series')
+                                  }
                                 }}
                               >
                                 Start

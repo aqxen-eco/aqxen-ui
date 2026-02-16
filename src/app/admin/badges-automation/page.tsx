@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueries } from '@tanstack/react-query'
+import { toast } from 'react-toastify'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { disableBadgeAutomation } from '@/api/chain/badge-automation/disable-badge-automation'
@@ -183,11 +184,16 @@ export default function BadgeAutomationPage() {
                   variant="secondary"
                   size="md"
                   onClick={async () => {
-                    await disableBadgeAutomation({
-                      session: session!,
-                      emission_symbol: row.emission_symbol,
-                    })
-                    badgeAutomationQuery.refetch()
+                    try {
+                      await disableBadgeAutomation({
+                        session: session!,
+                        emission_symbol: row.emission_symbol,
+                      })
+                      toast.success('Automation rule disabled')
+                      setTimeout(() => badgeAutomationQuery.refetch(), 1000)
+                    } catch {
+                      toast.error('Failed to disable automation rule')
+                    }
                   }}
                 >
                   Disable
@@ -198,11 +204,16 @@ export default function BadgeAutomationPage() {
                   variant="secondary"
                   size="md"
                   onClick={async () => {
-                    await enableBadgeAutomation({
-                      session: session!,
-                      emission_symbol: row.emission_symbol,
-                    })
-                    badgeAutomationQuery.refetch()
+                    try {
+                      await enableBadgeAutomation({
+                        session: session!,
+                        emission_symbol: row.emission_symbol,
+                      })
+                      toast.success('Automation rule enabled')
+                      setTimeout(() => badgeAutomationQuery.refetch(), 1000)
+                    } catch {
+                      toast.error('Failed to enable automation rule')
+                    }
                   }}
                 >
                   Enable

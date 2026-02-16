@@ -21,6 +21,7 @@ import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
+import { cancelRequest } from '@/api/chain/organization/cancel-request'
 import { listMemberRequests } from '@/api/chain/organization/list-member-requests'
 import { listMembers } from '@/api/chain/organization/list-members'
 import { listOrganization } from '@/api/chain/organization/list-organization'
@@ -81,6 +82,7 @@ export default function OrganizationPage() {
   const { session, isAuthenticated, actor } = useChain()
   const queryClient = useQueryClient()
   const [isRequesting, setIsRequesting] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
   const [activeTab, setActiveTab] = useState<'stream' | 'members'>('stream')
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
   const loadMoreBtnRef = useRef(null)
@@ -190,6 +192,23 @@ export default function OrganizationPage() {
     return () => observer.disconnect()
   }, [postsQuery])
 
+  async function handleCancelRequest() {
+    if (!session) return
+    setIsCancelling(true)
+    try {
+      await cancelRequest({ session, org })
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await queryClient.refetchQueries({
+        queryKey: ['member-requests', org],
+      })
+      toast.success('Request cancelled.')
+    } catch {
+      toast.error('Failed to cancel request.')
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
   async function handleRequestJoin() {
     if (!session) return
     setIsRequesting(true)
@@ -293,10 +312,10 @@ export default function OrganizationPage() {
                   <Button
                     variant="secondary"
                     size="lg"
-                    disabled
-                    className="border-gray-3 text-gray-3 opacity-100"
+                    disabled={isCancelling}
+                    onClick={handleCancelRequest}
                   >
-                    Request Pending
+                    {isCancelling ? 'Cancelling...' : 'Cancel Request'}
                   </Button>
                 ) : (
                   <Button
@@ -429,6 +448,7 @@ export default function OrganizationPage() {
                               render={({ field }) => (
                                 <Combobox
                                   title="Search members"
+                                  closeOnSelect
                                   triggerContent={
                                     field.value ? (
                                       <div

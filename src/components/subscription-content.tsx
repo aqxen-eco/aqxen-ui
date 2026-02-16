@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useGetBillingDetail } from '@/hooks/query/use-get-billing-detail'
+import { formatUsd } from '@/utils/intl-format'
 
 export function SubscriptionContent() {
   const billing = useGetBillingDetail()
@@ -46,7 +47,7 @@ export function SubscriptionContent() {
                           {String(row.bill_cycle_id)}
                         </TableCell>
                         <TableCell className="py-6">
-                          {row.amount_paid}
+                          {formatUsd(row.amount_paid)}
                         </TableCell>
                         <TableCell className="py-6 text-center">
                           {String(row.members_paid_for)}

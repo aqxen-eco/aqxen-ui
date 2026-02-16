@@ -221,7 +221,7 @@ export function BadgeDetailModal({
                   </Button>
                 </Dialog.Close>
 
-                <div className="max-h-[80vh] overflow-y-auto p-6 max-md:max-h-svh md:p-8">
+                <div className="max-h-[80vh] overflow-y-auto p-6 max-md:max-h-svh [scrollbar-width:none] md:p-8">
                   {isLoading ? (
                     <div className="flex h-40 items-center justify-center">
                       <p className="text-body-2 text-gray-3">Loading...</p>
