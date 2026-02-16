@@ -10,16 +10,26 @@ import { Button } from '@/components/ui/button'
 
 type ComboboxProps = {
   title: string
+  triggerContent?: React.ReactNode
   children?: React.ReactNode
 } & React.ComponentPropsWithoutRef<typeof Command>
 
-export function Combobox({ title, children, ...props }: ComboboxProps) {
+export function Combobox({
+  title,
+  triggerContent,
+  children,
+  ...props
+}: ComboboxProps) {
   return (
     <Popover.Root>
       <div className="border-gray-3 flex items-center gap-1 border-b group-data-[error=true]/input:border-red-600 focus-within:border-white">
         <Popover.Trigger className="text-body-2 text-gray-3 flex w-full items-center justify-between gap-2 text-left focus:outline-hidden">
-          <span className="pt-2 pb-[calc(1rem-1px)]">{title}</span>
-          <div className="p-2">
+          <div className="flex min-h-10 flex-1 flex-wrap items-center gap-2 py-1">
+            {triggerContent || (
+              <span className="text-gray-3">{title}</span>
+            )}
+          </div>
+          <div className="shrink-0 p-2">
             <MdKeyboardArrowDown className="size-6" />
           </div>
         </Popover.Trigger>

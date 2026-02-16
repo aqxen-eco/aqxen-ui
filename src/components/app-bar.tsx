@@ -18,7 +18,7 @@ import { useGetUserProfile } from '@/hooks/query/use-get-user-profile'
 export function AppBar() {
   const [showMenu, setShowMenu] = useState(false)
   const { isAuthenticated, login, logout, actor } = useChain()
-  const { hasOrganization, displayName, ipfs } = useOrganization()
+  const { hasOrganization } = useOrganization()
   const { data: userProfile } = useGetUserProfile(actor ?? null)
   const pathname = usePathname()
   const router = useRouter()
@@ -39,12 +39,12 @@ export function AppBar() {
             >
               <div className="relative size-6 flex-none overflow-hidden rounded-full">
                 <img
-                  src={ipfs ? IPFS_IMAGE_SOURCE + ipfs : '/img/logo.svg'}
+                  src="/img/logo.svg"
                   alt=""
                   className="absolute inset-0 size-full object-cover"
                 />
               </div>
-              <span className="truncate">{displayName || 'AqXen'}</span>
+              <span className="truncate">AqXen</span>
             </NextLink>
 
             <Button
@@ -121,14 +121,6 @@ export function AppBar() {
             </div>
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {hasOrganization && (
-                  <Link
-                    href="/feed"
-                    variant="primary"
-                  >
-                    Feed
-                  </Link>
-                )}
                 <DropdownRoot
                   customTrigger={
                     <button

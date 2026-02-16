@@ -193,6 +193,7 @@ export default function FeedPage() {
                 badgeSymbol={post.badgeSymbol}
                 content={post.content}
                 mentions={post.mention.map((item) => item.user.actor)}
+                organization={post.organization}
               >
                 {post.children.map((comment) => (
                   <PostItemComment

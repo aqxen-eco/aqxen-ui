@@ -4,11 +4,12 @@ import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
 import { listLifetimeBadge } from '@/api/chain/badge/list-lifetime-badge'
 import { listSeasonalBadge } from '@/api/chain/badge/list-seasonal-badge'
+import { listMembers } from '@/api/chain/organization/list-members'
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { listSeason } from '@/api/chain/season/list-season'
 import { listSeries } from '@/api/chain/series/list-series'
-import { type Badge } from '@/api/model/badge'
-import { BadgeStatus } from '@/api/model/badge'
+import { type Badge, BadgeStatus } from '@/api/model/badge'
+import { type Organization } from '@/api/model/organization'
 import { type Season } from '@/api/model/season'
 import { type Series } from '@/api/model/series'
 import { prisma } from '@/prisma-client'
@@ -23,6 +24,7 @@ type LifetimeBadges = {
 
 type SeasonSeriesBadges = {
   series: (Series & { badges: ({ balance: number } & Badge)[] })[]
+  orgDisplayName: string
 } & Season
 
 type GetUserBadges = {
@@ -157,9 +159,19 @@ export async function getUserBadges({
       }
     })
 
+    const seasonSymbol = season.agg_symbol.split(',')[1]?.toLowerCase()
+    const matchingOrg = organization.find(
+      (org) => seasonSymbol?.startsWith(org.org_code.toLowerCase())
+    )
+    const orgDisplayName =
+      matchingOrg?.onchain_lookup_data?.user?.display_name ||
+      matchingOrg?.org ||
+      ''
+
     return {
       ...season,
       series: seasonSeries,
+      orgDisplayName,
     }
   })
 
@@ -177,4 +189,63 @@ export async function getUserProfile({ actor }: { actor: string }) {
   })
 
   return user
+}
+
+export async function getUserPosts({ user }: { user: string }) {
+  const posts = await prisma.post.findMany({
+    where: {
+      user: { actor: user },
+      parentId: null,
+    },
+    include: {
+      user: true,
+      mention: {
+        include: {
+          user: {
+            select: {
+              actor: true,
+            },
+          },
+        },
+      },
+      children: {
+        include: {
+          user: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+
+  return posts
+}
+
+export type UserOrganization = Organization & { isOwner: boolean }
+
+export async function getUserOrganizations({
+  user,
+}: {
+  user: string
+}): Promise<UserOrganization[]> {
+  const { rows: orgs } = await listOrganization({})
+
+  const memberResults = await Promise.all(
+    orgs.map(async (org) => {
+      const { rows: members } = await listMembers({ scope: org.org })
+      const isMember = members.some((m) => m.account === user)
+      return { org, isMember }
+    })
+  )
+
+  return memberResults
+    .filter(({ isMember }) => isMember)
+    .map(({ org }) => ({
+      ...org,
+      isOwner: org.org === user,
+    }))
 }

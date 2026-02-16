@@ -10,6 +10,7 @@ type CreatePostProps = {
   badgeSymbol?: string[]
   mention?: string[]
   parentId?: string
+  organization?: string
 }
 
 export async function createPost({
@@ -18,6 +19,7 @@ export async function createPost({
   badgeSymbol,
   mention,
   parentId,
+  organization,
 }: CreatePostProps) {
   try {
     const authorGroupId = await ensurePinataGroup(actor)
@@ -34,6 +36,7 @@ export async function createPost({
     })
 
     let relatedPost = {}
+    let inheritedOrganization = organization
     if (parentId) {
       relatedPost = {
         parent: {
@@ -41,6 +44,14 @@ export async function createPost({
             id: parentId,
           },
         },
+      }
+
+      if (!inheritedOrganization) {
+        const parentPost = await prisma.post.findUnique({
+          where: { id: parentId },
+          select: { organization: true },
+        })
+        inheritedOrganization = parentPost?.organization ?? undefined
       }
     }
 
@@ -81,6 +92,7 @@ export async function createPost({
       data: {
         content,
         badgeSymbol,
+        organization: inheritedOrganization,
         user: {
           connect: {
             id: user.id,
@@ -103,13 +115,55 @@ export async function createPost({
   }
 }
 
+type GetPostsByBadgeProps = {
+  badgeSymbol: string
+  limit?: number
+}
+
+export async function getPostsByBadge({
+  badgeSymbol,
+  limit = 10,
+}: GetPostsByBadgeProps) {
+  const posts = await prisma.post.findMany({
+    take: limit,
+    where: {
+      badgeSymbol: { has: badgeSymbol },
+    },
+    include: {
+      user: true,
+      mention: {
+        include: {
+          user: {
+            select: {
+              actor: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+
+  return posts
+}
+
 type GetPostsProps = {
   cursor?: string
   limit: number
   orderBy: 'asc' | 'desc'
+  organizations?: string[]
+  actor?: string
 }
 
-export async function getPosts({ cursor, limit, orderBy }: GetPostsProps) {
+export async function getPosts({
+  cursor,
+  limit,
+  orderBy,
+  organizations,
+  actor,
+}: GetPostsProps) {
   try {
     const posts = await prisma.post.findMany({
       take: limit,
@@ -117,6 +171,8 @@ export async function getPosts({ cursor, limit, orderBy }: GetPostsProps) {
       cursor: cursor ? { id: cursor } : undefined,
       where: {
         parentId: null, // Filters only posts that are not comments
+        ...(organizations ? { organization: { in: organizations } } : {}),
+        ...(actor ? { user: { actor } } : {}),
       },
       include: {
         user: true,
