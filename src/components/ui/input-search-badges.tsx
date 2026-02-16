@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import type { Badge } from '@/api/model/badge'
@@ -23,8 +23,10 @@ export function InputSearchBadges({
     queryFn: async () => await listBadge({ scope: name }),
   })
 
+  const hasSynced = useRef(false)
   useEffect(() => {
-    if (badgesQuery.isSuccess && value.length > 0) {
+    if (badgesQuery.isSuccess && value.length > 0 && !hasSynced.current) {
+      hasSynced.current = true
       const selectedBadges = badgesQuery?.data?.rows.reduce<Badge[]>(
         (accumulator, currentValue) => {
           if (value.includes(currentValue.badge_symbol)) {

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import z from 'zod'
 
 import { addBadgeToSeason } from '@/api/chain/season/add-badge-to-season'
@@ -70,9 +71,10 @@ export default function AddBadgesPage() {
           queryKey: ['series', params.season_id],
         })
       }
+      toast.success('Badge added successfully')
       router.push(`/admin/seasons/${params.season_id}`)
-    } catch (error) {
-      console.log(error)
+    } catch {
+      toast.error('Failed to add badge')
     }
   }
 

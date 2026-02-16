@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
+import { toast } from 'react-toastify'
 import z from 'zod'
 
 import { createBadgeAutomation } from '@/api/chain/badge-automation/create-badge-automation'
@@ -101,9 +102,10 @@ export default function NewBadgeAutomationPage() {
         cyclic,
       })
 
+      toast.success('Automation rule created successfully')
       router.push('/admin/badges-automation')
-    } catch (error) {
-      console.log(error)
+    } catch {
+      toast.error('Failed to create automation rule')
     }
   }
 

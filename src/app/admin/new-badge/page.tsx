@@ -97,6 +97,7 @@ export default function NewBadgePage() {
         lifetime_stats: lifetimeStats,
         memo: description,
       })
+      toast.success('Badge created successfully')
       router.push('/admin/badges')
     } catch {
       toast.error('Failed to create badge')

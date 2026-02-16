@@ -1,7 +1,8 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import { toast } from 'react-toastify'
 
 import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
 import { listFees } from '@/api/chain/billing/list-fees'
@@ -23,11 +24,13 @@ import {
 } from '@/components/ui/table'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { formatUsd } from '@/utils/intl-format'
 
 export function BuySubscriptionTable() {
   const { session } = useChain()
   const { hasOrganization } = useOrganization()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const query = useQuery({
     queryKey: ['fees'],
@@ -66,8 +69,13 @@ export function BuySubscriptionTable() {
         await ensureOrgPinataGroup(session!.actor.toString())
         await ensureOrgBadgePinataGroup(session!.actor.toString())
       }
+      toast.success('Subscription purchased successfully')
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await queryClient.refetchQueries({ queryKey: ['billing-detail'] })
       router.push('/admin/subscription')
-    } catch {}
+    } catch {
+      toast.error('Failed to purchase subscription')
+    }
   }
 
   if (query.isLoading || currentCycleQuery.isLoading) {
@@ -84,15 +92,13 @@ export function BuySubscriptionTable() {
         <TableRow>
           <TableHead>Organization creation fee</TableHead>
           <TableHead>Member fee</TableHead>
-          <TableHead>Cycle</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {query.data.rows.map((item) => (
           <TableRow key={item.id}>
-            <TableCell className="py-6">{item.org_creation_fee}</TableCell>
-            <TableCell className="py-6">{item.member_fee}</TableCell>
-            <TableCell className="py-6">{String(currentCycleId)}</TableCell>
+            <TableCell className="py-6">{formatUsd(item.org_creation_fee)}</TableCell>
+            <TableCell className="py-6">{formatUsd(item.member_fee)}</TableCell>
             <TableCell className="text-right">
               {session && (
                 <Button

@@ -17,7 +17,7 @@ import { useGetUserProfile } from '@/hooks/query/use-get-user-profile'
 
 export function AppBar() {
   const [showMenu, setShowMenu] = useState(false)
-  const { isAuthenticated, login, logout, actor } = useChain()
+  const { isAuthenticated, isInitializing, login, logout, actor } = useChain()
   const { hasOrganization } = useOrganization()
   const { data: userProfile } = useGetUserProfile(actor ?? null)
   const pathname = usePathname()
@@ -65,42 +65,72 @@ export function AppBar() {
               >
                 Home
               </Link>
-              <Link
-                href="/about-us"
-                variant={pathname === '/about-us' ? 'link' : 'default'}
-                className="max-md:text-2xl"
-              >
-                About Us
-              </Link>
-              <Link
-                href="/stream"
-                variant={pathname === '/stream' ? 'link' : 'default'}
-                className="max-md:text-2xl"
-              >
-                Stream
-              </Link>
+              {!isInitializing && !isAuthenticated && (
+                <Link
+                  href="/about-us"
+                  variant={pathname === '/about-us' ? 'link' : 'default'}
+                  className="max-md:text-2xl"
+                >
+                  About
+                </Link>
+              )}
+              {!isInitializing && !isAuthenticated && (
+                <Link
+                  href="/subscriptions"
+                  variant={
+                    pathname.includes('/subscriptions') ? 'link' : 'default'
+                  }
+                  className="max-md:text-2xl"
+                >
+                  Pricing
+                </Link>
+              )}
+              {!isInitializing && isAuthenticated && (
+                <Link
+                  href="/stream"
+                  variant={pathname === '/stream' ? 'link' : 'default'}
+                  className="max-md:text-2xl"
+                >
+                  Stream
+                </Link>
+              )}
               <Link
                 href="/organizations"
-                variant={pathname.startsWith('/organizations') ? 'link' : 'default'}
+                variant={
+                  pathname.startsWith('/organizations') ? 'link' : 'default'
+                }
                 className="max-md:text-2xl"
               >
                 Organizations
               </Link>
-              <Link
-                href="/faq"
-                variant={pathname === '/faq' ? 'link' : 'default'}
-                className="max-md:text-2xl"
-              >
-                FAQ
-              </Link>
-              <Link
-                href="/contact"
-                variant={pathname === '/contact' ? 'link' : 'default'}
-                className="max-md:text-2xl"
-              >
-                Contact
-              </Link>
-              {!hasOrganization && (
+              {!isInitializing && !isAuthenticated && (
+                <Link
+                  href="/stream"
+                  variant={pathname === '/stream' ? 'link' : 'default'}
+                  className="max-md:text-2xl"
+                >
+                  Stream
+                </Link>
+              )}
+              {!isInitializing && !isAuthenticated && (
+                <Link
+                  href="/faq"
+                  variant={pathname === '/faq' ? 'link' : 'default'}
+                  className="max-md:text-2xl"
+                >
+                  FAQ
+                </Link>
+              )}
+              {!isInitializing && !isAuthenticated && (
+                <Link
+                  href="/contact"
+                  variant={pathname === '/contact' ? 'link' : 'default'}
+                  className="max-md:text-2xl"
+                >
+                  Contact
+                </Link>
+              )}
+              {!isInitializing && isAuthenticated && !hasOrganization && (
                 <Link
                   href="/subscriptions"
                   variant={

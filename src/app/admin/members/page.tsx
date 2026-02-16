@@ -37,6 +37,7 @@ import {
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { useGetBillingDetail } from '@/hooks/query/use-get-billing-detail'
+import { formatUsd } from '@/utils/intl-format'
 
 type PendingMemberAction = {
   type: 'add' | 'accept'
@@ -414,7 +415,7 @@ export default function MembersPage() {
                   {memberFee && (
                     <p className="text-body-2 mt-4 text-white">
                       Monthly member fee:{' '}
-                      <span className="font-semibold">{memberFee}</span>
+                      <span className="font-semibold">{formatUsd(memberFee)}</span>
                     </p>
                   )}
                   <div className="mt-6">

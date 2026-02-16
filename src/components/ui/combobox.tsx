@@ -1,5 +1,6 @@
 import * as Popover from '@radix-ui/react-popover'
 import { Command } from 'cmdk'
+import { useState } from 'react'
 import {
   MdKeyboardArrowDown,
   MdKeyboardArrowUp,
@@ -11,17 +12,20 @@ import { Button } from '@/components/ui/button'
 type ComboboxProps = {
   title: string
   triggerContent?: React.ReactNode
+  closeOnSelect?: boolean
   children?: React.ReactNode
 } & React.ComponentPropsWithoutRef<typeof Command>
 
 export function Combobox({
   title,
   triggerContent,
+  closeOnSelect,
   children,
   ...props
 }: ComboboxProps) {
+  const [open, setOpen] = useState(false)
   return (
-    <Popover.Root>
+    <Popover.Root open={open} onOpenChange={setOpen}>
       <div className="border-gray-3 flex items-center gap-1 border-b group-data-[error=true]/input:border-red-600 focus-within:border-white">
         <Popover.Trigger className="text-body-2 text-gray-3 flex w-full items-center justify-between gap-2 text-left focus:outline-hidden">
           <div className="flex min-h-10 flex-1 flex-wrap items-center gap-2 py-1">
@@ -52,7 +56,12 @@ export function Combobox({
                 </Button>
               </Popover.Close>
             </div>
-            <Command.List className="border-gray-2 bg-gray-1 mt-2 max-h-64 overflow-x-hidden overflow-y-auto rounded-2xl border p-4 [&_[cmdk-list-sizer]]:space-y-1">
+            <Command.List
+              className="border-gray-2 bg-gray-1 mt-2 max-h-64 overflow-x-hidden overflow-y-auto rounded-2xl border p-4 [&_[cmdk-list-sizer]]:space-y-1"
+              onClick={() => {
+                if (closeOnSelect) setOpen(false)
+              }}
+            >
               {children}
             </Command.List>
           </Command>
