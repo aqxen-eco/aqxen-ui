@@ -32,11 +32,16 @@ type BadgeImageProps = React.ComponentProps<'img'> & BadgeImageVariants
 export function BadgeImage({ size, src, className }: BadgeImageProps) {
   const { root, image } = badgeImage({ size })
 
+  const srcStr = typeof src === 'string' ? src : undefined
   const isFullUrl =
-    src?.startsWith('blob:') ||
-    src?.startsWith('http://') ||
-    src?.startsWith('https://')
-  const imageSrc = src ? (isFullUrl ? src : IPFS_IMAGE_SOURCE + src) : undefined
+    srcStr?.startsWith('blob:') ||
+    srcStr?.startsWith('http://') ||
+    srcStr?.startsWith('https://')
+  const imageSrc = srcStr
+    ? isFullUrl
+      ? srcStr
+      : IPFS_IMAGE_SOURCE + srcStr
+    : undefined
 
   return (
     <Root className={root({ class: className })}>
