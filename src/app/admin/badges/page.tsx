@@ -1,15 +1,19 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
+import type { Badge } from '@/api/model/badge'
 import {
   HeaderAdmin,
   HeaderAdminMenu,
   HeaderAdminTitle,
 } from '@/components/header-admin'
 import { TableSkeleton } from '@/components/skeleton'
+import { BadgeDetailModal } from '@/components/ui/badge-detail-modal'
 import { BadgeImage } from '@/components/ui/badge-image'
+import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
 import { Select, SelectItem } from '@/components/ui/select'
 import {
@@ -25,6 +29,7 @@ import { useOrganization } from '@/contexts/organization'
 
 export default function BadgesPage() {
   const { name, removeOrganizationSymbol } = useOrganization()
+  const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)
 
   const query = useQuery({
     queryKey: ['badges', name],
@@ -50,7 +55,7 @@ export default function BadgesPage() {
                 <TableHead className="w-10">Sym</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead className="w-40 text-center">
-                  Rarity counts
+                  Total awarded
                 </TableHead>
                 <TableHead className="w-28" />
               </TableRow>
@@ -62,27 +67,40 @@ export default function BadgesPage() {
                     {removeOrganizationSymbol(row.badge_symbol)}
                   </TableCell>
                   <TableCell>
-                    <div className="inline-flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="inline-flex cursor-pointer items-center gap-2"
+                      onClick={() => setSelectedBadge(row)}
+                    >
                       <BadgeImage
                         src={row.offchain_lookup_data.user.ipfs_image}
                         size="xs"
                       />
-                      <span className="text-body-2 font-sans font-medium text-nowrap text-white">
+                      <span className="text-body-2 font-sans font-medium text-nowrap text-white hover:underline">
                         {row.onchain_lookup_data.user.display_name}
                       </span>
-                    </div>
+                    </button>
                   </TableCell>
                   <TableCell className="text-center">
                     {row.rarity_counts}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link
-                      href={`/admin/badges/${row.badge_symbol}/send-badge`}
-                      variant="secondary"
-                      size="md"
-                    >
-                      Send
-                    </Link>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        onClick={() => setSelectedBadge(row)}
+                      >
+                        Details
+                      </Button>
+                      <Link
+                        href={`/admin/badges/${row.badge_symbol}/send-badge`}
+                        variant="secondary"
+                        size="md"
+                      >
+                        Send
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -111,6 +129,15 @@ export default function BadgesPage() {
           </Table>
         )}
       </div>
+      <BadgeDetailModal
+        open={!!selectedBadge}
+        onOpenChange={(open) => {
+          if (!open) setSelectedBadge(null)
+        }}
+        badgeSymbol={selectedBadge?.badge_symbol ?? ''}
+        scope={name}
+        badge={selectedBadge ?? undefined}
+      />
     </>
   )
 }

@@ -18,6 +18,7 @@ type DropdownRootProps = {
   label?: string
   align?: 'start' | 'center' | 'end'
   customTrigger?: React.ReactNode
+  container?: HTMLElement | null
   children: React.ReactNode
 }
 
@@ -25,6 +26,7 @@ export function DropdownRoot({
   label,
   customTrigger,
   align,
+  container,
   children,
 }: DropdownRootProps) {
   const [open, setOpen] = useState(false)
@@ -46,7 +48,7 @@ export function DropdownRoot({
       )}
       <AnimatePresence>
         {open && (
-          <Portal forceMount>
+          <Portal forceMount container={container}>
             <Content
               forceMount
               align={align}

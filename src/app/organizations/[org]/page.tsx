@@ -12,7 +12,11 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { MdClose } from 'react-icons/md'
+import {
+  MdClose,
+  MdOutlineDynamicFeed,
+  MdOutlinePeople,
+} from 'react-icons/md'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
@@ -361,6 +365,7 @@ export default function OrganizationPage() {
           className={tabClass}
           onClick={() => setActiveTab('stream')}
         >
+          <MdOutlineDynamicFeed className="size-5" />
           Stream
         </button>
         <button
@@ -369,6 +374,7 @@ export default function OrganizationPage() {
           className={tabClass}
           onClick={() => setActiveTab('members')}
         >
+          <MdOutlinePeople className="size-5" />
           Members
         </button>
       </div>
