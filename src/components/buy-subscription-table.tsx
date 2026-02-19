@@ -10,6 +10,7 @@ import { transferToken } from '@/api/chain/billing/transfer-token'
 import { createOrganization } from '@/api/chain/organization/create-organization'
 import {
   ensureOrgBadgePinataGroup,
+  ensureOrgBeamsPinataGroup,
   ensureOrgPinataGroup,
 } from '@/app/admin/organization/actions'
 import { TableSkeleton } from '@/components/skeleton'
@@ -68,6 +69,7 @@ export function BuySubscriptionTable() {
         })
         await ensureOrgPinataGroup(session!.actor.toString())
         await ensureOrgBadgePinataGroup(session!.actor.toString())
+        await ensureOrgBeamsPinataGroup(session!.actor.toString())
       }
       toast.success('Subscription purchased successfully')
       await new Promise((resolve) => setTimeout(resolve, 1000))

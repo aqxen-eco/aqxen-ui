@@ -27,4 +27,7 @@ export enum Contract {
   ANDEMITTER = 'andemittedev',
   BOUNDED_AGG = 'boundedagdev',
   BOUNDED_STATS = 'boundedstdev',
+
+  BEAMS = 'beamsdevdevd',
+  BEAMS_MANAGER = 'beamsmanadev',
 }

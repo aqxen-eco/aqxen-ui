@@ -6,6 +6,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 
+import { ClaimBeamsSection } from './claim-beams-section'
 import {
   getUserBadges,
   getUserOrganizations,
@@ -180,6 +181,17 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             </p>
           )}
         </section>
+
+        <ClaimBeamsSection
+          user={user}
+          userOrgNames={userOrgs.map((org) => org.org)}
+          orgDisplayNames={Object.fromEntries(
+            userOrgs.map((org) => [
+              org.org,
+              org.onchain_lookup_data?.user?.display_name || org.org,
+            ]),
+          )}
+        />
 
         <ProfileTabs feedContent={feedContent} badgesContent={badgesContent} />
       </Box>

@@ -2,6 +2,10 @@ import { execute } from '@/api/chain/execute-action'
 import { type CreateOrganizationProps } from '@/api/model/organization'
 import { Contract } from '@/constants'
 
+function formatTimePointSec(date: Date): string {
+  return date.toISOString().replace(/\.\d{3}Z$/, '')
+}
+
 export async function createOrganization({
   session,
   org_creation_fee,
@@ -57,6 +61,17 @@ export async function createOrganization({
         to: Contract.BILLING,
         quantity: memberFee,
         memo: `bill:${organizationName}:${currentCycleId}:1`,
+      },
+    },
+    {
+      account: Contract.BEAMS_MANAGER,
+      name: 'enablebeams',
+      authorization: [session.permissionLevel],
+      data: {
+        org: organizationName,
+        starttime: formatTimePointSec(
+          new Date(Date.now() + 5 * 60 * 1000),
+        ),
       },
     },
   ])

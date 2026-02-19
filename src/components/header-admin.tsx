@@ -32,6 +32,10 @@ export const navLinks = [
     label: 'Members',
     href: '/admin/members',
   },
+  {
+    label: 'Beams',
+    href: '/admin/beams',
+  },
 ] as const
 
 type HeaderAdminProps = {
