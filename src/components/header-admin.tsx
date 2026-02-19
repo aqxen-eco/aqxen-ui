@@ -13,28 +13,28 @@ export const navLinks = [
     href: '/admin/organization',
   },
   {
-    label: 'Subscription',
-    href: '/admin/subscription',
-  },
-  {
-    label: 'Badges',
-    href: '/admin/badges',
-  },
-  {
-    label: 'Seasons',
-    href: '/admin/seasons',
-  },
-  {
-    label: 'Badges automation',
-    href: '/admin/badges-automation',
-  },
-  {
     label: 'Members',
     href: '/admin/members',
   },
   {
     label: 'Beams',
     href: '/admin/beams',
+  },
+  {
+    label: 'Badges',
+    href: '/admin/badges',
+  },
+  {
+    label: 'Badge Automation',
+    href: '/admin/badges-automation',
+  },
+  {
+    label: 'Seasons',
+    href: '/admin/seasons',
+  },
+  {
+    label: 'Subscription',
+    href: '/admin/subscription',
   },
 ] as const
 

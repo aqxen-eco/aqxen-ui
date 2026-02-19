@@ -142,6 +142,7 @@ export function PostItem({
   const { actor: currentActor, session } = useChain()
 
   const isOwnPost = currentActor === actor
+  const isOrgPost = !!organization && actor === organization
 
   const recognizeForm = useForm<RecognizeSchema>({
     resolver: zodResolver(recognizeSchema),
@@ -325,11 +326,11 @@ export function PostItem({
                     className="mt-2"
                     onClick={() => setShowRecognize(true)}
                   >
-                    {isOwnPost ? 'Comment' : '+1 recognize'}
+                    {isOwnPost || isOrgPost ? 'Comment' : '+1 recognize'}
                   </Button>
                 </motion.div>
               )}
-              {showRecognize && isOwnPost && (
+              {showRecognize && (isOwnPost || isOrgPost) && (
                 <motion.form
                   onSubmit={commentForm.handleSubmit(onComment)}
                   initial={{ opacity: 0, y: 16 }}
@@ -371,7 +372,7 @@ export function PostItem({
                   </div>
                 </motion.form>
               )}
-              {showRecognize && !isOwnPost && (
+              {showRecognize && !isOwnPost && !isOrgPost && (
                 <motion.form
                   onSubmit={recognizeForm.handleSubmit(onRecognize)}
                   initial={{ opacity: 0, y: 16 }}
@@ -637,6 +638,8 @@ type PostItemCommentProps = {
   avatarIpfs?: string | null
   createdAt: Date
   content: string
+  badgeSymbol?: string[]
+  organization?: string | null
 }
 
 export function PostItemComment({
@@ -644,7 +647,18 @@ export function PostItemComment({
   avatarIpfs,
   createdAt,
   content,
+  badgeSymbol = [],
+  organization,
 }: PostItemCommentProps) {
+  const { name } = useOrganization()
+  const badgeScope = organization || name
+
+  const badgesQuery = useQuery({
+    queryKey: ['badges', badgeScope],
+    queryFn: async () => await listBadge({ scope: badgeScope }),
+    enabled: !!badgeScope && badgeSymbol.length > 0,
+  })
+
   return (
     <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
       <Avatar
@@ -662,8 +676,6 @@ export function PostItemComment({
                 {actor}
               </Link>
             </p>
-            {/* <Avatar size="xs">AZ</Avatar>
-            <span className="text-body-2 text-gray-3">Responsibility</span> */}
             <span className="text-gray-3">
               {' '}
               • {format(new Date(createdAt), 'EEE d MMM')}
@@ -674,6 +686,25 @@ export function PostItemComment({
             <span className="text-body-2">50</span>
           </div>
         </div>
+        {badgeSymbol.length > 0 && badgesQuery.isSuccess && (
+          <div className="flex flex-wrap gap-1">
+            {badgesQuery.data.rows
+              .filter((row) => badgeSymbol.includes(row.badge_symbol))
+              .map((row) => (
+                <Tooltip
+                  key={row.badge_symbol}
+                  content={row.onchain_lookup_data.user.display_name}
+                >
+                  <Button square>
+                    <BadgeImage
+                      src={row.offchain_lookup_data.user.ipfs_image}
+                      size="xs"
+                    />
+                  </Button>
+                </Tooltip>
+              ))}
+          </div>
+        )}
         <p className="text-body-2 text-gray-3">{content}</p>
       </div>
     </div>

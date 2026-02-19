@@ -12,6 +12,7 @@ import {
   listBeamMetadata,
 } from '@/api/chain/beams/list-beam-metadata'
 import { type BeamStats, listBeamStats } from '@/api/chain/beams/list-beam-stats'
+import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import type { Badge } from '@/api/model/badge'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Button } from '@/components/ui/button'
@@ -29,6 +30,17 @@ function getDisplayName(
   return symbol.slice(-3).toUpperCase()
 }
 
+function getSymbol(meta: BeamMetadata) {
+  return meta.badge_symbol.includes(',')
+    ? meta.badge_symbol.split(',')[1]
+    : meta.badge_symbol
+}
+
+function findStat(meta: BeamMetadata, stats: BeamStats[]) {
+  const symbol = getSymbol(meta)
+  return stats.find((s) => s.badge_asset.split(' ')[1] === symbol)
+}
+
 function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
   const now = Date.now() / 1000
   const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
@@ -40,20 +52,18 @@ function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
   const currentCycleStart =
     starttime + Math.floor(elapsed / cycleLength) * cycleLength
 
-  const symbol = meta.badge_symbol.includes(',')
-    ? meta.badge_symbol.split(',')[1]
-    : meta.badge_symbol
-
-  const stat = stats.find((s) => {
-    const statSymbol = s.badge_asset.split(' ')[1]
-    return statSymbol === symbol
-  })
-
+  const stat = findStat(meta, stats)
   if (!stat) return true
 
   const lastClaimed =
     new Date(`${stat.last_claimed_time}Z`).getTime() / 1000
   return lastClaimed < currentCycleStart
+}
+
+function getBalance(meta: BeamMetadata, stats: BeamStats[]) {
+  const stat = findStat(meta, stats)
+  if (!stat) return 0
+  return parseInt(stat.badge_asset.split(' ')[0], 10) || 0
 }
 
 type ClaimBeamsSectionProps = {
@@ -101,21 +111,41 @@ export function ClaimBeamsSection({
     enabled: isOwnProfile,
   })
 
+  const beamTemplatesQuery = useQuery({
+    queryKey: ['beam-templates'],
+    queryFn: listBeamTemplates,
+    enabled: isOwnProfile,
+  })
+
   if (!isOwnProfile) return null
 
   const isLoading =
     metadataQueries.some((q) => q.isLoading) ||
-    badgeQueries.some((q) => q.isLoading)
+    badgeQueries.some((q) => q.isLoading) ||
+    beamTemplatesQuery.isLoading
   if (isLoading) return null
+
+  const templateNames = new Set(
+    beamTemplatesQuery.data?.map((t) => t.display_name) ?? [],
+  )
 
   const orgBeams = userOrgNames
     .map((org, i) => {
       const metadata = metadataQueries[i]?.data ?? []
-      const beams = metadata.map((meta) => ({
-        ...meta,
-        org,
-        claimable: isClaimable(meta, stats),
-      }))
+      const beams = metadata
+        .filter((meta) => {
+          const badge = badgesBySymbol.get(meta.badge_symbol)
+          if (!badge) return false
+          return templateNames.has(
+            badge.onchain_lookup_data.user.display_name,
+          )
+        })
+        .map((meta) => ({
+          ...meta,
+          org,
+          claimable: isClaimable(meta, stats),
+          balance: getBalance(meta, stats),
+        }))
       return { org, beams }
     })
     .filter(({ beams }) => beams.length > 0)
@@ -136,10 +166,14 @@ export function ClaimBeamsSection({
         badgeSymbols: allClaimable.map((b) => b.badge_symbol),
       })
       toast.success('Beams claimed successfully!')
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       await queryClient.invalidateQueries({ queryKey: ['beam-stats'] })
       for (const org of userOrgNames) {
         await queryClient.invalidateQueries({
           queryKey: ['beam-metadata', org],
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ['badges', org],
         })
       }
     } catch (e) {
@@ -196,7 +230,8 @@ export function ClaimBeamsSection({
                     />
                     {getDisplayName(beam.badge_symbol, badgesBySymbol)}
                     <span className="text-gray-3">
-                      ({beam.supply_per_cycle})
+                      {beam.balance}
+                      {beam.claimable && ` (+${beam.supply_per_cycle})`}
                     </span>
                     <span
                       className={`size-2 rounded-full ${

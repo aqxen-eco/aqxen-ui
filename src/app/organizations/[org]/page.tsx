@@ -399,6 +399,8 @@ export default function OrganizationPage() {
                       avatarIpfs={comment.user.avatarIpfs}
                       createdAt={comment.createdAt}
                       content={comment.content}
+                      badgeSymbol={comment.badgeSymbol}
+                      organization={comment.organization}
                     />
                   ))}
                 </PostItem>
