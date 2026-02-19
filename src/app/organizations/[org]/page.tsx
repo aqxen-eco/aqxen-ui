@@ -238,6 +238,7 @@ export default function OrganizationPage() {
               )}
               {isAuthenticated &&
                 actor !== org &&
+                !isMember &&
                 (hasPendingRequest ? (
                   <Button
                     variant="secondary"
