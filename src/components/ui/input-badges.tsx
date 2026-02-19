@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { MdClose } from 'react-icons/md'
 import { twMerge } from 'tailwind-merge'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
+import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Combobox, ComboboxEmpty, ComboboxItem } from '@/components/ui/combobox'
 import { useOrganization } from '@/contexts/organization'
@@ -35,6 +37,32 @@ export function InputBadges({
       }),
     enabled: !!badgeScope,
   })
+
+  const beamTemplatesQuery = useQuery({
+    queryKey: ['beam-templates'],
+    queryFn: listBeamTemplates,
+  })
+
+  const filteredRows = useMemo(() => {
+    if (!badgesQuery.data?.rows) return []
+    if (!beamTemplatesQuery.data) return badgesQuery.data.rows
+
+    const templateNames = new Set(
+      beamTemplatesQuery.data.map((t) => t.display_name)
+    )
+    const trackingMetrics = ['Giving', 'Rep', 'Uniqueness']
+
+    return badgesQuery.data.rows.filter((badge) => {
+      const displayName =
+        badge.onchain_lookup_data.user.display_name
+      if (templateNames.has(displayName)) return false
+      return !trackingMetrics.some((metric) => {
+        if (!displayName.endsWith(` ${metric}`)) return false
+        const beamName = displayName.slice(0, -(metric.length + 1))
+        return templateNames.has(beamName)
+      })
+    })
+  }, [badgesQuery.data?.rows, beamTemplatesQuery.data])
 
   if (!badgesQuery.isSuccess) {
     return (
@@ -110,7 +138,7 @@ export function InputBadges({
         >
           <ComboboxEmpty />
 
-          {badgesQuery?.data?.rows.map((badge) => (
+          {filteredRows.map((badge) => (
             <ComboboxItem
               key={badge.badge_symbol}
               className="data-[selected=true]:bg-gray-3 relative flex cursor-default items-center gap-2 rounded-xs px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:text-white"
