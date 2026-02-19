@@ -88,7 +88,7 @@ export async function createPost({
       }
     }
 
-    await prisma.post.create({
+    const post = await prisma.post.create({
       data: {
         content,
         badgeSymbol,
@@ -105,6 +105,7 @@ export async function createPost({
 
     return {
       success: true,
+      postId: post.id,
     }
   } catch (error) {
     console.error('Error creating post:', error)

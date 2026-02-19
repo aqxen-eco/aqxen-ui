@@ -391,6 +391,7 @@ export default function OrganizationPage() {
                     (item) => item.user.actor
                   )}
                   organization={post.organization}
+                  totalScore={post.totalScore}
                 >
                   {post.children.map((comment) => (
                     <PostItemComment
@@ -401,6 +402,7 @@ export default function OrganizationPage() {
                       content={comment.content}
                       badgeSymbol={comment.badgeSymbol}
                       organization={comment.organization}
+                      totalScore={comment.totalScore}
                     />
                   ))}
                 </PostItem>

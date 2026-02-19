@@ -30,6 +30,7 @@ import { useGetOrganization } from '@/hooks/query/use-get-organization'
 import { listFormat } from '@/utils/intl-format'
 
 import { createPost } from './actions'
+import { processBeamGive } from './reputation'
 
 type PostItemProps = {
   id: string
@@ -40,6 +41,7 @@ type PostItemProps = {
   badgeSymbol: string[]
   mentions?: string[]
   organization?: string | null
+  totalScore: number
   children: React.ReactNode
 }
 
@@ -65,6 +67,7 @@ export function PostItem({
   badgeSymbol,
   mentions,
   organization,
+  totalScore,
   children,
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
@@ -170,13 +173,34 @@ export function PostItem({
 
       await sendMultiBadge(data)
 
-      await createPost({
+      const result = await createPost({
         parentId: id,
         actor: currentActor!,
         content,
         badgeSymbol: badges,
         mention: [actor],
       })
+
+      if (result.success && result.postId && organization) {
+        const beamBadgeSymbols = new Set(
+          beamBadges.map((b) => b.badge_symbol),
+        )
+
+        await Promise.all(
+          badges
+            .filter((b) => beamBadgeSymbols.has(b))
+            .map((badge) =>
+              processBeamGive({
+                postId: result.postId!,
+                giverActor: currentActor!,
+                recipientActor: actor,
+                badgeSymbol: badge,
+                amount: 1,
+                orgAccount: organization,
+              }),
+            ),
+        )
+      }
 
       toast('Recognition published!')
       recognizeForm.reset()
@@ -277,7 +301,7 @@ export function PostItem({
             </p>
             <div className="text-gray-3 flex gap-0.5">
               <MdWorkspacePremium className="size-6" />
-              <span className="text-body-2">50</span>
+              <span className="text-body-2">{totalScore}</span>
             </div>
           </div>
           {badgeSymbol.length > 0 && (
@@ -643,6 +667,7 @@ type PostItemCommentProps = {
   content: string
   badgeSymbol?: string[]
   organization?: string | null
+  totalScore?: number
 }
 
 export function PostItemComment({
@@ -652,6 +677,7 @@ export function PostItemComment({
   content,
   badgeSymbol = [],
   organization,
+  totalScore,
 }: PostItemCommentProps) {
   const { name } = useOrganization()
   const badgeScope = organization || name
@@ -686,7 +712,7 @@ export function PostItemComment({
           </div>
           <div className="text-gray-3 flex gap-0.5">
             <MdWorkspacePremium className="size-6" />
-            <span className="text-body-2">50</span>
+            <span className="text-body-2">{totalScore ?? 0}</span>
           </div>
         </div>
         {badgeSymbol.length > 0 && badgesQuery.isSuccess && (

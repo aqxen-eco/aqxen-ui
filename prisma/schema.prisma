@@ -40,10 +40,17 @@ model Post {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  parent   Post?     @relation("PostToParent", fields: [parentId], references: [id])
-  parentId String?   @map("parent_id")
-  children Post[]    @relation("PostToParent")
-  mention  Mention[]
+  parScore   Float @default(0) @map("par_score")
+  upaScore   Float @default(0) @map("upa_score")
+  gpaScore   Float @default(0) @map("gpa_score")
+  rpaScore   Float @default(0) @map("rpa_score")
+  totalScore Float @default(0) @map("total_score")
+
+  parent    Post?      @relation("PostToParent", fields: [parentId], references: [id])
+  parentId  String?    @map("parent_id")
+  children  Post[]     @relation("PostToParent")
+  mention   Mention[]
+  beamGives BeamGive[]
 
   @@map("post")
 }
@@ -56,6 +63,73 @@ model Mention {
   userId String @map("user_id")
 
   @@map("mention")
+}
+
+model BeamGive {
+  id             String   @id @default(uuid())
+  post           Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId         String   @map("post_id")
+  giverActor     String   @map("giver_actor")
+  recipientActor String   @map("recipient_actor")
+  badgeSymbol    String   @map("badge_symbol")
+  orgAccount     String   @map("org_account")
+  parAmount      Int      @map("par_amount")
+  upaEmitted     Int      @map("upa_emitted")
+  gpaEmitted     Float    @map("gpa_emitted")
+  xyzEmitted     Int      @map("xyz_emitted")
+  rpaEmitted     Float    @map("rpa_emitted")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("beam_give")
+}
+
+model UniqueGiver {
+  id             String @id @default(uuid())
+  recipientActor String @map("recipient_actor")
+  giverActor     String @map("giver_actor")
+
+  @@unique([recipientActor, giverActor])
+  @@map("unique_giver")
+}
+
+model SeasonUniqueGiver {
+  id             String @id @default(uuid())
+  recipientActor String @map("recipient_actor")
+  giverActor     String @map("giver_actor")
+  seasonId       String @map("season_id")
+
+  @@unique([recipientActor, giverActor, seasonId])
+  @@map("season_unique_giver")
+}
+
+model UserEmissionTotal {
+  id              String @id @default(uuid())
+  userActor       String @map("user_actor")
+  orgAccount      String @map("org_account")
+  beamBadgeSymbol String @map("beam_badge_symbol")
+  parTotal        Float  @default(0) @map("par_total")
+  upaTotal        Float  @default(0) @map("upa_total")
+  gpaTotal        Float  @default(0) @map("gpa_total")
+  xyzTotal        Float  @default(0) @map("xyz_total")
+  rpaEmittedTotal Float  @default(0) @map("rpa_emitted_total")
+
+  @@unique([userActor, orgAccount, beamBadgeSymbol])
+  @@map("user_emission_total")
+}
+
+model UserReputationScore {
+  id         String   @id @default(uuid())
+  userActor  String   @map("user_actor")
+  orgAccount String   @map("org_account")
+  parScore   Float    @default(0) @map("par_score")
+  upaScore   Float    @default(0) @map("upa_score")
+  gpaScore   Float    @default(0) @map("gpa_score")
+  rpaScore   Float    @default(0) @map("rpa_score")
+  totalScore Float    @default(0) @map("total_score")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([userActor, orgAccount])
+  @@map("user_reputation_score")
 }
 
 model PinataGroup {
