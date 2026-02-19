@@ -182,6 +182,9 @@ export function PostItem({
       recognizeForm.reset()
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setShowRecognize(false)
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['beam-stats'] })
+      }, 1000)
     } catch {
       toast.error('Failed to send badge')
     }

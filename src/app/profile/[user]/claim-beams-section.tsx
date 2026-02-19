@@ -16,6 +16,7 @@ import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import type { Badge } from '@/api/model/badge'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Button } from '@/components/ui/button'
+import { Tooltip } from '@/components/ui/tooltip'
 import { useChain } from '@/contexts/chain'
 
 function getDisplayName(
@@ -64,6 +65,35 @@ function getBalance(meta: BeamMetadata, stats: BeamStats[]) {
   const stat = findStat(meta, stats)
   if (!stat) return 0
   return parseInt(stat.badge_asset.split(' ')[0], 10) || 0
+}
+
+function getNextClaimableLabel(meta: BeamMetadata, stats: BeamStats[]) {
+  const now = Date.now() / 1000
+  const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
+  const cycleLength = meta.cycle_length
+
+  if (cycleLength <= 0 || now < starttime) return 'Not yet started'
+
+  const elapsed = now - starttime
+  const currentCycleStart =
+    starttime + Math.floor(elapsed / cycleLength) * cycleLength
+
+  const stat = findStat(meta, stats)
+
+  if (!stat) return 'Claimable now'
+
+  const lastClaimed =
+    new Date(`${stat.last_claimed_time}Z`).getTime() / 1000
+
+  if (lastClaimed < currentCycleStart) return 'Claimable now'
+
+  const nextCycleStart = currentCycleStart + cycleLength
+  const secondsUntil = Math.max(0, Math.round(nextCycleStart - now))
+
+  if (secondsUntil < 60) return `Claimable in ${secondsUntil}s`
+  if (secondsUntil < 3600) return `Claimable in ${Math.ceil(secondsUntil / 60)}m`
+  if (secondsUntil < 86400) return `Claimable in ${Math.ceil(secondsUntil / 3600)}h`
+  return `Claimable in ${Math.ceil(secondsUntil / 86400)}d`
 }
 
 type ClaimBeamsSectionProps = {
@@ -145,6 +175,7 @@ export function ClaimBeamsSection({
           org,
           claimable: isClaimable(meta, stats),
           balance: getBalance(meta, stats),
+          nextClaimableLabel: getNextClaimableLabel(meta, stats),
         }))
       return { org, beams }
     })
@@ -216,29 +247,33 @@ export function ClaimBeamsSection({
               {beams.map((beam) => {
                 const badge = badgesBySymbol.get(beam.badge_symbol)
                 return (
-                  <div
+                  <Tooltip
                     key={beam.badge_symbol}
-                    className={`border-gray-2 flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${
-                      beam.claimable
-                        ? 'bg-gray-1 text-white'
-                        : 'text-gray-3 bg-transparent'
-                    }`}
+                    content={beam.nextClaimableLabel}
                   >
-                    <BadgeImage
-                      src={badge?.offchain_lookup_data.user.ipfs_image}
-                      size="xs"
-                    />
-                    {getDisplayName(beam.badge_symbol, badgesBySymbol)}
-                    <span className="text-gray-3">
-                      {beam.balance}
-                      {beam.claimable && ` (+${beam.supply_per_cycle})`}
-                    </span>
-                    <span
-                      className={`size-2 rounded-full ${
-                        beam.claimable ? 'bg-green-500' : 'bg-red-500'
+                    <div
+                      className={`border-gray-2 flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${
+                        beam.claimable
+                          ? 'bg-gray-1 text-white'
+                          : 'text-gray-3 bg-transparent'
                       }`}
-                    />
-                  </div>
+                    >
+                      <BadgeImage
+                        src={badge?.offchain_lookup_data.user.ipfs_image}
+                        size="xs"
+                      />
+                      {getDisplayName(beam.badge_symbol, badgesBySymbol)}
+                      <span className="text-gray-3">
+                        {beam.balance}
+                        {beam.claimable && ` (+${beam.supply_per_cycle})`}
+                      </span>
+                      <span
+                        className={`size-2 rounded-full ${
+                          beam.claimable ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                    </div>
+                  </Tooltip>
                 )
               })}
             </div>
