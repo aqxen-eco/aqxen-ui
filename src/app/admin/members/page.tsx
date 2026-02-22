@@ -20,6 +20,7 @@ import { listMemberRequests } from '@/api/chain/organization/list-member-request
 import { listMembers } from '@/api/chain/organization/list-members'
 import { rejectMember } from '@/api/chain/organization/reject-member'
 import { removeMember } from '@/api/chain/organization/remove-member'
+import { getOrgMemberReputation } from '@/app/profile/[user]/functions'
 import {
   HeaderAdmin,
   HeaderAdminMenu,
@@ -67,6 +68,11 @@ export default function MembersPage() {
   const membersQuery = useQuery({
     queryKey: ['members', name],
     queryFn: async () => await listMembers({ scope: name }),
+  })
+
+  const reputationQuery = useQuery({
+    queryKey: ['org-member-reputation', name],
+    queryFn: async () => await getOrgMemberReputation({ orgAccount: name }),
   })
 
   const requestsQuery = useQuery({
@@ -361,6 +367,7 @@ export default function MembersPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Account</TableHead>
+                    <TableHead>Reputation</TableHead>
                     <TableHead>Joined at</TableHead>
                     <TableHead className="w-44" />
                   </TableRow>
@@ -369,6 +376,9 @@ export default function MembersPage() {
                   {membersQuery.data.rows.map((row) => (
                     <TableRow key={row.account}>
                       <TableCell>{row.account}</TableCell>
+                      <TableCell className="text-gray-3">
+                        {reputationQuery.data?.[row.account] ?? 0}
+                      </TableCell>
                       <TableCell className="text-gray-3">
                         {format(new Date(row.joined_at), 'EEE d MMM yyyy')}
                       </TableCell>

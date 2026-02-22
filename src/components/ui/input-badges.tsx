@@ -17,6 +17,7 @@ type InputBadgesProps = {
   hideSearch?: boolean
   hideRemoveBadgeButton?: boolean
   scope?: string
+  beamsOnly?: boolean
 }
 
 export function InputBadges({
@@ -25,6 +26,7 @@ export function InputBadges({
   hideSearch = false,
   hideRemoveBadgeButton = false,
   scope,
+  beamsOnly = false,
 }: InputBadgesProps) {
   const { name } = useOrganization()
   const badgeScope = scope ?? name
@@ -45,7 +47,7 @@ export function InputBadges({
 
   const filteredRows = useMemo(() => {
     if (!badgesQuery.data?.rows) return []
-    if (!beamTemplatesQuery.data) return badgesQuery.data.rows
+    if (!beamTemplatesQuery.data) return beamsOnly ? [] : badgesQuery.data.rows
 
     const templateNames = new Set(
       beamTemplatesQuery.data.map((t) => t.display_name)
@@ -55,6 +57,11 @@ export function InputBadges({
     return badgesQuery.data.rows.filter((badge) => {
       const displayName =
         badge.onchain_lookup_data.user.display_name
+
+      if (beamsOnly) {
+        return templateNames.has(displayName)
+      }
+
       if (templateNames.has(displayName)) return false
       return !trackingMetrics.some((metric) => {
         if (!displayName.endsWith(` ${metric}`)) return false
@@ -62,7 +69,7 @@ export function InputBadges({
         return templateNames.has(beamName)
       })
     })
-  }, [badgesQuery.data?.rows, beamTemplatesQuery.data])
+  }, [badgesQuery.data?.rows, beamTemplatesQuery.data, beamsOnly])
 
   if (!badgesQuery.isSuccess) {
     return (

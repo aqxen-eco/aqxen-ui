@@ -174,7 +174,7 @@ export function ProfileForm() {
                 initial={{ opacity: 0, y: 32 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 32 }}
-                className="border-gray-2 bg-gray-1 fixed top-1/2 left-1/2 z-60 w-full max-w-[calc(var(--spacing-container-md)-2rem)] -translate-x-1/2 -translate-y-1/2 border p-4 shadow-lg max-md:h-svh md:rounded-2xl md:p-8"
+                className="border-gray-2 bg-gray-1 fixed inset-0 z-60 w-full overflow-y-auto border p-4 shadow-lg md:inset-auto md:top-1/2 md:left-1/2 md:max-h-[calc(100vh-4rem)] md:max-w-[calc(var(--spacing-container-md)-2rem)] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:p-8"
               >
                 <Dialog.Close asChild>
                   <Button

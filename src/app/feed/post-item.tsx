@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import { Children, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { MdClose, MdMoreHoriz, MdWorkspacePremium } from 'react-icons/md'
+import { MdClose, MdMoreHoriz, MdStar, MdWorkspacePremium } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
@@ -32,6 +32,38 @@ import { listFormat } from '@/utils/intl-format'
 import { createPost } from './actions'
 import { processBeamGive } from './reputation'
 
+type BeamBreakdownRow = { name: string; score: number }
+
+function buildBeamBreakdown(
+  beamGives: BeamGiveEntry[] | undefined,
+  badgeRows:
+    | { badge_symbol: string; onchain_lookup_data: { user: { display_name: string } } }[]
+    | undefined
+): BeamBreakdownRow[] {
+  if (!beamGives || beamGives.length === 0) return []
+
+  const grouped = new Map<string, number>()
+  for (const g of beamGives) {
+    const total = g.parAmount + g.upaEmitted + g.gpaEmitted + g.rpaEmitted
+    grouped.set(g.badgeSymbol, (grouped.get(g.badgeSymbol) ?? 0) + total)
+  }
+
+  return Array.from(grouped.entries()).map(([symbol, score]) => {
+    const badge = badgeRows?.find((b) => b.badge_symbol === symbol)
+    const name =
+      badge?.onchain_lookup_data.user.display_name ?? symbol
+    return { name, score: Math.round(score * 100) / 100 }
+  })
+}
+
+type BeamGiveEntry = {
+  badgeSymbol: string
+  parAmount: number
+  upaEmitted: number
+  gpaEmitted: number
+  rpaEmitted: number
+}
+
 type PostItemProps = {
   id: string
   actor: string
@@ -42,6 +74,7 @@ type PostItemProps = {
   mentions?: string[]
   organization?: string | null
   totalScore: number
+  beamGives?: BeamGiveEntry[]
   children: React.ReactNode
 }
 
@@ -68,6 +101,7 @@ export function PostItem({
   mentions,
   organization,
   totalScore,
+  beamGives,
   children,
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
@@ -243,17 +277,15 @@ export function PostItem({
             {actor.slice(0, 2)}
           </Avatar>
           {organization && orgAvatar && (
-            <Tooltip content={orgDisplayName || organization}>
-              <button className="absolute -right-1 -bottom-1 z-20">
-                <Avatar
-                  size="xs"
-                  src={IPFS_IMAGE_SOURCE + orgAvatar}
-                  className="ring-gray-1 ring-2"
-                >
-                  {organization.slice(0, 2)}
-                </Avatar>
-              </button>
-            </Tooltip>
+            <div className="absolute -right-1 -top-1 z-20">
+              <Avatar
+                size="xs"
+                src={IPFS_IMAGE_SOURCE + orgAvatar}
+                className="ring-gray-1 ring-2"
+              >
+                {organization.slice(0, 2)}
+              </Avatar>
+            </div>
           )}
         </div>
         <div className="max-md:space-y-2">
@@ -299,10 +331,50 @@ export function PostItem({
                 </>
               )}
             </p>
-            <div className="text-gray-3 flex gap-0.5">
-              <MdWorkspacePremium className="size-6" />
-              <span className="text-body-2">{totalScore}</span>
-            </div>
+            <Tooltip
+              className="min-w-40"
+              content={
+                (() => {
+                  const rows = buildBeamBreakdown(beamGives, badgeRows)
+                  if (rows.length === 0) {
+                    return (
+                      <span className="text-gray-3">
+                        No beam contributions
+                      </span>
+                    )
+                  }
+                  return (
+                    <div className="space-y-1">
+                      {rows.map((row) => (
+                        <div
+                          key={row.name}
+                          className="flex justify-between gap-4"
+                        >
+                          <span className="text-white">{row.name}</span>
+                          <span className="text-gray-3 tabular-nums">
+                            {row.score}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="border-gray-2 my-1 border-t" />
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white font-medium">
+                          Total
+                        </span>
+                        <span className="text-white tabular-nums font-medium">
+                          {totalScore}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })()
+              }
+            >
+              <div className="text-gray-3 flex cursor-default gap-0.5">
+                <MdWorkspacePremium className="size-6" />
+                <span className="text-body-2">{totalScore}</span>
+              </div>
+            </Tooltip>
           </div>
           {badgeSymbol.length > 0 && (
             <div>
@@ -350,10 +422,17 @@ export function PostItem({
                 >
                   <Button
                     variant="secondary"
-                    className="mt-2"
+                    className="mt-2 items-center"
                     onClick={() => setShowRecognize(true)}
                   >
-                    {isOwnPost || isOrgPost ? 'Comment' : '+1 recognize'}
+                    {isOwnPost || isOrgPost ? (
+                      'Comment'
+                    ) : (
+                      <>
+                        <MdStar className="size-4" />
+                        Recognize
+                      </>
+                    )}
                   </Button>
                 </motion.div>
               )}
@@ -668,6 +747,7 @@ type PostItemCommentProps = {
   badgeSymbol?: string[]
   organization?: string | null
   totalScore?: number
+  beamGives?: BeamGiveEntry[]
 }
 
 export function PostItemComment({
@@ -678,9 +758,14 @@ export function PostItemComment({
   badgeSymbol = [],
   organization,
   totalScore,
+  beamGives,
 }: PostItemCommentProps) {
   const { name } = useOrganization()
   const badgeScope = organization || name
+
+  const orgQuery = useGetOrganization(organization)
+  const orgAvatar =
+    orgQuery.data?.rows[0]?.offchain_lookup_data?.user.ipfs_image
 
   const badgesQuery = useQuery({
     queryKey: ['badges', badgeScope],
@@ -690,13 +775,26 @@ export function PostItemComment({
 
   return (
     <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
-      <Avatar
-        size="md"
-        className="ring-gray-1 relative z-10 ring-8"
-        src={avatarIpfs ? IPFS_IMAGE_SOURCE + avatarIpfs : undefined}
-      >
-        {actor.slice(0, 2)}
-      </Avatar>
+      <div className="relative">
+        <Avatar
+          size="md"
+          className="ring-gray-1 relative z-10 ring-8"
+          src={avatarIpfs ? IPFS_IMAGE_SOURCE + avatarIpfs : undefined}
+        >
+          {actor.slice(0, 2)}
+        </Avatar>
+        {organization && orgAvatar && (
+          <div className="absolute -right-1 -top-1 z-20">
+            <Avatar
+              size="xs"
+              src={IPFS_IMAGE_SOURCE + orgAvatar}
+              className="ring-gray-1 ring-2"
+            >
+              {organization.slice(0, 2)}
+            </Avatar>
+          </div>
+        )}
+      </div>
       <div className="max-md:space-y-2">
         <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
           <div className="flex gap-2">
@@ -710,10 +808,53 @@ export function PostItemComment({
               • {format(new Date(createdAt), 'EEE d MMM')}
             </span>
           </div>
-          <div className="text-gray-3 flex gap-0.5">
-            <MdWorkspacePremium className="size-6" />
-            <span className="text-body-2">{totalScore ?? 0}</span>
-          </div>
+          <Tooltip
+            className="min-w-40"
+            content={
+              (() => {
+                const rows = buildBeamBreakdown(
+                  beamGives,
+                  badgesQuery.data?.rows
+                )
+                if (rows.length === 0) {
+                  return (
+                    <span className="text-gray-3">
+                      No beam contributions
+                    </span>
+                  )
+                }
+                return (
+                  <div className="space-y-1">
+                    {rows.map((row) => (
+                      <div
+                        key={row.name}
+                        className="flex justify-between gap-4"
+                      >
+                        <span className="text-white">{row.name}</span>
+                        <span className="text-gray-3 tabular-nums">
+                          {row.score}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="border-gray-2 my-1 border-t" />
+                    <div className="flex justify-between gap-4">
+                      <span className="text-white font-medium">
+                        Total
+                      </span>
+                      <span className="text-white tabular-nums font-medium">
+                        {totalScore ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })()
+            }
+          >
+            <div className="text-gray-3 flex cursor-default gap-0.5">
+              <MdWorkspacePremium className="size-6" />
+              <span className="text-body-2">{totalScore ?? 0}</span>
+            </div>
+          </Tooltip>
         </div>
         {badgeSymbol.length > 0 && badgesQuery.isSuccess && (
           <div className="flex flex-wrap gap-1">

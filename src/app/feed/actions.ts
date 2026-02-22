@@ -186,9 +186,27 @@ export async function getPosts({
             },
           },
         },
+        beamGives: {
+          select: {
+            badgeSymbol: true,
+            parAmount: true,
+            upaEmitted: true,
+            gpaEmitted: true,
+            rpaEmitted: true,
+          },
+        },
         children: {
           include: {
             user: true,
+            beamGives: {
+              select: {
+                badgeSymbol: true,
+                parAmount: true,
+                upaEmitted: true,
+                gpaEmitted: true,
+                rpaEmitted: true,
+              },
+            },
           },
           orderBy: {
             createdAt: 'desc',

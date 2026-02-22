@@ -44,77 +44,59 @@ type GetUserBadges = {
 export async function getUserBadges({
   user,
 }: GetUserBadgesProps): Promise<GetUserBadges> {
+  // Step 1: Fetch user-scoped data and all organizations
   const [
     { rows: organization },
-    { rows: badges },
-    { rows: seasons },
     { rows: lifetimeBadges },
     { rows: seasonalBadges },
-    { rows: badgesStatus },
+    beamTemplates,
   ] = await Promise.all([
     listOrganization({}),
-    listBadge({
-      scope: user,
-    }),
-    listSeason({
-      scope: user,
-    }),
-    listLifetimeBadge({
-      scope: user,
-    }),
-    listSeasonalBadge({
-      scope: user,
-    }),
-    listBadgeStatus({
-      scope: user,
-    }),
+    listLifetimeBadge({ scope: user }),
+    listSeasonalBadge({ scope: user }),
+    listBeamTemplates(),
   ])
 
-  const organizationThatNeedsToGetBadges = [] as string[]
-
+  // Step 2: Determine relevant orgs from lifetime badge symbols
+  const relevantOrgNames = new Set<string>()
   organization.forEach((org) => {
     lifetimeBadges.forEach((userBadge) => {
       const symbol = userBadge.balance.split(' ')[1].toLowerCase()
       const orgCode = org.org_code.toLowerCase()
-
       if (symbol.startsWith(orgCode)) {
-        if (!organizationThatNeedsToGetBadges.includes(org.org)) {
-          organizationThatNeedsToGetBadges.push(org.org)
-        }
+        relevantOrgNames.add(org.org)
       }
     })
   })
 
-  // Collect all org accounts from both lifetime badges and seasons
-  const allRelevantOrgs = new Set(organizationThatNeedsToGetBadges)
-  for (const season of seasons) {
-    const seasonSymbol = season.agg_symbol.split(',')[1]?.toLowerCase()
-    if (seasonSymbol) {
-      const matchingOrg = organization.find((org) =>
-        seasonSymbol.startsWith(org.org_code.toLowerCase())
-      )
-      if (matchingOrg) allRelevantOrgs.add(matchingOrg.org)
-    }
-  }
+  // Step 3: Fetch per-org data (badge defs, seasons, badge status, beam metadata)
+  const perOrgData = await Promise.all(
+    Array.from(relevantOrgNames).map(async (orgName) => {
+      const [badgeResult, seasonResult, badgeStatusResult, beamMeta] =
+        await Promise.all([
+          listBadge({ scope: orgName }),
+          listSeason({ scope: orgName }),
+          listBadgeStatus({ scope: orgName }),
+          listBeamMetadata({ scope: orgName }),
+        ])
+      return {
+        orgName,
+        badges: badgeResult.rows,
+        seasons: seasonResult.rows,
+        badgeStatus: badgeStatusResult.rows,
+        beamMeta,
+      }
+    })
+  )
 
-  const allRelevantOrgsArray = Array.from(allRelevantOrgs)
-
-  const [badgesOfAnotherOrganization, beamMetadataPerOrg, beamTemplates] =
-    await Promise.all([
-      Promise.all(
-        organizationThatNeedsToGetBadges.map(async (org) => {
-          const { rows } = await listBadge({ scope: org })
-          return rows
-        })
-      ),
-      Promise.all(
-        allRelevantOrgsArray.map((org) => listBeamMetadata({ scope: org }))
-      ),
-      listBeamTemplates(),
-    ])
+  // Merge per-org results
+  const badges = perOrgData.flatMap((d) => d.badges)
+  const seasons = perOrgData.flatMap((d) => d.seasons)
+  const badgesStatus = perOrgData.flatMap((d) => d.badgeStatus)
+  const beamMetadataFlat = perOrgData.flatMap((d) => d.beamMeta)
 
   const beamBadgeSymbols = new Set(
-    beamMetadataPerOrg.flat().map((meta) => meta.badge_symbol)
+    beamMetadataFlat.map((meta) => meta.badge_symbol)
   )
   const beamTemplateNames = new Set(beamTemplates.map((t) => t.display_name))
   const trackingMetrics = ['Giving', 'Rep', 'Uniqueness']
@@ -144,10 +126,6 @@ export async function getUserBadges({
 
     return false
   }
-
-  const badgesOfAnotherOrganizationFlatted = badgesOfAnotherOrganization.flat()
-
-  badges.push(...badgesOfAnotherOrganizationFlatted)
 
   const lifetimeBadgesBalanceSymbol = lifetimeBadges.map((userBadge) => {
     const [balance, symbol] = userBadge.balance.split(' ')
@@ -340,4 +318,39 @@ export async function getUserOrganizations({
       ...org,
       isOwner: org.org === user,
     }))
+}
+
+export async function getUserReputation({ user }: { user: string }) {
+  const rows = await prisma.userReputationScore.findMany({
+    where: { userActor: user },
+    select: { orgAccount: true, totalScore: true },
+  })
+
+  const perOrg: Record<string, number> = {}
+  let total = 0
+
+  for (const row of rows) {
+    const score = Math.round(row.totalScore * 100) / 100
+    perOrg[row.orgAccount] = score
+    total += score
+  }
+
+  return { perOrg, total: Math.round(total * 100) / 100 }
+}
+
+export async function getOrgMemberReputation({
+  orgAccount,
+}: {
+  orgAccount: string
+}): Promise<Record<string, number>> {
+  const rows = await prisma.userReputationScore.findMany({
+    where: { orgAccount },
+    select: { userActor: true, totalScore: true },
+  })
+
+  const result: Record<string, number> = {}
+  for (const row of rows) {
+    result[row.userActor] = Math.round(row.totalScore * 100) / 100
+  }
+  return result
 }
