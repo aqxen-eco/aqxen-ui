@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import type { Badge as BadgeType } from '@/api/model/badge'
 import { type Series } from '@/api/model/series'
@@ -14,6 +14,8 @@ import {
 import { Box } from '@/components/ui/box'
 import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 
+const LIFETIME_KEY = '__lifetime__'
+
 type SeasonalBadgesSectionProps = {
   lastSeriesId?: number
   name: string
@@ -26,15 +28,48 @@ type SeasonalBadgesSectionProps = {
 export function SeasonalBadgesSection({
   name,
   orgDisplayName,
-  lastSeriesId,
   series,
 }: SeasonalBadgesSectionProps) {
-  const [selectedSeries, setSelectedSeries] = useState(lastSeriesId)
+  const [selectedSeries, setSelectedSeries] = useState<
+    number | typeof LIFETIME_KEY
+  >(LIFETIME_KEY)
   const [selectedBadge, setSelectedBadge] = useState<
     ({ balance: number } & BadgeType) | null
   >(null)
 
-  const seriesValue = series.find((series) => series.seq_id === selectedSeries)
+  const lifetimeBadges = useMemo(() => {
+    const badgeMap = new Map<
+      string,
+      { balance: number } & BadgeType
+    >()
+
+    for (const s of series) {
+      for (const badge of s.badges) {
+        const existing = badgeMap.get(badge.badge_symbol)
+        if (existing) {
+          badgeMap.set(badge.badge_symbol, {
+            ...existing,
+            balance: existing.balance + badge.balance,
+          })
+        } else {
+          badgeMap.set(badge.badge_symbol, { ...badge })
+        }
+      }
+    }
+
+    return Array.from(badgeMap.values())
+  }, [series])
+
+  const isLifetime = selectedSeries === LIFETIME_KEY
+  const seriesValue = isLifetime
+    ? null
+    : series.find((s) => s.seq_id === selectedSeries)
+  const displayBadges = isLifetime
+    ? lifetimeBadges
+    : seriesValue?.badges ?? []
+  const dropdownLabel = isLifetime
+    ? 'Lifetime'
+    : seriesValue?.sequence_description
 
   return (
     <section className="py-8">
@@ -45,32 +80,34 @@ export function SeasonalBadgesSection({
             <span className="text-gray-3"> — {orgDisplayName}</span>
           )}{' '}
           <span className="text-gray-3">
-            {seriesValue?.badges && seriesValue?.badges.length > 0
-              ? `(${seriesValue?.badges.length})`
-              : null}
+            {displayBadges.length > 0 ? `(${displayBadges.length})` : null}
           </span>
         </h3>
         {series.length > 0 && (
-          <DropdownRoot label={seriesValue?.sequence_description} align="end">
-            {series.map((series) => (
+          <DropdownRoot label={dropdownLabel} align="end">
+            <DropdownItem
+              isSelected={isLifetime}
+              onClick={() => setSelectedSeries(LIFETIME_KEY)}
+            >
+              Lifetime
+            </DropdownItem>
+            {series.map((s) => (
               <DropdownItem
-                key={series.seq_id}
-                isSelected={series.seq_id === selectedSeries}
-                onClick={() => {
-                  setSelectedSeries(series.seq_id)
-                }}
+                key={s.seq_id}
+                isSelected={s.seq_id === selectedSeries}
+                onClick={() => setSelectedSeries(s.seq_id)}
               >
-                {series.sequence_description}
+                {s.sequence_description}
               </DropdownItem>
             ))}
           </DropdownRoot>
         )}
       </header>
-      {seriesValue?.badges && seriesValue?.badges.length > 0 ? (
+      {displayBadges.length > 0 ? (
         <>
           <BadgeSwiper>
             <BadgeSwiperWrapper>
-              {seriesValue.badges.map((badge) => (
+              {displayBadges.map((badge) => (
                 <BadgeSwiperSlide key={badge.badge_symbol}>
                   <button
                     type="button"

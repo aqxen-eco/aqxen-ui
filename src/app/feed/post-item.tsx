@@ -1,24 +1,27 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import * as Popover from '@radix-ui/react-popover'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Command } from 'cmdk'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
-import { Children, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { MdMoreHoriz, MdWorkspacePremium } from 'react-icons/md'
+import { Children, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { MdClose, MdMoreHoriz, MdWorkspacePremium } from 'react-icons/md'
 import { toast } from 'react-toastify'
+import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
+import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { Avatar } from '@/components/ui/avatar'
 import { BadgeDetailModal } from '@/components/ui/badge-detail-modal'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
-import { InputBadges } from '@/components/ui/input-badges'
 import { Tooltip } from '@/components/ui/tooltip'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
@@ -66,6 +69,7 @@ export function PostItem({
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
+  const [addBadgeOpen, setAddBadgeOpen] = useState(false)
   const { name } = useOrganization()
 
   const orgQuery = useGetOrganization(organization)
@@ -77,14 +81,68 @@ export function PostItem({
     return Children.count(children) > 1
   })
 
+  const badgeScope = organization || name
+
   const query = useQuery({
-    queryKey: ['badges', name],
-    queryFn: async () => await listBadge({ scope: name }),
+    queryKey: ['badges', badgeScope],
+    queryFn: async () => await listBadge({ scope: badgeScope }),
+    enabled: !!badgeScope,
   })
+
+  const beamTemplatesQuery = useQuery({
+    queryKey: ['beam-templates'],
+    queryFn: listBeamTemplates,
+  })
+
+  const badgeRows = query.data?.rows
+  const beamTemplates = beamTemplatesQuery.data
+
+  const { beamBadges, customBadges } = useMemo(() => {
+    if (!badgeRows) {
+      return { beamBadges: [], customBadges: [] }
+    }
+
+    if (!beamTemplates) {
+      return { beamBadges: [], customBadges: badgeRows }
+    }
+
+    const templateNames = new Set(
+      beamTemplates.map((t) => t.display_name)
+    )
+    const trackingMetrics = ['Giving', 'Rep', 'Uniqueness']
+
+    const beams: typeof badgeRows = []
+    const custom: typeof badgeRows = []
+
+    for (const badge of badgeRows) {
+      const displayName =
+        badge.onchain_lookup_data.user.display_name
+
+      if (templateNames.has(displayName)) {
+        beams.push(badge)
+      } else {
+        const isTracking = trackingMetrics.some((metric) => {
+          if (!displayName.endsWith(` ${metric}`)) return false
+          const beamName = displayName.slice(
+            0,
+            -(metric.length + 1)
+          )
+          return templateNames.has(beamName)
+        })
+
+        if (!isTracking) {
+          custom.push(badge)
+        }
+      }
+    }
+
+    return { beamBadges: beams, customBadges: custom }
+  }, [badgeRows, beamTemplates])
 
   const { actor: currentActor, session } = useChain()
 
   const isOwnPost = currentActor === actor
+  const isOrgPost = !!organization && actor === organization
 
   const recognizeForm = useForm<RecognizeSchema>({
     resolver: zodResolver(recognizeSchema),
@@ -124,6 +182,9 @@ export function PostItem({
       recognizeForm.reset()
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setShowRecognize(false)
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['beam-stats'] })
+      }, 1000)
     } catch {
       toast.error('Failed to send badge')
     }
@@ -268,11 +329,11 @@ export function PostItem({
                     className="mt-2"
                     onClick={() => setShowRecognize(true)}
                   >
-                    {isOwnPost ? 'Comment' : '+1 recognize'}
+                    {isOwnPost || isOrgPost ? 'Comment' : '+1 recognize'}
                   </Button>
                 </motion.div>
               )}
-              {showRecognize && isOwnPost && (
+              {showRecognize && (isOwnPost || isOrgPost) && (
                 <motion.form
                   onSubmit={commentForm.handleSubmit(onComment)}
                   initial={{ opacity: 0, y: 16 }}
@@ -314,7 +375,7 @@ export function PostItem({
                   </div>
                 </motion.form>
               )}
-              {showRecognize && !isOwnPost && (
+              {showRecognize && !isOwnPost && !isOrgPost && (
                 <motion.form
                   onSubmit={recognizeForm.handleSubmit(onRecognize)}
                   initial={{ opacity: 0, y: 16 }}
@@ -323,21 +384,196 @@ export function PostItem({
                   transition={{ duration: 0.2 }}
                   className="border-gray-2 mt-4 space-y-4 border-t pt-4"
                 >
-                  <div>
-                    <span className="text-body-2 mb-1 block font-medium text-white">
-                      Badges
-                    </span>
-                    <Controller
-                      name="badges"
-                      control={recognizeForm.control}
-                      render={({ field }) => (
-                        <InputBadges
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      )}
-                    />
-                  </div>
+                  {beamBadges.length > 0 && (
+                    <div>
+                      <span className="text-body-2 mb-1 block font-medium text-white">
+                        Beams
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {beamBadges.map((badge) => {
+                          const isSelected = badgesWatched?.includes(
+                            badge.badge_symbol
+                          )
+                          return (
+                            <button
+                              key={badge.badge_symbol}
+                              type="button"
+                              onClick={() => {
+                                const current =
+                                  recognizeForm.getValues('badges') ?? []
+                                if (current.includes(badge.badge_symbol)) {
+                                  recognizeForm.setValue(
+                                    'badges',
+                                    current.filter(
+                                      (s) => s !== badge.badge_symbol
+                                    ),
+                                    { shouldValidate: true }
+                                  )
+                                } else {
+                                  recognizeForm.setValue(
+                                    'badges',
+                                    [...current, badge.badge_symbol],
+                                    { shouldValidate: true }
+                                  )
+                                }
+                              }}
+                              className={twMerge(
+                                'border-gray-2 bg-gray-1 inline-flex items-center gap-2 rounded-xl border px-3 py-2 transition-colors',
+                                isSelected && 'border-white bg-gray-2'
+                              )}
+                            >
+                              <BadgeImage
+                                src={
+                                  badge.offchain_lookup_data.user.ipfs_image
+                                }
+                                size="xs"
+                              />
+                              <span className="text-body-2 font-medium text-white">
+                                {badge.onchain_lookup_data.user.display_name}
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {customBadges.length > 0 && (
+                    <div>
+                      <span className="text-body-2 mb-1 block font-medium text-white">
+                        {beamBadges.length > 0 ? 'Other Badges' : 'Badges'}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {customBadges
+                          .filter((b) =>
+                            badgesWatched?.includes(b.badge_symbol)
+                          )
+                          .map((badge) => (
+                            <div
+                              key={badge.badge_symbol}
+                              className="border-white bg-gray-2 inline-flex items-center gap-2 rounded-xl border px-3 py-2"
+                            >
+                              <BadgeImage
+                                src={
+                                  badge.offchain_lookup_data.user.ipfs_image
+                                }
+                                size="xs"
+                              />
+                              <span className="text-body-2 font-medium text-white">
+                                {badge.onchain_lookup_data.user.display_name}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const current =
+                                    recognizeForm.getValues('badges') ?? []
+                                  recognizeForm.setValue(
+                                    'badges',
+                                    current.filter(
+                                      (s) => s !== badge.badge_symbol
+                                    ),
+                                    { shouldValidate: true }
+                                  )
+                                }}
+                                className="text-gray-3 hover:text-white -mr-1"
+                              >
+                                <MdClose className="size-4" />
+                              </button>
+                            </div>
+                          ))}
+                        <Popover.Root
+                          open={addBadgeOpen}
+                          onOpenChange={setAddBadgeOpen}
+                        >
+                          <Popover.Trigger asChild>
+                            <button
+                              type="button"
+                              className="border-gray-2 bg-gray-1 inline-flex items-center gap-2 rounded-xl border px-3 py-2 transition-colors hover:border-white"
+                            >
+                              <span className="text-body-2 font-medium text-white">
+                                + Add Badge
+                              </span>
+                            </button>
+                          </Popover.Trigger>
+                          <Popover.Portal>
+                            <Popover.Content
+                              side="bottom"
+                              align="start"
+                              sideOffset={8}
+                              className="border-gray-2 bg-gray-1 z-70 w-64 rounded-2xl border p-2"
+                            >
+                              <Command
+                                filter={(value, search) => {
+                                  const badge = customBadges.find(
+                                    (b) => b.badge_symbol === value
+                                  )
+                                  if (
+                                    badge?.onchain_lookup_data.user.display_name
+                                      .toLowerCase()
+                                      .includes(search.toLowerCase())
+                                  )
+                                    return 1
+                                  return 0
+                                }}
+                              >
+                                <Command.Input
+                                  placeholder="Search badges"
+                                  className="text-body-2 placeholder:text-gray-3 w-full bg-transparent px-2 py-1.5 text-white outline-none"
+                                />
+                                <Command.List className="mt-1 max-h-48 overflow-y-auto [&_[cmdk-list-sizer]]:space-y-1">
+                                  <Command.Empty className="text-body-2 text-gray-3 py-4 text-center">
+                                    No badges found.
+                                  </Command.Empty>
+                                  {customBadges
+                                    .filter(
+                                      (b) =>
+                                        !badgesWatched?.includes(
+                                          b.badge_symbol
+                                        )
+                                    )
+                                    .map((badge) => (
+                                      <Command.Item
+                                        key={badge.badge_symbol}
+                                        value={badge.badge_symbol}
+                                        onSelect={() => {
+                                          const current =
+                                            recognizeForm.getValues(
+                                              'badges'
+                                            ) ?? []
+                                          recognizeForm.setValue(
+                                            'badges',
+                                            [
+                                              ...current,
+                                              badge.badge_symbol,
+                                            ],
+                                            { shouldValidate: true }
+                                          )
+                                          setAddBadgeOpen(false)
+                                        }}
+                                        className="text-body-2 text-gray-3 data-[selected=true]:bg-gray-2 flex cursor-default items-center gap-2 rounded-lg px-2 py-1.5 outline-hidden select-none data-[selected=true]:text-white"
+                                      >
+                                        <BadgeImage
+                                          src={
+                                            badge.offchain_lookup_data.user
+                                              .ipfs_image
+                                          }
+                                          size="xs"
+                                        />
+                                        <span className="text-body-2 font-medium">
+                                          {
+                                            badge.onchain_lookup_data.user
+                                              .display_name
+                                          }
+                                        </span>
+                                      </Command.Item>
+                                    ))}
+                                </Command.List>
+                              </Command>
+                            </Popover.Content>
+                          </Popover.Portal>
+                        </Popover.Root>
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <span className="text-body-2 mb-1 block font-medium text-white">
                       Message
@@ -405,6 +641,8 @@ type PostItemCommentProps = {
   avatarIpfs?: string | null
   createdAt: Date
   content: string
+  badgeSymbol?: string[]
+  organization?: string | null
 }
 
 export function PostItemComment({
@@ -412,7 +650,18 @@ export function PostItemComment({
   avatarIpfs,
   createdAt,
   content,
+  badgeSymbol = [],
+  organization,
 }: PostItemCommentProps) {
+  const { name } = useOrganization()
+  const badgeScope = organization || name
+
+  const badgesQuery = useQuery({
+    queryKey: ['badges', badgeScope],
+    queryFn: async () => await listBadge({ scope: badgeScope }),
+    enabled: !!badgeScope && badgeSymbol.length > 0,
+  })
+
   return (
     <div className="grid grid-cols-[3rem_1fr] gap-4 p-4">
       <Avatar
@@ -430,8 +679,6 @@ export function PostItemComment({
                 {actor}
               </Link>
             </p>
-            {/* <Avatar size="xs">AZ</Avatar>
-            <span className="text-body-2 text-gray-3">Responsibility</span> */}
             <span className="text-gray-3">
               {' '}
               • {format(new Date(createdAt), 'EEE d MMM')}
@@ -442,6 +689,25 @@ export function PostItemComment({
             <span className="text-body-2">50</span>
           </div>
         </div>
+        {badgeSymbol.length > 0 && badgesQuery.isSuccess && (
+          <div className="flex flex-wrap gap-1">
+            {badgesQuery.data.rows
+              .filter((row) => badgeSymbol.includes(row.badge_symbol))
+              .map((row) => (
+                <Tooltip
+                  key={row.badge_symbol}
+                  content={row.onchain_lookup_data.user.display_name}
+                >
+                  <Button square>
+                    <BadgeImage
+                      src={row.offchain_lookup_data.user.ipfs_image}
+                      size="xs"
+                    />
+                  </Button>
+                </Tooltip>
+              ))}
+          </div>
+        )}
         <p className="text-body-2 text-gray-3">{content}</p>
       </div>
     </div>

@@ -1,15 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import { MdOutlineDynamicFeed, MdOutlineWorkspacePremium } from 'react-icons/md'
+import {
+  MdElectricBolt,
+  MdOutlineDynamicFeed,
+  MdOutlineWorkspacePremium,
+} from 'react-icons/md'
 
 type ProfileTabsProps = {
   feedContent: React.ReactNode
   badgesContent: React.ReactNode
+  beamsContent: React.ReactNode
 }
 
-export function ProfileTabs({ feedContent, badgesContent }: ProfileTabsProps) {
-  const [activeTab, setActiveTab] = useState<'feed' | 'badges'>('feed')
+export function ProfileTabs({
+  feedContent,
+  badgesContent,
+  beamsContent,
+}: ProfileTabsProps) {
+  const [activeTab, setActiveTab] = useState<'feed' | 'badges' | 'beams'>(
+    'feed',
+  )
+
+  const tabClass =
+    'text-body-2 text-gray-3 relative flex cursor-pointer items-center gap-2 pb-4 font-medium data-[state=active]:text-white data-[state=active]:before:absolute data-[state=active]:before:bottom-0 data-[state=active]:before:left-0 data-[state=active]:before:h-0.5 data-[state=active]:before:w-full data-[state=active]:before:bg-white'
 
   return (
     <>
@@ -17,7 +31,7 @@ export function ProfileTabs({ feedContent, badgesContent }: ProfileTabsProps) {
         <button
           type="button"
           data-state={activeTab === 'feed' ? 'active' : 'idle'}
-          className="text-body-2 text-gray-3 relative flex cursor-pointer items-center gap-2 pb-4 font-medium data-[state=active]:text-white data-[state=active]:before:absolute data-[state=active]:before:bottom-0 data-[state=active]:before:left-0 data-[state=active]:before:h-0.5 data-[state=active]:before:w-full data-[state=active]:before:bg-white"
+          className={tabClass}
           onClick={() => setActiveTab('feed')}
         >
           <MdOutlineDynamicFeed className="size-5" />
@@ -26,15 +40,25 @@ export function ProfileTabs({ feedContent, badgesContent }: ProfileTabsProps) {
         <button
           type="button"
           data-state={activeTab === 'badges' ? 'active' : 'idle'}
-          className="text-body-2 text-gray-3 relative flex cursor-pointer items-center gap-2 pb-4 font-medium data-[state=active]:text-white data-[state=active]:before:absolute data-[state=active]:before:bottom-0 data-[state=active]:before:left-0 data-[state=active]:before:h-0.5 data-[state=active]:before:w-full data-[state=active]:before:bg-white"
+          className={tabClass}
           onClick={() => setActiveTab('badges')}
         >
           <MdOutlineWorkspacePremium className="size-5" />
           Badges
         </button>
+        <button
+          type="button"
+          data-state={activeTab === 'beams' ? 'active' : 'idle'}
+          className={tabClass}
+          onClick={() => setActiveTab('beams')}
+        >
+          <MdElectricBolt className="size-5" />
+          Beams
+        </button>
       </div>
       {activeTab === 'feed' && feedContent}
       {activeTab === 'badges' && badgesContent}
+      {activeTab === 'beams' && beamsContent}
     </>
   )
 }

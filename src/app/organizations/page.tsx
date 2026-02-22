@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 
 import { cancelRequest } from '@/api/chain/organization/cancel-request'
 import { listMemberRequests } from '@/api/chain/organization/list-member-requests'
+import { listMembers } from '@/api/chain/organization/list-members'
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { requestJoin } from '@/api/chain/organization/request-join'
 import { Avatar } from '@/components/ui/avatar'
@@ -28,29 +29,44 @@ export default function OrganizationsPage() {
 
   const orgs = orgsQuery.data?.rows ?? []
 
+  const nonOwnedOrgs = orgs.filter((org) => org.org !== actor)
+
   const requestQueries = useQueries({
     queries: isAuthenticated
-      ? orgs
-          .filter((org) => org.org !== actor)
-          .map((org) => ({
-            queryKey: ['member-requests', org.org],
-            queryFn: async () => await listMemberRequests({ scope: org.org }),
-          }))
+      ? nonOwnedOrgs.map((org) => ({
+          queryKey: ['member-requests', org.org],
+          queryFn: async () => await listMemberRequests({ scope: org.org }),
+        }))
+      : [],
+  })
+
+  const memberQueries = useQueries({
+    queries: isAuthenticated
+      ? nonOwnedOrgs.map((org) => ({
+          queryKey: ['members', org.org],
+          queryFn: async () => await listMembers({ scope: org.org }),
+        }))
       : [],
   })
 
   const pendingOrgNames = new Set<string>()
-  orgs
-    .filter((org) => org.org !== actor)
-    .forEach((org, i) => {
-      const query = requestQueries[i]
-      if (
-        query?.isSuccess &&
-        query.data.rows.some((row) => row.account === actor)
-      ) {
-        pendingOrgNames.add(org.org)
-      }
-    })
+  const memberOrgNames = new Set<string>()
+  nonOwnedOrgs.forEach((org, i) => {
+    const requestQuery = requestQueries[i]
+    if (
+      requestQuery?.isSuccess &&
+      requestQuery.data.rows.some((row) => row.account === actor)
+    ) {
+      pendingOrgNames.add(org.org)
+    }
+    const memberQuery = memberQueries[i]
+    if (
+      memberQuery?.isSuccess &&
+      memberQuery.data.rows.some((row) => row.account === actor)
+    ) {
+      memberOrgNames.add(org.org)
+    }
+  })
 
   async function handleCancelRequest(org: string) {
     if (!session) return
@@ -150,7 +166,9 @@ export default function OrganizationsPage() {
                   <Button asChild variant="primary" size="md">
                     <Link href={`/organizations/${org.org}`}>View</Link>
                   </Button>
-                  {isAuthenticated && actor !== org.org && (
+                  {isAuthenticated &&
+                    actor !== org.org &&
+                    !memberOrgNames.has(org.org) && (
                     pendingOrgNames.has(org.org) ? (
                       <Button
                         variant="secondary"

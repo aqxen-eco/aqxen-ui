@@ -6,28 +6,18 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'motion/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
-import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
-import { listMembers } from '@/api/chain/organization/list-members'
 import { createPost, getPosts } from '@/app/feed/actions'
 import { PostItem, PostItemComment } from '@/app/feed/post-item'
 import { getUserOrganizations } from '@/app/profile/[user]/functions'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import {
-  Combobox,
-  ComboboxEmpty,
-  ComboboxItem,
-} from '@/components/ui/combobox'
 import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
-import { InputBadges } from '@/components/ui/input-badges'
 import { Select, SelectItem } from '@/components/ui/select'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
@@ -43,24 +33,10 @@ const sortList = [
   },
 ]
 
-const postSchema = z
-  .object({
-    content: z.string().nonempty('Post content is required'),
-    organization: z.string().nonempty('Select an organization'),
-    recognize: z.boolean(),
-    recipientAccount: z.string().optional(),
-    badges: z.string().array().optional(),
-  })
-  .refine(
-    (data) =>
-      !data.recognize ||
-      (data.recipientAccount && data.recipientAccount.length > 0),
-    { message: 'Select a member to recognize', path: ['recipientAccount'] }
-  )
-  .refine(
-    (data) => !data.recognize || (data.badges && data.badges.length > 0),
-    { message: 'Select at least one badge', path: ['badges'] }
-  )
+const postSchema = z.object({
+  content: z.string().nonempty('Post content is required'),
+  organization: z.string().nonempty('Select an organization'),
+})
 
 type PostSchema = z.infer<typeof postSchema>
 
@@ -141,7 +117,6 @@ export default function Stream() {
 }
 
 function AuthenticatedStream({ actor }: { actor: string | undefined }) {
-  const { session } = useChain()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
@@ -174,9 +149,6 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
       defaultValues: {
         content: '',
         organization: '',
-        recognize: false,
-        recipientAccount: '',
-        badges: [],
       },
     })
 
@@ -199,26 +171,10 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
     } else {
       setValue('organization', '')
     }
-    setValue('recognize', false)
-    setValue('recipientAccount', '')
-    setValue('badges', [])
   }, [activeTab, isOrgTab, setValue])
 
   const selectedOrg = watch('organization')
   const contentWatched = watch('content')
-  const recognizeWatched = watch('recognize')
-
-  const membersQuery = useQuery({
-    queryKey: ['members', selectedOrg],
-    queryFn: () => listMembers({ scope: selectedOrg }),
-    enabled: !!selectedOrg && recognizeWatched,
-  })
-
-  const filteredMembers = useMemo(
-    () =>
-      membersQuery.data?.rows.filter((m) => m.account !== actor) ?? [],
-    [membersQuery.data, actor]
-  )
 
   const queryParams = useMemo(() => {
     if (activeTab === 'my-posts') {
@@ -272,57 +228,24 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
     }
 
     try {
-      if (data.recognize && data.badges?.length && data.recipientAccount) {
-        const badgeActions = data.badges.map((badge) => ({
-          session: session!,
-          badge_symbol: badge,
-          amount: 1,
-          to: data.recipientAccount!,
-          memo: data.content,
-        }))
-        await sendMultiBadge(badgeActions)
-
-        await createPost({
-          actor,
-          content: data.content,
-          badgeSymbol: data.badges,
-          mention: [data.recipientAccount],
-          organization: data.organization,
-        })
-      } else {
-        await createPost({
-          actor,
-          content: data.content,
-          organization: data.organization,
-        })
-      }
+      await createPost({
+        actor,
+        content: data.content,
+        organization: data.organization,
+      })
 
       reset()
       if (isOrgTab) {
         setValue('organization', activeTab)
       }
-      toast('Recognition published!')
+      toast('Post published!')
       queryClient.invalidateQueries({ queryKey: ['posts'] })
     } catch {
-      toast.error('Failed to publish recognition')
+      toast.error('Failed to publish post')
     }
   }
 
-  const recipientWatched = watch('recipientAccount')
-  const badgesWatched = watch('badges')
-
-  const canSubmit = (() => {
-    if (!contentWatched || !selectedOrg) return false
-    if (recognizeWatched) {
-      return (
-        !!recipientWatched &&
-        recipientWatched.length > 0 &&
-        !!badgesWatched &&
-        badgesWatched.length > 0
-      )
-    }
-    return true
-  })()
+  const canSubmit = !!contentWatched && !!selectedOrg
 
   return (
     <div className="max-w-container-md mx-auto space-y-4 px-4 py-8">
@@ -397,161 +320,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                   />
                 </label>
 
-                <AnimatePresence>
-                  {recognizeWatched && selectedOrg && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="border-gray-2 space-y-4 border-t pt-4 pb-6">
-                        <div>
-                          <span className="text-body-2 mb-1 block font-medium text-white">
-                            Member
-                          </span>
-                          <Controller
-                            name="recipientAccount"
-                            control={control}
-                            render={({ field }) => (
-                              <Combobox
-                                title="Search members"
-                                closeOnSelect
-                                triggerContent={
-                                  field.value ? (
-                                    <div
-                                      className="border-gray-2 bg-gray-2 inline-flex h-7 items-center gap-2 rounded-full border py-1 pr-1 pl-2"
-                                      onClick={(e) =>
-                                        e.stopPropagation()
-                                      }
-                                    >
-                                      <Avatar size="xs">
-                                        {field.value
-                                          .slice(0, 2)
-                                          .toUpperCase()}
-                                      </Avatar>
-                                      <span className="text-body-2 font-medium text-white">
-                                        {field.value}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          field.onChange('')
-                                        }}
-                                        className="text-gray-3 hover:text-white p-0.5"
-                                      >
-                                        <MdClose className="size-4" />
-                                      </button>
-                                    </div>
-                                  ) : null
-                                }
-                                filter={(value, search) => {
-                                  if (
-                                    value
-                                      .toLowerCase()
-                                      .includes(
-                                        search.toLowerCase()
-                                      )
-                                  )
-                                    return 1
-                                  return 0
-                                }}
-                              >
-                                <ComboboxEmpty />
-                                {filteredMembers.map((member) => (
-                                  <ComboboxItem
-                                    key={member.account}
-                                    value={member.account}
-                                    onSelect={(value) => {
-                                      field.onChange(
-                                        field.value === value
-                                          ? ''
-                                          : value
-                                      )
-                                    }}
-                                    checked={
-                                      field.value === member.account
-                                    }
-                                  >
-                                    <span className="flex items-center gap-2">
-                                      <Avatar size="xs">
-                                        {member.account
-                                          .slice(0, 2)
-                                          .toUpperCase()}
-                                      </Avatar>
-                                      {member.account}
-                                    </span>
-                                  </ComboboxItem>
-                                ))}
-                              </Combobox>
-                            )}
-                          />
-                        </div>
-
-                        <div>
-                          <span className="text-body-2 mb-1 block font-medium text-white">
-                            Badges
-                          </span>
-                          <Controller
-                            name="badges"
-                            control={control}
-                            render={({ field }) => (
-                              <InputBadges
-                                value={field.value}
-                                onChange={field.onChange}
-                                scope={selectedOrg}
-                              />
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
                 <div className="flex items-center gap-2">
-                  {selectedOrg && (
-                    <label className="border-gray-2 hover:border-gray-3 flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={recognizeWatched}
-                        onChange={(e) => {
-                          setValue('recognize', e.target.checked)
-                          if (!e.target.checked) {
-                            setValue('recipientAccount', '')
-                            setValue('badges', [])
-                          }
-                        }}
-                        className="sr-only"
-                      />
-                      <span
-                        data-checked={recognizeWatched}
-                        className="border-gray-3 flex size-4 items-center justify-center rounded border data-[checked=true]:border-white data-[checked=true]:bg-white"
-                      >
-                        {recognizeWatched && (
-                          <svg
-                            viewBox="0 0 12 12"
-                            className="size-3 text-black"
-                          >
-                            <path
-                              d="M10 3L4.5 8.5 2 6"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        )}
-                      </span>
-                      <span className="text-body-2 text-nowrap font-medium text-white">
-                        Recognize
-                      </span>
-                    </label>
-                  )}
-
                   <div className="ml-auto flex items-center gap-2">
                     {showOrgSelector && (
                       <Controller
@@ -562,11 +331,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                             label="Organization"
                             placeholder="Select org"
                             value={field.value}
-                            onValueChange={(value) => {
-                              field.onChange(value)
-                              setValue('recipientAccount', '')
-                              setValue('badges', [])
-                            }}
+                            onValueChange={field.onChange}
                           >
                             {userOrgs?.map((org) => {
                               const displayName =
@@ -629,6 +394,8 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                     avatarIpfs={comment.user.avatarIpfs}
                     createdAt={comment.createdAt}
                     content={comment.content}
+                    badgeSymbol={comment.badgeSymbol}
+                    organization={comment.organization}
                   />
                 ))}
               </PostItem>

@@ -4,6 +4,8 @@ import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
 import { listLifetimeBadge } from '@/api/chain/badge/list-lifetime-badge'
 import { listSeasonalBadge } from '@/api/chain/badge/list-seasonal-badge'
+import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
+import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { listMembers } from '@/api/chain/organization/list-members'
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { listSeason } from '@/api/chain/season/list-season'
@@ -20,16 +22,23 @@ type GetUserBadgesProps = {
 
 type LifetimeBadges = {
   balance: number
+  orgName: string
+  orgIpfsImage: string
+  orgAccountName: string
 } & Badge
 
 type SeasonSeriesBadges = {
   series: (Series & { badges: ({ balance: number } & Badge)[] })[]
   orgDisplayName: string
+  orgIpfsImage: string
+  orgAccountName: string
 } & Season
 
 type GetUserBadges = {
   badges: LifetimeBadges[]
   seasons: SeasonSeriesBadges[]
+  beamBadges: LifetimeBadges[]
+  beamSeasons: SeasonSeriesBadges[]
 }
 
 export async function getUserBadges({
@@ -76,14 +85,65 @@ export async function getUserBadges({
     })
   })
 
-  const badgesOfAnotherOrganization = await Promise.all(
-    organizationThatNeedsToGetBadges.map(async (org) => {
-      const { rows: badgesOfAnotherOrganization } = await listBadge({
-        scope: org,
-      })
-      return badgesOfAnotherOrganization
-    })
+  // Collect all org accounts from both lifetime badges and seasons
+  const allRelevantOrgs = new Set(organizationThatNeedsToGetBadges)
+  for (const season of seasons) {
+    const seasonSymbol = season.agg_symbol.split(',')[1]?.toLowerCase()
+    if (seasonSymbol) {
+      const matchingOrg = organization.find((org) =>
+        seasonSymbol.startsWith(org.org_code.toLowerCase())
+      )
+      if (matchingOrg) allRelevantOrgs.add(matchingOrg.org)
+    }
+  }
+
+  const allRelevantOrgsArray = Array.from(allRelevantOrgs)
+
+  const [badgesOfAnotherOrganization, beamMetadataPerOrg, beamTemplates] =
+    await Promise.all([
+      Promise.all(
+        organizationThatNeedsToGetBadges.map(async (org) => {
+          const { rows } = await listBadge({ scope: org })
+          return rows
+        })
+      ),
+      Promise.all(
+        allRelevantOrgsArray.map((org) => listBeamMetadata({ scope: org }))
+      ),
+      listBeamTemplates(),
+    ])
+
+  const beamBadgeSymbols = new Set(
+    beamMetadataPerOrg.flat().map((meta) => meta.badge_symbol)
   )
+  const beamTemplateNames = new Set(beamTemplates.map((t) => t.display_name))
+  const trackingMetrics = ['Giving', 'Rep', 'Uniqueness']
+
+  function isBeamOrTrackingBadge(badge: Badge) {
+    if (beamBadgeSymbols.has(badge.badge_symbol)) return true
+
+    const displayName = badge.onchain_lookup_data?.user?.display_name
+    if (!displayName) return false
+
+    if (beamTemplateNames.has(displayName)) return true
+
+    return trackingMetrics.some((metric) => {
+      if (!displayName.endsWith(` ${metric}`)) return false
+      const beamName = displayName.slice(0, -(metric.length + 1))
+      return beamTemplateNames.has(beamName)
+    })
+  }
+
+  function isTopLevelBeam(badge: Badge) {
+    if (beamBadgeSymbols.has(badge.badge_symbol)) return true
+
+    const displayName = badge.onchain_lookup_data?.user?.display_name
+    if (!displayName) return false
+
+    if (beamTemplateNames.has(displayName)) return true
+
+    return false
+  }
 
   const badgesOfAnotherOrganizationFlatted = badgesOfAnotherOrganization.flat()
 
@@ -100,84 +160,116 @@ export async function getUserBadges({
     }
   })
 
-  const lifeTimeBadges = badges.reduce<Badge[]>((accumulate, currentValue) => {
-    const findUserBadge = lifetimeBadgesBalanceSymbol.find(
-      (b) => b.badge_symbol === currentValue.badge_symbol
-    )
-    if (!!findUserBadge) {
-      return [
-        ...accumulate,
-        {
-          ...currentValue,
-          balance: findUserBadge.balance,
-        },
-      ]
-    }
-    return accumulate
-  }, [])
+  const { lifeTimeBadges, beamLifetimeBadges } = badges.reduce<{
+    lifeTimeBadges: LifetimeBadges[]
+    beamLifetimeBadges: LifetimeBadges[]
+  }>(
+    (acc, currentValue) => {
+      const findUserBadge = lifetimeBadgesBalanceSymbol.find(
+        (b) => b.badge_symbol === currentValue.badge_symbol
+      )
+      if (!findUserBadge) return acc
 
-  const series = await Promise.all(
+      const badgeSymbol = findUserBadge.symbol?.toLowerCase() ?? ''
+      const matchingOrg = organization.find((org) =>
+        badgeSymbol.startsWith(org.org_code.toLowerCase())
+      )
+
+      const entry: LifetimeBadges = {
+        ...currentValue,
+        balance: findUserBadge.balance,
+        orgName:
+          matchingOrg?.onchain_lookup_data?.user?.display_name ||
+          matchingOrg?.org ||
+          '',
+        orgIpfsImage:
+          matchingOrg?.offchain_lookup_data?.user?.ipfs_image || '',
+        orgAccountName: matchingOrg?.org || '',
+      }
+
+      if (isTopLevelBeam(currentValue)) {
+        acc.beamLifetimeBadges.push(entry)
+      } else if (!isBeamOrTrackingBadge(currentValue)) {
+        acc.lifeTimeBadges.push(entry)
+      }
+
+      return acc
+    },
+    { lifeTimeBadges: [], beamLifetimeBadges: [] },
+  )
+
+  const seriesPerSeason = await Promise.all(
     seasons.map((season) =>
       listSeries({ scope: season.agg_symbol.split(',')[1] })
     )
   )
 
-  const seasonsWithBadgesAndSeries = seasons.map((season, seasonIndex) => {
-    const seasonSeries = series[seasonIndex].rows.map((series) => {
-      const seriesBadge = badgesStatus.reduce<Badge[]>(
-        (acc, crr: BadgeStatus) => {
-          if (
-            crr.seq_id === series.seq_id &&
-            crr.agg_symbol === season.agg_symbol
-          ) {
-            const badge = badges.find(
-              (item) => item.badge_symbol === crr.badge_symbol
-            )
-            const seasonalBadgeBalance = seasonalBadges.find(
-              (item) => item.badge_agg_seq_id === crr.badge_agg_seq_id
-            )
+  function buildSeasonData(filterFn: (badge: Badge) => boolean) {
+    return seasons.map((season, seasonIndex) => {
+      const seasonSeries = seriesPerSeason[seasonIndex].rows.map(
+        (seriesItem) => {
+          const seriesBadge = badgesStatus.reduce<
+            ({ balance: number } & Badge)[]
+          >((acc, crr: BadgeStatus) => {
+            if (
+              crr.seq_id === seriesItem.seq_id &&
+              crr.agg_symbol === season.agg_symbol
+            ) {
+              const badge = badges.find(
+                (item) => item.badge_symbol === crr.badge_symbol
+              )
+              const seasonalBadgeBalance = seasonalBadges.find(
+                (item) => item.badge_agg_seq_id === crr.badge_agg_seq_id
+              )
 
-            if (badge) {
-              const badgeWithBalance = {
-                ...badge,
-                balance: seasonalBadgeBalance?.count ?? 0,
+              if (badge && filterFn(badge)) {
+                acc.push({
+                  ...badge,
+                  balance: seasonalBadgeBalance?.count ?? 0,
+                })
               }
-              return [...acc, badgeWithBalance]
             }
 
             return acc
-          }
+          }, [])
 
-          return acc
+          return {
+            ...seriesItem,
+            badges: seriesBadge,
+          }
         },
-        []
       )
 
+      const seasonSymbol = season.agg_symbol.split(',')[1]?.toLowerCase()
+      const matchingOrg = organization.find((org) =>
+        seasonSymbol?.startsWith(org.org_code.toLowerCase()),
+      )
+      const orgDisplayName =
+        matchingOrg?.onchain_lookup_data?.user?.display_name ||
+        matchingOrg?.org ||
+        ''
+
       return {
-        ...series,
-        badges: seriesBadge,
+        ...season,
+        series: seasonSeries,
+        orgDisplayName,
+        orgIpfsImage:
+          matchingOrg?.offchain_lookup_data?.user?.ipfs_image || '',
+        orgAccountName: matchingOrg?.org || '',
       }
-    })
+    }) as SeasonSeriesBadges[]
+  }
 
-    const seasonSymbol = season.agg_symbol.split(',')[1]?.toLowerCase()
-    const matchingOrg = organization.find(
-      (org) => seasonSymbol?.startsWith(org.org_code.toLowerCase())
-    )
-    const orgDisplayName =
-      matchingOrg?.onchain_lookup_data?.user?.display_name ||
-      matchingOrg?.org ||
-      ''
-
-    return {
-      ...season,
-      series: seasonSeries,
-      orgDisplayName,
-    }
-  })
+  const seasonsWithBadgesAndSeries = buildSeasonData(
+    (badge) => !isBeamOrTrackingBadge(badge),
+  )
+  const beamSeasonsData = buildSeasonData(isTopLevelBeam)
 
   return {
-    badges: lifeTimeBadges as LifetimeBadges[],
-    seasons: seasonsWithBadgesAndSeries as SeasonSeriesBadges[],
+    badges: lifeTimeBadges,
+    seasons: seasonsWithBadgesAndSeries,
+    beamBadges: beamLifetimeBadges,
+    beamSeasons: beamSeasonsData,
   }
 }
 

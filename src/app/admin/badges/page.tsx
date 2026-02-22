@@ -1,9 +1,10 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
+import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
 import type { Badge } from '@/api/model/badge'
 import {
   HeaderAdmin,
@@ -36,6 +37,19 @@ export default function BadgesPage() {
     queryFn: async () => await listBadge({ scope: name }),
   })
 
+  const beamsQuery = useQuery({
+    queryKey: ['beams', name],
+    queryFn: async () => await listBeamMetadata({ scope: name }),
+  })
+
+  const filteredRows = useMemo(() => {
+    if (!query.data?.rows) return []
+    const beamSymbols = new Set(
+      beamsQuery.data?.map((b) => b.badge_symbol) ?? [],
+    )
+    return query.data.rows.filter((row) => !beamSymbols.has(row.badge_symbol))
+  }, [query.data, beamsQuery.data])
+
   return (
     <>
       <HeaderAdmin>
@@ -48,7 +62,7 @@ export default function BadgesPage() {
       </HeaderAdmin>
       <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
         {query.isLoading && <TableSkeleton />}
-        {(query.isSuccess || (query.data && query.data.rows.length > 0)) && (
+        {query.isSuccess && filteredRows.length > 0 && (
           <Table>
             <TableHeader>
               <TableRow>
@@ -61,7 +75,7 @@ export default function BadgesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {query.data.rows.map((row) => (
+              {filteredRows.map((row) => (
                 <TableRow key={row.badge_symbol}>
                   <TableCell className="text-gray-3">
                     {removeOrganizationSymbol(row.badge_symbol)}

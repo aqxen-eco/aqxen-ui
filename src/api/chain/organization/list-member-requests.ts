@@ -14,6 +14,7 @@ export async function listMemberRequests({
     scope,
     table: 'requests',
     json: true,
+    limit: 1000,
   })
 
   return { rows, more }

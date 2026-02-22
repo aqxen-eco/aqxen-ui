@@ -6,6 +6,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 
+import { ClaimBeamsSection } from './claim-beams-section'
 import {
   getUserBadges,
   getUserOrganizations,
@@ -13,9 +14,9 @@ import {
   getUserProfile,
 } from './functions'
 import { LifetimeBadgesSection } from './lifetime-badges-section'
+import { OrgBadgesSection } from './org-badges-section'
 import { ProfileFeed } from './profile-feed'
 import { ProfileTabs } from './profile-tabs'
-import { SeasonalBadgesSection } from './seasonal-badges-section'
 
 type ProfilePageProps = {
   params: Promise<{
@@ -26,7 +27,7 @@ type ProfilePageProps = {
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { user } = await params
 
-  const [profile, { badges, seasons }, userOrgs, posts] = await Promise.all([
+  const [profile, { badges, seasons, beamBadges, beamSeasons }, userOrgs, posts] = await Promise.all([
     getUserProfile({ actor: user }),
     getUserBadges({ user }),
     getUserOrganizations({ user }),
@@ -39,23 +40,94 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const feedContent = <ProfileFeed posts={posts} />
 
+  const orgAccounts = [
+    ...new Set([
+      ...badges.map((b) => b.orgAccountName),
+      ...seasons.map((s) => s.orgAccountName),
+    ]),
+  ].filter(Boolean)
+
+  const orgGroups = orgAccounts.map((orgAccount) => {
+    const orgBadge = badges.find((b) => b.orgAccountName === orgAccount)
+    const orgSeason = seasons.find((s) => s.orgAccountName === orgAccount)
+
+    return {
+      orgAccount,
+      displayName: orgBadge?.orgName || orgSeason?.orgDisplayName || orgAccount,
+      ipfsImage: orgBadge?.orgIpfsImage || orgSeason?.orgIpfsImage || '',
+      badges: badges.filter((b) => b.orgAccountName === orgAccount),
+      seasons: seasons.filter((s) => s.orgAccountName === orgAccount),
+    }
+  })
+
   const badgesContent = (
     <>
-      {badges.length > 0 && <LifetimeBadgesSection badges={badges} />}
+      {badges.length > 0 && (
+        <LifetimeBadgesSection badges={badges} showOrgOverlay />
+      )}
 
-      {seasons.map((season) => (
-        <SeasonalBadgesSection
-          key={season.agg_symbol}
-          lastSeriesId={season.active_seq_ids.at(-1)}
-          name={season.onchain_lookup_data.user.display_name}
-          orgDisplayName={season.orgDisplayName}
-          series={season.series}
+      {orgGroups.map((group) => (
+        <OrgBadgesSection
+          key={group.orgAccount}
+          orgAccount={group.orgAccount}
+          displayName={group.displayName}
+          ipfsImage={group.ipfsImage}
+          badges={group.badges}
+          seasons={group.seasons}
         />
       ))}
 
       {badges.length === 0 && seasons.length === 0 && (
         <div className="px-8 py-8 max-md:px-4">
           <p className="text-body-2 text-gray-3">No badges yet.</p>
+        </div>
+      )}
+    </>
+  )
+
+  const beamOrgAccounts = [
+    ...new Set([
+      ...beamBadges.map((b) => b.orgAccountName),
+      ...beamSeasons.map((s) => s.orgAccountName),
+    ]),
+  ].filter(Boolean)
+
+  const beamOrgGroups = beamOrgAccounts.map((orgAccount) => {
+    const orgBadge = beamBadges.find((b) => b.orgAccountName === orgAccount)
+    const orgSeason = beamSeasons.find(
+      (s) => s.orgAccountName === orgAccount,
+    )
+
+    return {
+      orgAccount,
+      displayName:
+        orgBadge?.orgName || orgSeason?.orgDisplayName || orgAccount,
+      ipfsImage: orgBadge?.orgIpfsImage || orgSeason?.orgIpfsImage || '',
+      badges: beamBadges.filter((b) => b.orgAccountName === orgAccount),
+      seasons: beamSeasons.filter((s) => s.orgAccountName === orgAccount),
+    }
+  })
+
+  const beamsContent = (
+    <>
+      {beamBadges.length > 0 && (
+        <LifetimeBadgesSection badges={beamBadges} showOrgOverlay />
+      )}
+
+      {beamOrgGroups.map((group) => (
+        <OrgBadgesSection
+          key={group.orgAccount}
+          orgAccount={group.orgAccount}
+          displayName={group.displayName}
+          ipfsImage={group.ipfsImage}
+          badges={group.badges}
+          seasons={group.seasons}
+        />
+      ))}
+
+      {beamBadges.length === 0 && beamSeasons.length === 0 && (
+        <div className="px-8 py-8 max-md:px-4">
+          <p className="text-body-2 text-gray-3">No beams yet.</p>
         </div>
       )}
     </>
@@ -181,7 +253,18 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           )}
         </section>
 
-        <ProfileTabs feedContent={feedContent} badgesContent={badgesContent} />
+        <ClaimBeamsSection
+          user={user}
+          userOrgNames={userOrgs.map((org) => org.org)}
+          orgDisplayNames={Object.fromEntries(
+            userOrgs.map((org) => [
+              org.org,
+              org.onchain_lookup_data?.user?.display_name || org.org,
+            ]),
+          )}
+        />
+
+        <ProfileTabs feedContent={feedContent} badgesContent={badgesContent} beamsContent={beamsContent} />
       </Box>
     </div>
   )

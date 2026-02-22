@@ -10,14 +10,24 @@ import {
   BadgeSwiperSlide,
   BadgeSwiperWrapper,
 } from '@/components/ui/badge-swiper'
+import { IPFS_IMAGE_SOURCE } from '@/constants'
 
-type LifetimeBadge = { balance: number } & BadgeType
+type LifetimeBadge = {
+  balance: number
+  orgName?: string
+  orgIpfsImage?: string
+  orgAccountName?: string
+} & BadgeType
 
 type LifetimeBadgesSectionProps = {
   badges: LifetimeBadge[]
+  showOrgOverlay?: boolean
 }
 
-export function LifetimeBadgesSection({ badges }: LifetimeBadgesSectionProps) {
+export function LifetimeBadgesSection({
+  badges,
+  showOrgOverlay,
+}: LifetimeBadgesSectionProps) {
   const [selectedBadge, setSelectedBadge] = useState<BadgeType | null>(null)
 
   return (
@@ -41,6 +51,16 @@ export function LifetimeBadgesSection({ badges }: LifetimeBadgesSectionProps) {
                   name={badge.onchain_lookup_data.user.display_name}
                   balance={String(badge.balance)}
                   ipfs={badge.offchain_lookup_data.user.ipfs_image}
+                  orgOverlaySrc={
+                    showOrgOverlay && badge.orgIpfsImage
+                      ? IPFS_IMAGE_SOURCE + badge.orgIpfsImage
+                      : undefined
+                  }
+                  orgOverlayInitials={
+                    showOrgOverlay && badge.orgName
+                      ? badge.orgName.slice(0, 2).toUpperCase()
+                      : undefined
+                  }
                 />
               </button>
             </BadgeSwiperSlide>
