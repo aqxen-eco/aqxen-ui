@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBadgeStatus } from '@/api/chain/badge/list-badge-status'
+import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { jungleClient } from '@/api/chain/jungle-client'
 import { listSeason } from '@/api/chain/season/list-season'
 import { endSeries } from '@/api/chain/series/end-series'
@@ -51,6 +52,7 @@ export default function SeasonPage() {
     badgesStatusQuery,
     seriesQuery,
     boundedCountsQuery,
+    beamTemplatesQuery,
   ] = useQueries({
     queries: [
         {
@@ -120,6 +122,10 @@ export default function SeasonPage() {
             return result.rows as BoundedBadgeCounts[]
           },
         },
+        {
+          queryKey: ['beam-templates'],
+          queryFn: listBeamTemplates,
+        },
       ],
     }
   )
@@ -134,9 +140,27 @@ export default function SeasonPage() {
   }
 
   const season = seasonQuery?.data?.rows?.[0]
-  const seasonBadges = badgesQuery?.data?.rows.filter((badge) =>
+  const allSeasonBadges = badgesQuery?.data?.rows.filter((badge) =>
     season?.init_badge_symbols.includes(badge.badge_symbol)
   )
+
+  const beamTemplateNames = new Set(
+    beamTemplatesQuery.data?.map((t: { display_name: string }) => t.display_name) ?? []
+  )
+  const trackingMetrics = ['Giving', 'Rep', 'Uniqueness']
+
+  const seasonBeams = allSeasonBadges?.filter((badge) =>
+    beamTemplateNames.has(badge.onchain_lookup_data.user.display_name)
+  )
+  const seasonBadges = allSeasonBadges?.filter((badge) => {
+    const displayName = badge.onchain_lookup_data.user.display_name
+    if (beamTemplateNames.has(displayName)) return false
+    return !trackingMetrics.some((metric) => {
+      if (!displayName.endsWith(` ${metric}`)) return false
+      const beamName = displayName.slice(0, -(metric.length + 1))
+      return beamTemplateNames.has(beamName)
+    })
+  })
 
   const allCounts = boundedCountsQuery.data ?? []
   const seasonStatuses = badgesStatusQuery.data?.rows.filter(
@@ -193,6 +217,68 @@ export default function SeasonPage() {
         />
       </HeaderAdmin>
       <div className="by-8 max-w-container-lg mx-auto space-y-8 px-4 pb-8">
+        <section className="space-y-4">
+          <header className="flex items-center">
+            <div className="flex flex-1 items-center gap-1">
+              <h2 className="text-title-2 text-white">Beams</h2>
+            </div>
+            <div className="flex-none">
+              <Link
+                href={`/admin/seasons/${season_id}/add-beams`}
+                variant="secondary"
+                size="md"
+              >
+                Add beams
+              </Link>
+            </div>
+          </header>
+          {badgesQuery.isSuccess && (
+            <>
+              {seasonBeams && seasonBeams.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10">Sym</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead className="w-32 text-center">
+                        Total awarded
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {seasonBeams?.map((badge) => (
+                      <TableRow key={badge.badge_symbol}>
+                        <TableCell className="text-gray-3">
+                          {removeOrganizationSymbol(badge.badge_symbol)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="inline-flex items-center gap-2">
+                            <BadgeImage
+                              src={badge.offchain_lookup_data.user.ipfs_image}
+                              size="xs"
+                            />
+                            <span className="text-body-2 font-sans font-medium text-nowrap text-white">
+                              {badge.onchain_lookup_data.user.display_name}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {getSeasonalTotal(badge.badge_symbol)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Box className="flex h-50 w-full items-center justify-center text-center">
+                  <p className="text-body-2 text-gray-3">
+                    No beams in this season
+                  </p>
+                </Box>
+              )}
+            </>
+          )}
+        </section>
         <section className="space-y-4">
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">

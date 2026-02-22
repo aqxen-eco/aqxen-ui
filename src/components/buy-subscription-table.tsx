@@ -74,7 +74,7 @@ export function BuySubscriptionTable() {
       toast.success('Subscription purchased successfully')
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await queryClient.refetchQueries({ queryKey: ['billing-detail'] })
-      router.push('/admin/subscription')
+      router.push(hasOrganization ? '/admin/subscription' : '/admin/organization')
     } catch {
       toast.error('Failed to purchase subscription')
     }

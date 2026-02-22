@@ -275,6 +275,14 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
         >
           All
         </button>
+        <button
+          type="button"
+          data-state={activeTab === 'my-posts' ? 'active' : 'idle'}
+          className={tabClass}
+          onClick={() => handleTabChange('my-posts')}
+        >
+          My Posts
+        </button>
         {userOrgs?.map((org) => {
           const displayName =
             org.onchain_lookup_data?.user?.display_name || org.org
@@ -296,14 +304,6 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
             </button>
           )
         })}
-        <button
-          type="button"
-          data-state={activeTab === 'my-posts' ? 'active' : 'idle'}
-          className={tabClass}
-          onClick={() => handleTabChange('my-posts')}
-        >
-          My Posts
-        </button>
       </div>
 
       <div className="space-y-4">
@@ -386,6 +386,11 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                 content={post.content}
                 mentions={post.mention.map((item) => item.user.actor)}
                 organization={post.organization}
+                totalScore={post.totalScore}
+                beamGives={[
+                  ...post.beamGives,
+                  ...post.children.flatMap((c) => c.beamGives),
+                ]}
               >
                 {post.children.map((comment) => (
                   <PostItemComment
@@ -396,6 +401,8 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                     content={comment.content}
                     badgeSymbol={comment.badgeSymbol}
                     organization={comment.organization}
+                    totalScore={comment.totalScore}
+                    beamGives={comment.beamGives}
                   />
                 ))}
               </PostItem>

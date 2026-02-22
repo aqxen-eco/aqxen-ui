@@ -194,6 +194,11 @@ export default function FeedPage() {
                 content={post.content}
                 mentions={post.mention.map((item) => item.user.actor)}
                 organization={post.organization}
+                totalScore={post.totalScore}
+                beamGives={[
+                  ...post.beamGives,
+                  ...post.children.flatMap((c) => c.beamGives),
+                ]}
               >
                 {post.children.map((comment) => (
                   <PostItemComment
@@ -204,6 +209,8 @@ export default function FeedPage() {
                     content={comment.content}
                     badgeSymbol={comment.badgeSymbol}
                     organization={comment.organization}
+                    totalScore={comment.totalScore}
+                    beamGives={comment.beamGives}
                   />
                 ))}
               </PostItem>

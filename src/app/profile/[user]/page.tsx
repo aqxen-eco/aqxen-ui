@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { MdOutlineInterests, MdOutlineLocationOn, MdStar } from 'react-icons/md'
+import { MdOutlineInterests, MdOutlineLocationOn, MdStar, MdWorkspacePremium } from 'react-icons/md'
 
 import { ProfileForm } from '@/components/profile-form'
 import { Avatar } from '@/components/ui/avatar'
@@ -12,6 +12,7 @@ import {
   getUserOrganizations,
   getUserPosts,
   getUserProfile,
+  getUserReputation,
 } from './functions'
 import { LifetimeBadgesSection } from './lifetime-badges-section'
 import { OrgBadgesSection } from './org-badges-section'
@@ -27,11 +28,12 @@ type ProfilePageProps = {
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { user } = await params
 
-  const [profile, { badges, seasons, beamBadges, beamSeasons }, userOrgs, posts] = await Promise.all([
+  const [profile, { badges, seasons, beamBadges, beamSeasons }, userOrgs, posts, reputation] = await Promise.all([
     getUserProfile({ actor: user }),
     getUserBadges({ user }),
     getUserOrganizations({ user }),
     getUserPosts({ user }),
+    getUserReputation({ user }),
   ])
 
   if (!user) {
@@ -111,7 +113,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const beamsContent = (
     <>
       {beamBadges.length > 0 && (
-        <LifetimeBadgesSection badges={beamBadges} showOrgOverlay />
+        <LifetimeBadgesSection badges={beamBadges} showOrgOverlay label="Beams" />
       )}
 
       {beamOrgGroups.map((group) => (
@@ -122,6 +124,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           ipfsImage={group.ipfsImage}
           badges={group.badges}
           seasons={group.seasons}
+          label="Beams"
         />
       ))}
 
@@ -160,16 +163,22 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             {user.slice(0, 2)}
           </Avatar>
           <div className="space-y-1">
-            <h1 className="text-title-2 text-white">
-              {profile?.name ? (
-                <>
-                  {profile.name}
-                  <span className="text-body-2 text-gray-3 ml-1">({user})</span>
-                </>
-              ) : (
-                user
-              )}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-title-2 text-white">
+                {profile?.name ? (
+                  <>
+                    {profile.name}
+                    <span className="text-body-2 text-gray-3 ml-1">({user})</span>
+                  </>
+                ) : (
+                  user
+                )}
+              </h1>
+              <span className="text-gray-3 flex items-center gap-0.5">
+                <MdWorkspacePremium className="size-5" />
+                <span className="text-body-2">{reputation.total}</span>
+              </span>
+            </div>
             <div className="flex max-md:flex-col md:flex-wrap md:items-center md:gap-4">
               {profile?.location && (
                 <p className="text-body-2 text-gray-3 flex items-center gap-1">
@@ -201,8 +210,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <div className={profile?.about ? 'mt-6' : ''}>
               <header className="mb-4 px-8 max-md:px-4">
                 <h4 className="text-body-2 font-medium text-white">
-                  Organizations{' '}
-                  <span className="text-gray-3">({userOrgs.length})</span>
+                  Organizations
                 </h4>
               </header>
               <div className="flex flex-wrap gap-4 px-8 max-md:px-4">
@@ -232,6 +240,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                       </Avatar>
                       <span className="text-body-2 font-medium text-white">
                         {displayName}
+                        <span className="text-gray-3">
+                          {' '}({reputation.perOrg[org.org] ?? 0})
+                        </span>
                       </span>
                       {org.isOwner && (
                         <MdStar

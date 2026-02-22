@@ -22,6 +22,7 @@ import { listOrganization } from '@/api/chain/organization/list-organization'
 import { requestJoin } from '@/api/chain/organization/request-join'
 import { createPost, getPosts } from '@/app/feed/actions'
 import { PostItem, PostItemComment } from '@/app/feed/post-item'
+import { getOrgMemberReputation } from '@/app/profile/[user]/functions'
 import { TableSkeleton } from '@/components/skeleton'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -70,6 +71,11 @@ export default function OrganizationPage() {
   const membersQuery = useQuery({
     queryKey: ['members', org],
     queryFn: async () => await listMembers({ scope: org }),
+  })
+
+  const reputationQuery = useQuery({
+    queryKey: ['org-member-reputation', org],
+    queryFn: async () => await getOrgMemberReputation({ orgAccount: org }),
   })
 
   const requestsQuery = useQuery({
@@ -391,6 +397,11 @@ export default function OrganizationPage() {
                     (item) => item.user.actor
                   )}
                   organization={post.organization}
+                  totalScore={post.totalScore}
+                  beamGives={[
+                    ...post.beamGives,
+                    ...post.children.flatMap((c) => c.beamGives),
+                  ]}
                 >
                   {post.children.map((comment) => (
                     <PostItemComment
@@ -401,6 +412,8 @@ export default function OrganizationPage() {
                       content={comment.content}
                       badgeSymbol={comment.badgeSymbol}
                       organization={comment.organization}
+                      totalScore={comment.totalScore}
+                      beamGives={comment.beamGives}
                     />
                   ))}
                 </PostItem>
@@ -456,6 +469,7 @@ export default function OrganizationPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Account</TableHead>
+                    <TableHead>Reputation</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="w-28" />
                   </TableRow>
@@ -464,6 +478,9 @@ export default function OrganizationPage() {
                   {membersQuery.data.rows.map((row) => (
                     <TableRow key={row.account}>
                       <TableCell>{row.account}</TableCell>
+                      <TableCell className="text-gray-3">
+                        {reputationQuery.data?.[row.account] ?? 0}
+                      </TableCell>
                       <TableCell className="text-gray-3">
                         {format(
                           new Date(row.joined_at),

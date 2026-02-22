@@ -23,12 +23,14 @@ type SeasonalBadgesSectionProps = {
   series: (Series & {
     badges: ({ balance: number } & BadgeType)[]
   })[]
+  label?: string
 }
 
 export function SeasonalBadgesSection({
   name,
   orgDisplayName,
   series,
+  label = 'Badges',
 }: SeasonalBadgesSectionProps) {
   const [selectedSeries, setSelectedSeries] = useState<
     number | typeof LIFETIME_KEY
@@ -60,6 +62,11 @@ export function SeasonalBadgesSection({
     return Array.from(badgeMap.values())
   }, [series])
 
+  const lifetimeTotal = useMemo(
+    () => lifetimeBadges.reduce((sum, b) => sum + b.balance, 0),
+    [lifetimeBadges],
+  )
+
   const isLifetime = selectedSeries === LIFETIME_KEY
   const seriesValue = isLifetime
     ? null
@@ -67,6 +74,9 @@ export function SeasonalBadgesSection({
   const displayBadges = isLifetime
     ? lifetimeBadges
     : seriesValue?.badges ?? []
+  const displayTotal = isLifetime
+    ? lifetimeTotal
+    : displayBadges.reduce((sum, b) => sum + b.balance, 0)
   const dropdownLabel = isLifetime
     ? 'Lifetime'
     : seriesValue?.sequence_description
@@ -80,7 +90,9 @@ export function SeasonalBadgesSection({
             <span className="text-gray-3"> — {orgDisplayName}</span>
           )}{' '}
           <span className="text-gray-3">
-            {displayBadges.length > 0 ? `(${displayBadges.length})` : null}
+            {displayBadges.length > 0
+              ? `(${displayBadges.length} ${label.toLowerCase()} earned)`
+              : null}
           </span>
         </h3>
         {series.length > 0 && (
@@ -89,7 +101,7 @@ export function SeasonalBadgesSection({
               isSelected={isLifetime}
               onClick={() => setSelectedSeries(LIFETIME_KEY)}
             >
-              Lifetime
+              Lifetime ({lifetimeTotal})
             </DropdownItem>
             {series.map((s) => (
               <DropdownItem
@@ -97,7 +109,7 @@ export function SeasonalBadgesSection({
                 isSelected={s.seq_id === selectedSeries}
                 onClick={() => setSelectedSeries(s.seq_id)}
               >
-                {s.sequence_description}
+                {s.sequence_description} ({s.badges.reduce((sum, b) => sum + b.balance, 0)})
               </DropdownItem>
             ))}
           </DropdownRoot>
@@ -118,6 +130,7 @@ export function SeasonalBadgesSection({
                       name={badge.onchain_lookup_data.user.display_name}
                       balance={String(badge.balance)}
                       ipfs={badge.offchain_lookup_data.user.ipfs_image}
+                      label={label === 'Beams' ? 'beam' : 'badge'}
                     />
                   </button>
                 </BadgeSwiperSlide>
@@ -136,7 +149,7 @@ export function SeasonalBadgesSection({
       ) : (
         <div className="px-8 max-md:px-4">
           <Box className="flex h-50 w-full items-center justify-center text-center">
-            <p className="text-body-2 text-gray-3">No Badges received yet</p>
+            <p className="text-body-2 text-gray-3">No {label.toLowerCase()} received yet</p>
           </Box>
         </div>
       )}

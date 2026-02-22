@@ -88,7 +88,7 @@ export async function createPost({
       }
     }
 
-    await prisma.post.create({
+    const post = await prisma.post.create({
       data: {
         content,
         badgeSymbol,
@@ -105,6 +105,7 @@ export async function createPost({
 
     return {
       success: true,
+      postId: post.id,
     }
   } catch (error) {
     console.error('Error creating post:', error)
@@ -185,9 +186,27 @@ export async function getPosts({
             },
           },
         },
+        beamGives: {
+          select: {
+            badgeSymbol: true,
+            parAmount: true,
+            upaEmitted: true,
+            gpaEmitted: true,
+            rpaEmitted: true,
+          },
+        },
         children: {
           include: {
             user: true,
+            beamGives: {
+              select: {
+                badgeSymbol: true,
+                parAmount: true,
+                upaEmitted: true,
+                gpaEmitted: true,
+                rpaEmitted: true,
+              },
+            },
           },
           orderBy: {
             createdAt: 'desc',
