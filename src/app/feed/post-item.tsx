@@ -213,7 +213,27 @@ export function PostItem({
         memo: content,
       }))
 
-      await sendMultiBadge(data)
+      const txResult = await sendMultiBadge(data)
+
+      let onChainPostId: string | undefined
+      const logAction = txResult?.response?.processed?.action_traces
+        ?.flatMap(
+          (t: {
+            inline_traces?: {
+              act?: {
+                name?: string
+                data?: { post_id?: number }
+              }
+            }[]
+          }) => t.inline_traces ?? []
+        )
+        ?.find(
+          (t: { act?: { name?: string } }) =>
+            t.act?.name === 'logpost'
+        )
+      if (logAction?.act?.data?.post_id != null) {
+        onChainPostId = String(logAction.act.data.post_id)
+      }
 
       const result = await createPost({
         parentId: id,
@@ -221,6 +241,7 @@ export function PostItem({
         content,
         badgeSymbol: badges,
         mention: [actor],
+        onChainPostId,
       })
 
       if (result.success && result.postId && organization) {

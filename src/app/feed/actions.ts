@@ -11,6 +11,7 @@ type CreatePostProps = {
   mention?: string[]
   parentId?: string
   organization?: string
+  onChainPostId?: string
 }
 
 export async function createPost({
@@ -20,6 +21,7 @@ export async function createPost({
   mention,
   parentId,
   organization,
+  onChainPostId,
 }: CreatePostProps) {
   try {
     const authorGroupId = await ensurePinataGroup(actor)
@@ -93,6 +95,7 @@ export async function createPost({
         content,
         badgeSymbol,
         organization: inheritedOrganization,
+        onChainPostId: onChainPostId ? BigInt(onChainPostId) : null,
         user: {
           connect: {
             id: user.id,

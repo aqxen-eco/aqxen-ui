@@ -18,5 +18,5 @@ export async function sendMultiBadge(data: SendBadgeProps[]) {
     },
   }))
 
-  await execute(data[0].session, result)
+  return await execute(data[0].session, result)
 }

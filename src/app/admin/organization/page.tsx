@@ -53,7 +53,7 @@ export default function OrganizationPage() {
     reset,
     watch,
     setError,
-    formState: { errors, isSubmitting, isLoading },
+    formState: { errors, isSubmitting },
   } = useForm<OrganizationSchema>({
     resolver: zodResolver(organizationSchema),
     defaultValues: {
@@ -131,7 +131,7 @@ export default function OrganizationPage() {
             id="displayName"
             {...register('displayName')}
             aria-invalid={!!errors['displayName']}
-            disabled={isLoading}
+            disabled={isSubmitting || isUploading}
           />
           <ErrorMessage>{errors['displayName']?.message}</ErrorMessage>
         </Field>
@@ -157,7 +157,7 @@ export default function OrganizationPage() {
             maxLength={255}
             aria-invalid={!!errors['shortDescription']}
             className="min-h-32"
-            disabled={isLoading}
+            disabled={isSubmitting || isUploading}
           />
           <ErrorMessage>{errors['shortDescription']?.message}</ErrorMessage>
         </Field>
@@ -168,7 +168,7 @@ export default function OrganizationPage() {
             {...register('about')}
             placeholder="Tell people about your organization"
             className="min-h-48"
-            disabled={isLoading}
+            disabled={isSubmitting || isUploading}
           />
         </Field>
         <Field>
@@ -178,14 +178,14 @@ export default function OrganizationPage() {
             {...register('purpose')}
             placeholder="What is your organization's purpose?"
             className="min-h-48"
-            disabled={isLoading}
+            disabled={isSubmitting || isUploading}
           />
         </Field>
         <Button
           type="submit"
           variant="primary"
           size="lg"
-          disabled={isSubmitting || isLoading || isUploading}
+          disabled={isSubmitting || isUploading}
         >
           {isSubmitting || isUploading ? 'Saving...' : 'Save'}
         </Button>
