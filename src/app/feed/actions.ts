@@ -2,10 +2,21 @@
 
 import type { User } from '@/../generated/prisma/client'
 import { ensurePinataGroup } from '@/api/pinata/create-group'
+import { createRateLimiter } from '@/lib/rate-limit'
+import { requireAuth } from '@/lib/require-auth'
+import {
+  createAnnouncementSchema,
+  createPostSchema,
+  getAnnouncementsSchema,
+  getPostsByBadgeSchema,
+  getPostsSchema,
+} from '@/lib/schemas'
 import { prisma } from '@/prisma-client'
 
+const postLimiter = createRateLimiter({ windowMs: 60_000, max: 10 })
+const announcementLimiter = createRateLimiter({ windowMs: 60_000, max: 5 })
+
 type CreatePostProps = {
-  actor: string
   content: string
   badgeSymbol?: string[]
   mention?: string[]
@@ -14,16 +25,23 @@ type CreatePostProps = {
   onChainPostId?: string
 }
 
-export async function createPost({
-  actor,
-  content,
-  badgeSymbol,
-  mention,
-  parentId,
-  organization,
-  onChainPostId,
-}: CreatePostProps) {
+export async function createPost(input: CreatePostProps) {
   try {
+    const actor = await requireAuth()
+    const {
+      content,
+      badgeSymbol,
+      mention,
+      parentId,
+      organization,
+      onChainPostId,
+    } = createPostSchema.parse(input)
+
+    const limit = postLimiter.check(actor)
+    if (!limit.ok) {
+      return { success: false, error: 'Rate limit exceeded' }
+    }
+
     const authorGroupId = await ensurePinataGroup(actor)
 
     const user = await prisma.user.upsert({
@@ -111,6 +129,9 @@ export async function createPost({
       postId: post.id,
     }
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return { success: false, error: 'Unauthorized' }
+    }
     console.error('Error creating post:', error)
     return {
       success: false,
@@ -120,19 +141,22 @@ export async function createPost({
 }
 
 type CreateAnnouncementProps = {
-  actor: string
   content: string
   organization: string
   onChainPostId?: string
 }
 
-export async function createAnnouncement({
-  actor,
-  content,
-  organization,
-  onChainPostId,
-}: CreateAnnouncementProps) {
+export async function createAnnouncement(input: CreateAnnouncementProps) {
   try {
+    const actor = await requireAuth()
+    const { content, organization, onChainPostId } =
+      createAnnouncementSchema.parse(input)
+
+    const limit = announcementLimiter.check(actor)
+    if (!limit.ok) {
+      return { success: false, error: 'Rate limit exceeded' }
+    }
+
     const authorGroupId = await ensurePinataGroup(actor)
 
     const user = await prisma.user.upsert({
@@ -165,6 +189,9 @@ export async function createAnnouncement({
       postId: post.id,
     }
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return { success: false, error: 'Unauthorized' }
+    }
     console.error('Error creating announcement:', error)
     return {
       success: false,
@@ -180,13 +207,11 @@ type GetAnnouncementsProps = {
   organization: string
 }
 
-export async function getAnnouncements({
-  cursor,
-  limit,
-  orderBy,
-  organization,
-}: GetAnnouncementsProps) {
+export async function getAnnouncements(input: GetAnnouncementsProps) {
   try {
+    const { cursor, limit, orderBy, organization } =
+      getAnnouncementsSchema.parse(input)
+
     const posts = await prisma.post.findMany({
       take: limit,
       skip: cursor ? 1 : 0,
@@ -261,10 +286,9 @@ type GetPostsByBadgeProps = {
   limit?: number
 }
 
-export async function getPostsByBadge({
-  badgeSymbol,
-  limit = 10,
-}: GetPostsByBadgeProps) {
+export async function getPostsByBadge(input: GetPostsByBadgeProps) {
+  const { badgeSymbol, limit = 10 } = getPostsByBadgeSchema.parse(input)
+
   const posts = await prisma.post.findMany({
     take: limit,
     where: {
@@ -298,20 +322,17 @@ type GetPostsProps = {
   actor?: string
 }
 
-export async function getPosts({
-  cursor,
-  limit,
-  orderBy,
-  organizations,
-  actor,
-}: GetPostsProps) {
+export async function getPosts(input: GetPostsProps) {
   try {
+    const { cursor, limit, orderBy, organizations, actor } =
+      getPostsSchema.parse(input)
+
     const posts = await prisma.post.findMany({
       take: limit,
-      skip: cursor ? 1 : 0, // Skip the cursor if provided
+      skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
       where: {
-        parentId: null, // Filters only posts that are not comments
+        parentId: null,
         ...(organizations ? { organization: { in: organizations } } : {}),
         ...(actor ? { user: { actor } } : {}),
       },

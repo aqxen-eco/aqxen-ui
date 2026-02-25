@@ -1,10 +1,11 @@
 'use server'
 
 import { ensurePinataGroup } from '@/api/pinata/create-group'
+import { requireAuth } from '@/lib/require-auth'
+import { updateProfileSchema } from '@/lib/schemas'
 import { prisma } from '@/prisma-client'
 
 type UpdateProfileProps = {
-  actor: string
   name?: string
   about?: string
   location?: string
@@ -13,19 +14,16 @@ type UpdateProfileProps = {
   coverIpfs?: string
 }
 
-export async function ensureProfilePinataGroup(actor: string) {
+export async function ensureProfilePinataGroup() {
+  const actor = await requireAuth()
   return await ensurePinataGroup(actor)
 }
 
-export async function updateProfile({
-  actor,
-  name,
-  about,
-  location,
-  interests,
-  avatarIpfs,
-  coverIpfs,
-}: UpdateProfileProps) {
+export async function updateProfile(input: UpdateProfileProps) {
+  const actor = await requireAuth()
+  const { name, about, location, interests, avatarIpfs, coverIpfs } =
+    updateProfileSchema.parse(input)
+
   const pinataGroupId = await ensurePinataGroup(actor)
 
   return await prisma.user.upsert({

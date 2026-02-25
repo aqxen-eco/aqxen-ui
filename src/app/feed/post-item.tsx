@@ -237,7 +237,6 @@ export function PostItem({
 
       const result = await createPost({
         parentId: id,
-        actor: currentActor!,
         content,
         badgeSymbol: badges,
         mention: [actor],
@@ -255,7 +254,6 @@ export function PostItem({
             .map((badge) =>
               processBeamGive({
                 postId: result.postId!,
-                giverActor: currentActor!,
                 recipientActor: actor,
                 badgeSymbol: badge,
                 amount: 1,
@@ -281,7 +279,6 @@ export function PostItem({
     try {
       await createPost({
         parentId: id,
-        actor: currentActor!,
         content,
       })
 

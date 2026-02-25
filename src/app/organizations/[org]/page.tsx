@@ -252,7 +252,6 @@ export default function OrganizationPage() {
         }
 
         await createAnnouncement({
-          actor,
           content: data.content,
           organization: org,
           onChainPostId,
@@ -264,7 +263,6 @@ export default function OrganizationPage() {
         queryClient.invalidateQueries({ queryKey: ['announcements'] })
       } else {
         await createPost({
-          actor,
           content: data.content,
           organization: org,
         })

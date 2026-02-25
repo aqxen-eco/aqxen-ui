@@ -1,6 +1,5 @@
 type UploadFileOptions = {
   groupId?: string
-  actor?: string
   variant?: 'avatar' | 'cover'
   groupName?: string
   name?: string
@@ -13,10 +12,7 @@ export async function uploadFile(
   const formData = new FormData()
   formData.append('file', file)
   if (options.groupId) formData.append('groupId', options.groupId)
-  if (options.actor) {
-    formData.append('actor', options.actor)
-    if (options.variant) formData.append('variant', options.variant)
-  }
+  if (options.variant) formData.append('variant', options.variant)
   if (options.groupName) formData.append('groupName', options.groupName)
   if (options.name) formData.append('uploadName', options.name)
 

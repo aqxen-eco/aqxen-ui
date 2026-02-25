@@ -2,11 +2,15 @@ import { NextResponse } from 'next/server'
 
 import { ensurePinataGroupByName } from '@/api/pinata/create-group'
 import { getPinataClient } from '@/lib/pinata-client'
+import { createRateLimiter } from '@/lib/rate-limit'
+import { getSession } from '@/lib/session'
 import { prisma } from '@/prisma-client'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+
+const uploadLimiter = createRateLimiter({ windowMs: 60_000, max: 10 })
 
 async function getUploadName(
   actor: string,
@@ -34,6 +38,21 @@ async function getUploadName(
 }
 
 export async function POST(request: Request) {
+  const session = await getSession()
+  if (!session.actor) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const actor = session.actor
+
+  const limit = uploadLimiter.check(actor)
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded' },
+      { status: 429 },
+    )
+  }
+
   const jwt = process.env.PINATA_JWT
   if (!jwt) {
     return NextResponse.json(
@@ -64,7 +83,6 @@ export async function POST(request: Request) {
   }
 
   const groupId = formData.get('groupId')
-  const actor = formData.get('actor')
   const variant = formData.get('variant')
   const groupName = formData.get('groupName')
   const clientUploadName = formData.get('uploadName')
@@ -76,8 +94,6 @@ export async function POST(request: Request) {
   let resolvedGroupId = groupId && typeof groupId === 'string' ? groupId : null
 
   if (
-    actor &&
-    typeof actor === 'string' &&
     variant &&
     (variant === 'avatar' || variant === 'cover')
   ) {

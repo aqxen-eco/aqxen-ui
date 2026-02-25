@@ -251,7 +251,6 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
 
     try {
       await createPost({
-        actor,
         content: data.content,
         organization: data.organization,
       })
@@ -301,7 +300,6 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
       }
 
       await createAnnouncement({
-        actor,
         content: data.content,
         organization: ownedOrgName,
         onChainPostId,
