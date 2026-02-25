@@ -1,12 +1,14 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import z from 'zod'
 
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { createSeason } from '@/api/chain/season/create-season'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
@@ -31,6 +33,12 @@ export default function NewSeasonPage() {
   const { session } = useChain()
   const router = useRouter()
   const queryClient = useQueryClient()
+
+  const badgesQuery = useQuery({
+    queryKey: ['badges', orgName],
+    queryFn: async () => await listBadge({ scope: orgName }),
+    enabled: !!orgName,
+  })
 
   const {
     control,
@@ -63,6 +71,20 @@ export default function NewSeasonPage() {
 
   return (
     <Box className="p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
+      {badgesQuery.isSuccess && badgesQuery.data.rows.length === 0 && (
+        <div className="bg-gray-2 border-gray-3 m-8 mb-0 rounded-lg border p-4 max-md:mx-0">
+          <p className="text-body-2 text-gray-4">
+            No badges found for your organization.{' '}
+            <Link
+              href="/admin/new-badge"
+              className="text-white underline"
+            >
+              Create a badge
+            </Link>{' '}
+            to get started.
+          </p>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-8 p-8 max-md:p-0"

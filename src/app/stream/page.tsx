@@ -12,7 +12,12 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
-import { createPost, getPosts } from '@/app/feed/actions'
+import { announce } from '@/api/chain/organization/announce'
+import {
+  createAnnouncement,
+  createPost,
+  getPosts,
+} from '@/app/feed/actions'
 import { PostItem, PostItemComment } from '@/app/feed/post-item'
 import { getUserOrganizations } from '@/app/profile/[user]/functions'
 import { Avatar } from '@/components/ui/avatar'
@@ -21,6 +26,7 @@ import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
 import { Select, SelectItem } from '@/components/ui/select'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
+import { useOrganization } from '@/contexts/organization'
 
 const sortList = [
   {
@@ -119,6 +125,13 @@ export default function Stream() {
 function AuthenticatedStream({ actor }: { actor: string | undefined }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { session } = useChain()
+  const {
+    hasOrganization,
+    name: ownedOrgName,
+    displayName: ownedOrgDisplayName,
+    ipfs: ownedOrgIpfs,
+  } = useOrganization()
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
   const [activeTab, setActiveTab] = useState<string>(
     () => searchParams.get('tab') || 'all'
@@ -142,6 +155,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
 
   const showOrgSelector = activeTab === 'all' || activeTab === 'my-posts'
   const isOrgTab = !showOrgSelector
+  const isOwnedOrgTab = hasOrganization && activeTab === ownedOrgName
 
   const { control, register, handleSubmit, watch, reset, setValue } =
     useForm<PostSchema>({
@@ -160,10 +174,18 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
     enabled: !!actor,
   })
 
-  const userOrgNames = useMemo(
-    () => userOrgs?.map((org) => org.org) ?? [],
-    [userOrgs]
+  const ownedOrgInMemberList = useMemo(
+    () => userOrgs?.some((org) => org.org === ownedOrgName),
+    [userOrgs, ownedOrgName]
   )
+
+  const allOrgNames = useMemo(() => {
+    const names = userOrgs?.map((org) => org.org) ?? []
+    if (hasOrganization && !names.includes(ownedOrgName)) {
+      names.push(ownedOrgName)
+    }
+    return names
+  }, [userOrgs, hasOrganization, ownedOrgName])
 
   useEffect(() => {
     if (isOrgTab) {
@@ -181,12 +203,12 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
       return { actor }
     }
     if (activeTab === 'all') {
-      return userOrgNames.length > 0
-        ? { organizations: userOrgNames }
+      return allOrgNames.length > 0
+        ? { organizations: allOrgNames }
         : undefined
     }
     return { organizations: [activeTab] }
-  }, [activeTab, actor, userOrgNames])
+  }, [activeTab, actor, allOrgNames])
 
   const query = useInfiniteQuery({
     queryKey: ['posts', sort.value, activeTab, queryParams],
@@ -245,6 +267,54 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
     }
   }
 
+  async function onSubmitAnnouncement(data: PostSchema) {
+    if (!actor || !session) {
+      toast.error('You must be logged in to create an announcement')
+      return
+    }
+
+    try {
+      const result = await announce({
+        session,
+        org: ownedOrgName,
+        content: data.content,
+      })
+
+      let onChainPostId: string | undefined
+      const logAction = result?.response?.processed?.action_traces
+        ?.flatMap(
+          (t: {
+            inline_traces?: {
+              act?: {
+                name?: string
+                data?: { post_id?: number }
+              }
+            }[]
+          }) => t.inline_traces ?? []
+        )
+        ?.find(
+          (t: { act?: { name?: string } }) =>
+            t.act?.name === 'logannounce'
+        )
+      if (logAction?.act?.data?.post_id != null) {
+        onChainPostId = String(logAction.act.data.post_id)
+      }
+
+      await createAnnouncement({
+        actor,
+        content: data.content,
+        organization: ownedOrgName,
+        onChainPostId,
+      })
+      reset()
+      toast('Announcement published!')
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['announcements'] })
+    } catch {
+      toast.error('Failed to publish announcement')
+    }
+  }
+
   const canSubmit = !!contentWatched && !!selectedOrg
 
   return (
@@ -283,6 +353,30 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
         >
           My Posts
         </button>
+        {hasOrganization && !ownedOrgInMemberList && (
+          <button
+            type="button"
+            data-state={
+              activeTab === ownedOrgName ? 'active' : 'idle'
+            }
+            className={tabClass}
+            onClick={() => handleTabChange(ownedOrgName)}
+          >
+            <Avatar
+              size="xs"
+              src={
+                ownedOrgIpfs
+                  ? `${IPFS_IMAGE_SOURCE}${ownedOrgIpfs}`
+                  : undefined
+              }
+            >
+              {(ownedOrgDisplayName || ownedOrgName)
+                .charAt(0)
+                .toUpperCase()}
+            </Avatar>
+            {ownedOrgDisplayName || ownedOrgName}
+          </button>
+        )}
         {userOrgs?.map((org) => {
           const displayName =
             org.onchain_lookup_data?.user?.display_name || org.org
@@ -307,7 +401,34 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
       </div>
 
       <div className="space-y-4">
-        {actor && (
+        {actor && isOwnedOrgTab && (
+          <>
+            <form onSubmit={handleSubmit(onSubmitAnnouncement)}>
+              <div className="bg-gray-1 border-gray-2 rounded-2xl border p-4">
+                <label>
+                  <textarea
+                    {...register('content')}
+                    placeholder="Announce to your organization..."
+                    className="text-body-1 placeholder:text-gray-3 mb-6 block min-h-20 w-full resize-none outline-none"
+                    rows={4}
+                  />
+                </label>
+
+                <div className="flex items-center justify-end">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={!contentWatched}
+                  >
+                    Announce
+                  </Button>
+                </div>
+              </div>
+            </form>
+            <hr className="border-gray-2 border-t" />
+          </>
+        )}
+        {actor && !isOwnedOrgTab && (
           <>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="bg-gray-1 border-gray-2 rounded-2xl border p-4">
@@ -331,8 +452,39 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                             label="Organization"
                             placeholder="Select org"
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(value) => {
+                              if (
+                                hasOrganization &&
+                                value === ownedOrgName
+                              ) {
+                                handleTabChange(ownedOrgName)
+                                return
+                              }
+                              field.onChange(value)
+                            }}
                           >
+                            {hasOrganization &&
+                              !ownedOrgInMemberList && (
+                                <SelectItem value={ownedOrgName}>
+                                  <span className="flex items-center gap-2">
+                                    <Avatar
+                                      size="xs"
+                                      src={
+                                        ownedOrgIpfs
+                                          ? `${IPFS_IMAGE_SOURCE}${ownedOrgIpfs}`
+                                          : undefined
+                                      }
+                                    >
+                                      {(
+                                        ownedOrgDisplayName ||
+                                        ownedOrgName
+                                      ).charAt(0)}
+                                    </Avatar>
+                                    {ownedOrgDisplayName ||
+                                      ownedOrgName}
+                                  </span>
+                                </SelectItem>
+                              )}
                             {userOrgs?.map((org) => {
                               const displayName =
                                 org.onchain_lookup_data?.user
@@ -387,6 +539,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                 mentions={post.mention.map((item) => item.user.actor)}
                 organization={post.organization}
                 totalScore={post.totalScore}
+                isAnnouncement={post.isAnnouncement}
                 beamGives={[
                   ...post.beamGives,
                   ...post.children.flatMap((c) => c.beamGives),

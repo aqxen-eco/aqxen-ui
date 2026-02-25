@@ -116,6 +116,143 @@ export async function createPost({
   }
 }
 
+type CreateAnnouncementProps = {
+  actor: string
+  content: string
+  organization: string
+  onChainPostId?: string
+}
+
+export async function createAnnouncement({
+  actor,
+  content,
+  organization,
+  onChainPostId,
+}: CreateAnnouncementProps) {
+  try {
+    const authorGroupId = await ensurePinataGroup(actor)
+
+    const user = await prisma.user.upsert({
+      where: { actor },
+      update: {
+        ...(authorGroupId ? { pinataGroupId: authorGroupId } : {}),
+      },
+      create: {
+        actor,
+        pinataGroupId: authorGroupId,
+      },
+    })
+
+    const post = await prisma.post.create({
+      data: {
+        content,
+        organization,
+        isAnnouncement: true,
+        onChainPostId: onChainPostId ? BigInt(onChainPostId) : null,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    })
+
+    return {
+      success: true,
+      postId: post.id,
+    }
+  } catch (error) {
+    console.error('Error creating announcement:', error)
+    return {
+      success: false,
+      error: 'Failed to create announcement',
+    }
+  }
+}
+
+type GetAnnouncementsProps = {
+  cursor?: string
+  limit: number
+  orderBy: 'asc' | 'desc'
+  organization: string
+}
+
+export async function getAnnouncements({
+  cursor,
+  limit,
+  orderBy,
+  organization,
+}: GetAnnouncementsProps) {
+  try {
+    const posts = await prisma.post.findMany({
+      take: limit,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
+      where: {
+        parentId: null,
+        isAnnouncement: true,
+        organization,
+      },
+      include: {
+        user: true,
+        mention: {
+          include: {
+            user: {
+              select: {
+                actor: true,
+              },
+            },
+          },
+        },
+        beamGives: {
+          select: {
+            badgeSymbol: true,
+            parAmount: true,
+            upaEmitted: true,
+            gpaEmitted: true,
+            rpaEmitted: true,
+          },
+        },
+        children: {
+          include: {
+            user: true,
+            beamGives: {
+              select: {
+                badgeSymbol: true,
+                parAmount: true,
+                upaEmitted: true,
+                gpaEmitted: true,
+                rpaEmitted: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+      orderBy: {
+        createdAt: orderBy,
+      },
+    })
+
+    const nextCursor =
+      posts.length === limit ? posts[posts.length - 1].id : null
+
+    return {
+      success: true,
+      posts,
+      nextCursor,
+    }
+  } catch (error) {
+    console.error('Error fetching announcements:', error)
+    return {
+      success: false,
+      error: 'Failed to fetch announcements',
+    }
+  }
+}
+
 type GetPostsByBadgeProps = {
   badgeSymbol: string
   limit?: number

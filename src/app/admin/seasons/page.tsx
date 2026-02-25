@@ -58,7 +58,7 @@ export default function SeasonsPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/seasons" />
-        <HeaderAdminTitle title="Seasons" tooltip="Lorem ipsum dolor sit amed">
+        <HeaderAdminTitle title="Seasons" tooltip="Review your active and historical seasons. Seasons allow you to track and reset user reputation over set timeframes.">
           <Link href="/admin/new-season" variant="primary" size="md">
             New season
           </Link>

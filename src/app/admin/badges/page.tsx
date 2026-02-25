@@ -54,7 +54,7 @@ export default function BadgesPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/badges" />
-        <HeaderAdminTitle title="Badges" tooltip="Lorem ipsum dolor sit amed">
+        <HeaderAdminTitle title="Badges" tooltip="Manage your community's badge library. View, edit, or archive existing badges available for users to earn.">
           <Link href="/admin/new-badge" variant="primary" size="md">
             New badge
           </Link>

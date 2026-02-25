@@ -18,7 +18,7 @@ export default async function BadgesAutomation({
         <HeaderAdminMenu activeHref="/admin/badges-automation" />
         <HeaderAdminTitle
           title="Badges Automation"
-          tooltip="Lorem ipsum dolor sit amed"
+          tooltip="Monitor your active automation rules that instantly distribute badges to users when they hit certain milestones."
         >
           <Link href="/admin/new-badge-automation" variant="primary" size="md">
             New automation rule

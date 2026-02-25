@@ -35,7 +35,7 @@ export function Tooltip({
         <Portal>
           <Content
             className={twMerge(
-              'border-gray-2 bg-gray-1 text-body-3 z-10 max-w-64 rounded-lg border p-3 select-none',
+              'border-gray-2 bg-gray-1 text-body-3 z-50 max-w-64 rounded-lg border p-3 select-none',
               className
             )}
             sideOffset={5}

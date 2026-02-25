@@ -118,9 +118,11 @@ export default function MembersPage() {
     return msg.includes(MEMBER_FEE_ERROR)
   }
 
+  const isSelfAdd = account.trim().toLowerCase() === name.toLowerCase()
+
   async function handleAddMember(e: React.FormEvent) {
     e.preventDefault()
-    if (!session || !account.trim()) return
+    if (!session || !account.trim() || isSelfAdd) return
 
     if (slotsAreFull) {
       setPendingAction({ type: 'add', user: account.trim(), memo })
@@ -276,11 +278,16 @@ export default function MembersPage() {
                 type="submit"
                 variant="primary"
                 size="md"
-                disabled={isSubmitting || !account.trim()}
+                disabled={isSubmitting || !account.trim() || isSelfAdd}
               >
                 {isSubmitting ? 'Adding...' : 'Add'}
               </Button>
             </div>
+            {isSelfAdd && (
+              <p className="text-body-2 mt-2 text-red-400">
+                You cannot add yourself as a member.
+              </p>
+            )}
           </form>
         )}
 

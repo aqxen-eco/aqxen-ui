@@ -17,7 +17,7 @@ export default async function NewBadgeLayout({
         <HeaderAdminBack href="/admin/seasons">Season</HeaderAdminBack>
         <HeaderAdminTitle
           title="New Season"
-          tooltip="Lorem ipsum dolor sit amed"
+          tooltip="Configure an upcoming season. Define the start and end dates, and set the specific engagement rules for this cycle."
           className="max-w-container-md"
         />
       </HeaderAdmin>

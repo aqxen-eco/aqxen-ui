@@ -17,7 +17,7 @@ export default async function NewBadgeLayout({
         <HeaderAdminBack href="/admin/badges">Badges</HeaderAdminBack>
         <HeaderAdminTitle
           title="New Badge"
-          tooltip="Lorem ipsum dolor sit amed"
+          tooltip="Create a new custom badge. Upload your design, set the title, and write the description for this achievement."
           className="max-w-container-md"
         />
       </HeaderAdmin>
