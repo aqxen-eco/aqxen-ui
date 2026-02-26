@@ -4,21 +4,33 @@ import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-aut
 import type { BeamMetadata } from '@/api/chain/beams/list-beam-metadata'
 import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
 import type { BadgeAutomation } from '@/api/model/badge-automation'
+import { createRateLimiter } from '@/lib/rate-limit'
+import { requireAuth } from '@/lib/require-auth'
+import { processBeamGiveSchema } from '@/lib/schemas'
 import { prisma } from '@/prisma-client'
 
-// --- Cache helpers (5 min TTL) ---
+// --- Cache helpers (5 min TTL, max 500 entries) ---
 
 const CACHE_TTL = 5 * 60 * 1000
+const MAX_CACHE_ENTRIES = 500
 
 type CacheEntry<T> = { data: T; ts: number }
 
 const beamMetadataCache = new Map<string, CacheEntry<BeamMetadata[]>>()
 const automationCache = new Map<string, CacheEntry<BadgeAutomation[]>>()
 
+function evictIfNeeded<T>(cache: Map<string, CacheEntry<T>>) {
+  if (cache.size >= MAX_CACHE_ENTRIES) {
+    const oldest = cache.keys().next().value
+    if (oldest) cache.delete(oldest)
+  }
+}
+
 async function getCachedBeamMetadata(org: string): Promise<BeamMetadata[]> {
   const cached = beamMetadataCache.get(org)
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data
 
+  evictIfNeeded(beamMetadataCache)
   const rows = await listBeamMetadata({ scope: org })
   beamMetadataCache.set(org, { data: rows, ts: Date.now() })
   return rows
@@ -30,6 +42,7 @@ async function getCachedAutomations(
   const cached = automationCache.get(org)
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data
 
+  evictIfNeeded(automationCache)
   const result = await listBadgeAutomation({ scope: org })
   automationCache.set(org, { data: result.rows, ts: Date.now() })
   return result.rows
@@ -37,23 +50,26 @@ async function getCachedAutomations(
 
 // --- Main function ---
 
+const beamGiveLimiter = createRateLimiter({ windowMs: 60_000, max: 30 })
+
 type ProcessBeamGiveProps = {
   postId: string
-  giverActor: string
   recipientActor: string
   badgeSymbol: string
   amount: number
   orgAccount: string
 }
 
-export async function processBeamGive({
-  postId,
-  giverActor,
-  recipientActor,
-  badgeSymbol,
-  amount,
-  orgAccount,
-}: ProcessBeamGiveProps) {
+export async function processBeamGive(input: ProcessBeamGiveProps) {
+  const giverActor = await requireAuth()
+  const { postId, recipientActor, badgeSymbol, amount, orgAccount } =
+    processBeamGiveSchema.parse(input)
+
+  const limit = beamGiveLimiter.check(giverActor)
+  if (!limit.ok) {
+    throw new Error('Rate limit exceeded')
+  }
+
   // 1. PAR = amount
   const par = amount
 
@@ -65,7 +81,7 @@ export async function processBeamGive({
     })
     upa = 1
   } catch {
-    // unique constraint violation → repeat giver
+    // unique constraint violation -> repeat giver
     upa = 0
   }
 
@@ -110,7 +126,7 @@ export async function processBeamGive({
       })
       xyz = 1
     } catch {
-      // unique constraint violation → repeat giver this season
+      // unique constraint violation -> repeat giver this season
       xyz = 0
     }
   }

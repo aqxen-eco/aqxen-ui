@@ -40,6 +40,9 @@ model Post {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  isAnnouncement Boolean @default(false) @map("is_announcement")
+  onChainPostId  BigInt? @map("on_chain_post_id")
+
   parScore   Float @default(0) @map("par_score")
   upaScore   Float @default(0) @map("upa_score")
   gpaScore   Float @default(0) @map("gpa_score")

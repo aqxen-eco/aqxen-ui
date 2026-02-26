@@ -221,6 +221,11 @@ export default function SeasonPage() {
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
               <h2 className="text-title-2 text-white">Beams</h2>
+              <Tooltip content="Cycle-based badge distribution linked to this season. Beams automatically award badges based on recurring engagement cycles.">
+                <Button variant="link" size="md" square>
+                  <MdOutlineInfo className="size-6" />
+                </Button>
+              </Tooltip>
             </div>
             <div className="flex-none">
               <Link

@@ -19,7 +19,7 @@ export default async function BuySubscription({
         </HeaderAdminBack>
         <HeaderAdminTitle
           title="Buy Subscription"
-          tooltip="Lorem ipsum dolor sit amed"
+          tooltip="Explore available tiers, upgrade your current plan, or purchase add-ons to unlock advanced platform features."
         />
       </HeaderAdmin>
       <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">

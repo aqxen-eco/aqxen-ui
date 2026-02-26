@@ -9,7 +9,13 @@ import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import { Children, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { MdClose, MdMoreHoriz, MdStar, MdWorkspacePremium } from 'react-icons/md'
+import {
+  MdClose,
+  MdMoreHoriz,
+  MdOutlineCampaign,
+  MdStar,
+  MdWorkspacePremium,
+} from 'react-icons/md'
 import { toast } from 'react-toastify'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
@@ -75,6 +81,7 @@ type PostItemProps = {
   organization?: string | null
   totalScore: number
   beamGives?: BeamGiveEntry[]
+  isAnnouncement?: boolean
   children: React.ReactNode
 }
 
@@ -102,6 +109,7 @@ export function PostItem({
   organization,
   totalScore,
   beamGives,
+  isAnnouncement,
   children,
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
@@ -205,14 +213,34 @@ export function PostItem({
         memo: content,
       }))
 
-      await sendMultiBadge(data)
+      const txResult = await sendMultiBadge(data)
+
+      let onChainPostId: string | undefined
+      const logAction = txResult?.response?.processed?.action_traces
+        ?.flatMap(
+          (t: {
+            inline_traces?: {
+              act?: {
+                name?: string
+                data?: { post_id?: number }
+              }
+            }[]
+          }) => t.inline_traces ?? []
+        )
+        ?.find(
+          (t: { act?: { name?: string } }) =>
+            t.act?.name === 'logpost'
+        )
+      if (logAction?.act?.data?.post_id != null) {
+        onChainPostId = String(logAction.act.data.post_id)
+      }
 
       const result = await createPost({
         parentId: id,
-        actor: currentActor!,
         content,
         badgeSymbol: badges,
         mention: [actor],
+        onChainPostId,
       })
 
       if (result.success && result.postId && organization) {
@@ -226,7 +254,6 @@ export function PostItem({
             .map((badge) =>
               processBeamGive({
                 postId: result.postId!,
-                giverActor: currentActor!,
                 recipientActor: actor,
                 badgeSymbol: badge,
                 amount: 1,
@@ -252,7 +279,6 @@ export function PostItem({
     try {
       await createPost({
         parentId: id,
-        actor: currentActor!,
         content,
       })
 
@@ -290,7 +316,15 @@ export function PostItem({
         </div>
         <div className="max-md:space-y-2">
           <div className="flex flex-wrap items-center justify-between max-md:space-y-2">
-            <p className="text-body-2 text-white">
+            <p className="text-body-2 flex flex-wrap items-center text-white">
+              {isAnnouncement && (
+                <span className="text-yellow-400 mr-1 inline-flex items-center gap-0.5">
+                  <MdOutlineCampaign className="size-4" />
+                  <span className="text-caption font-medium">
+                    Announcement
+                  </span>
+                </span>
+              )}
               <Link href={`/profile/${actor}`} className="hover:underline">
                 {actor}
               </Link>

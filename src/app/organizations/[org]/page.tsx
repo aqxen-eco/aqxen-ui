@@ -11,7 +11,11 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { MdOutlineDynamicFeed, MdOutlinePeople } from 'react-icons/md'
+import {
+  MdOutlineCampaign,
+  MdOutlineDynamicFeed,
+  MdOutlinePeople,
+} from 'react-icons/md'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
@@ -20,7 +24,13 @@ import { listMemberRequests } from '@/api/chain/organization/list-member-request
 import { listMembers } from '@/api/chain/organization/list-members'
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { requestJoin } from '@/api/chain/organization/request-join'
-import { createPost, getPosts } from '@/app/feed/actions'
+import { announce } from '@/api/chain/organization/announce'
+import {
+  createAnnouncement,
+  createPost,
+  getAnnouncements,
+  getPosts,
+} from '@/app/feed/actions'
 import { PostItem, PostItemComment } from '@/app/feed/post-item'
 import { getOrgMemberReputation } from '@/app/profile/[user]/functions'
 import { TableSkeleton } from '@/components/skeleton'
@@ -58,9 +68,12 @@ export default function OrganizationPage() {
   const queryClient = useQueryClient()
   const [isRequesting, setIsRequesting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
-  const [activeTab, setActiveTab] = useState<'stream' | 'members'>('stream')
+  const [activeTab, setActiveTab] = useState<
+    'stream' | 'members' | 'announcements'
+  >('stream')
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
   const loadMoreBtnRef = useRef(null)
+  const announcementsLoadMoreRef = useRef(null)
 
   const orgQuery = useQuery({
     queryKey: ['organization', org],
@@ -128,6 +141,20 @@ export default function OrganizationPage() {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   })
 
+  // Announcements query
+  const announcementsQuery = useInfiniteQuery({
+    queryKey: ['announcements', org],
+    queryFn: async ({ pageParam }) =>
+      getAnnouncements({
+        limit: 2,
+        cursor: pageParam,
+        orderBy: 'desc',
+        organization: org,
+      }),
+    initialPageParam: '',
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  })
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -146,6 +173,25 @@ export default function OrganizationPage() {
 
     return () => observer.disconnect()
   }, [postsQuery])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && announcementsQuery.hasNextPage) {
+            announcementsQuery.fetchNextPage()
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+
+    if (announcementsLoadMoreRef.current) {
+      observer.observe(announcementsLoadMoreRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [announcementsQuery])
 
   async function handleCancelRequest() {
     if (!session) return
@@ -181,6 +227,8 @@ export default function OrganizationPage() {
     }
   }
 
+  const isOrgOwner = actor === org
+
   async function onSubmit(data: OrgPostSchema) {
     if (!actor) {
       toast.error('You must be logged in to create a post')
@@ -188,17 +236,47 @@ export default function OrganizationPage() {
     }
 
     try {
-      await createPost({
-        actor,
-        content: data.content,
-        organization: org,
-      })
+      if (isOrgOwner && session) {
+        const result = await announce({
+          session,
+          org,
+          content: data.content,
+        })
 
-      reset()
-      toast('Post published!')
-      queryClient.invalidateQueries({ queryKey: ['posts'] })
+        let onChainPostId: string | undefined
+        const logAction = result?.response?.processed?.action_traces
+          ?.flatMap((t: { inline_traces?: { act?: { name?: string; data?: { post_id?: number } } }[] }) => t.inline_traces ?? [])
+          ?.find((t: { act?: { name?: string } }) => t.act?.name === 'logannounce')
+        if (logAction?.act?.data?.post_id != null) {
+          onChainPostId = String(logAction.act.data.post_id)
+        }
+
+        await createAnnouncement({
+          content: data.content,
+          organization: org,
+          onChainPostId,
+        })
+
+        reset()
+        toast('Announcement published!')
+        queryClient.invalidateQueries({ queryKey: ['posts'] })
+        queryClient.invalidateQueries({ queryKey: ['announcements'] })
+      } else {
+        await createPost({
+          content: data.content,
+          organization: org,
+        })
+
+        reset()
+        toast('Post published!')
+        queryClient.invalidateQueries({ queryKey: ['posts'] })
+      }
     } catch {
-      toast.error('Failed to publish post')
+      toast.error(
+        isOrgOwner
+          ? 'Failed to publish announcement'
+          : 'Failed to publish post'
+      )
     }
   }
 
@@ -333,6 +411,15 @@ export default function OrganizationPage() {
           <MdOutlinePeople className="size-5" />
           Members
         </button>
+        <button
+          type="button"
+          data-state={activeTab === 'announcements' ? 'active' : 'idle'}
+          className={tabClass}
+          onClick={() => setActiveTab('announcements')}
+        >
+          <MdOutlineCampaign className="size-5" />
+          Announcements
+        </button>
       </div>
 
       {/* Stream tab */}
@@ -352,14 +439,18 @@ export default function OrganizationPage() {
             </DropdownRoot>
           </div>
 
-          {isAuthenticated && isMember && (
+          {isAuthenticated && (isMember || isOrgOwner) && (
             <>
               <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="bg-gray-1 border-gray-2 rounded-2xl border p-4">
                   <label>
                     <textarea
                       {...register('content')}
-                      placeholder="What do you consider is worth recognition?"
+                      placeholder={
+                        isOrgOwner
+                          ? 'Announce to your organization...'
+                          : 'What do you consider is worth recognition?'
+                      }
                       className="text-body-1 placeholder:text-gray-3 mb-6 block min-h-20 w-full resize-none outline-none"
                       rows={4}
                     />
@@ -372,7 +463,7 @@ export default function OrganizationPage() {
                         variant="primary"
                         disabled={!canSubmit}
                       >
-                        Post
+                        {isOrgOwner ? 'Announce' : 'Post'}
                       </Button>
                     </div>
                   </div>
@@ -398,6 +489,7 @@ export default function OrganizationPage() {
                   )}
                   organization={post.organization}
                   totalScore={post.totalScore}
+                  isAnnouncement={post.isAnnouncement}
                   beamGives={[
                     ...post.beamGives,
                     ...post.children.flatMap((c) => c.beamGives),
@@ -500,6 +592,79 @@ export default function OrganizationPage() {
               </Table>
             )}
         </section>
+      )}
+
+      {/* Announcements tab */}
+      {activeTab === 'announcements' && (
+        <div className="space-y-4 py-4">
+          {announcementsQuery.isSuccess &&
+            announcementsQuery.data.pages?.map((page) =>
+              page.posts?.map((post) => (
+                <PostItem
+                  key={post.id}
+                  id={post.id}
+                  actor={post.user.actor}
+                  avatarIpfs={post.user.avatarIpfs}
+                  createdAt={post.createdAt}
+                  badgeSymbol={post.badgeSymbol}
+                  content={post.content}
+                  mentions={post.mention.map(
+                    (item) => item.user.actor
+                  )}
+                  organization={post.organization}
+                  totalScore={post.totalScore}
+                  isAnnouncement
+                  beamGives={[
+                    ...post.beamGives,
+                    ...post.children.flatMap((c) => c.beamGives),
+                  ]}
+                >
+                  {post.children.map((comment) => (
+                    <PostItemComment
+                      key={comment.id}
+                      actor={comment.user.actor}
+                      avatarIpfs={comment.user.avatarIpfs}
+                      createdAt={comment.createdAt}
+                      content={comment.content}
+                      badgeSymbol={comment.badgeSymbol}
+                      organization={comment.organization}
+                      totalScore={comment.totalScore}
+                      beamGives={comment.beamGives}
+                    />
+                  ))}
+                </PostItem>
+              ))
+            )}
+
+          {announcementsQuery.isSuccess && (
+            <div className="flex items-center justify-center">
+              {announcementsQuery.data.pages[0].posts?.length === 0 ? (
+                <p className="text-body-2 text-gray-3 py-14">
+                  No announcements yet.
+                </p>
+              ) : (
+                <Button
+                  ref={announcementsLoadMoreRef}
+                  variant="secondary"
+                  onClick={() => announcementsQuery.fetchNextPage()}
+                  disabled={
+                    !announcementsQuery.hasNextPage ||
+                    announcementsQuery.isFetchingNextPage ||
+                    announcementsQuery.isFetching
+                  }
+                >
+                  {announcementsQuery.isFetchingNextPage
+                    ? 'Loading more...'
+                    : announcementsQuery.hasNextPage
+                      ? 'Load Newer'
+                      : announcementsQuery.isFetching
+                        ? 'Loading...'
+                        : 'Nothing more to load'}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

@@ -19,7 +19,7 @@ export default async function NewBadgeLayoutAutomation({
         </HeaderAdminBack>
         <HeaderAdminTitle
           title="New Badge Automation"
-          tooltip="Lorem ipsum dolor sit amed"
+          tooltip="Set up a new automated trigger. Define the exact user actions or point thresholds required to automatically unlock a specific badge."
           className="max-w-container-md"
         />
       </HeaderAdmin>

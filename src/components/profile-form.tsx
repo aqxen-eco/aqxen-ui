@@ -66,7 +66,7 @@ export function ProfileForm() {
         if (user?.pinataGroupId) {
           setPinataGroupId(user.pinataGroupId)
         } else {
-          const groupId = await ensureProfilePinataGroup(actor!)
+          const groupId = await ensureProfilePinataGroup()
           setPinataGroupId(groupId ?? undefined)
         }
         reset({
@@ -100,14 +100,12 @@ export function ProfileForm() {
           if (pendingAvatar) {
             finalAvatar = await uploadFile(pendingAvatar, {
               groupId: pinataGroupId,
-              actor: actor!,
               variant: 'avatar',
             })
           }
           if (pendingCover) {
             finalCover = await uploadFile(pendingCover, {
               groupId: pinataGroupId,
-              actor: actor!,
               variant: 'cover',
             })
           }
@@ -117,7 +115,6 @@ export function ProfileForm() {
       }
 
       await updateProfile({
-        actor: actor!,
         name,
         about,
         location,

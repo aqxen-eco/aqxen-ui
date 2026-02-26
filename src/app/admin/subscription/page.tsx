@@ -15,7 +15,7 @@ export default function SubscriptionPage() {
         <HeaderAdminMenu activeHref="/admin/subscription" />
         <HeaderAdminTitle
           title="Subscription"
-          tooltip="Lorem ipsum dolor sit amed"
+          tooltip="View your current subscription plan, track your platform usage limits, and manage your billing cycle."
         >
           <Link href="/admin/buy-subscription" variant="primary" size="md">
             Buy Subscription
