@@ -32,6 +32,8 @@ jobs:
       - name: Generate Prisma Client
         shell: bash -l {0}
         run: pnpm prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run ESLint
         shell: bash -l {0}
