@@ -42,6 +42,8 @@ jobs:
       - name: Build
         shell: bash -l {0}
         run: pnpm build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Archive build
         run: tar -czf build.tar.gz --exclude=.git --exclude=build.tar.gz .[!.]* *
