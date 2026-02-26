@@ -67,14 +67,16 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: DATABASE_URL
+          script_stop: true
           script: |
             cd ${{ vars.DEPLOY_FOLDER }}
             tar -xzf build.tar.gz
             export PATH="/root/.local/share/pnpm:$PATH"
+            export CI=true
             pnpm install --frozen-lockfile
             echo "DATABASE_URL='${DATABASE_URL}'" > .env
             export $(grep DATABASE_URL .env | xargs)
             pnpm prisma migrate deploy
-            systemctl restart upscale
-            systemctl restart nginx
-            systemctl status upscale --no-pager
+            sudo systemctl restart upscale
+            sudo systemctl restart nginx
+            sudo systemctl status upscale --no-pager
