@@ -37,7 +37,7 @@ jobs:
 
       - name: Run ESLint
         shell: bash -l {0}
-        run: pnpm lint
+        run: pnpm eslint .
 
       - name: Build
         shell: bash -l {0}
