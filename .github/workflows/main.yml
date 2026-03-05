@@ -32,6 +32,8 @@ jobs:
       - name: Generate Prisma Client
         shell: bash -l {0}
         run: pnpm prisma generate
+        env:
+          DATABASE_URL: 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
 
       - name: Run ESLint
         shell: bash -l {0}
@@ -40,6 +42,8 @@ jobs:
       - name: Build
         shell: bash -l {0}
         run: pnpm build
+        env:
+          DATABASE_URL: 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
 
       - name: Archive build
         run: tar -czf build.tar.gz --exclude=.git --exclude=build.tar.gz .[!.]* *
