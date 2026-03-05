@@ -325,9 +325,11 @@ export function PostItem({
                   </span>
                 </span>
               )}
-              <Link href={`/profile/${actor}`} className="hover:underline">
-                {actor}
-              </Link>
+              {!isAnnouncement && (
+                <Link href={`/profile/${actor}`} className="hover:underline">
+                  {actor}
+                </Link>
+              )}
               {mentions && mentions.length > 0 && (
                 <>
                   {' '}
@@ -349,13 +351,13 @@ export function PostItem({
                   )}
                 </>
               )}
+              <span className="text-gray-3 mx-1">•</span>
               <span className="text-gray-3">
-                {' '}
-                • {format(new Date(createdAt), 'EEE d MMM')}
+                {format(new Date(createdAt), 'EEE d MMM')}
               </span>
               {organization && orgDisplayName && (
                 <>
-                  <span className="text-gray-3"> • </span>
+                  <span className="text-gray-3 mx-1">•</span>
                   <Link
                     href={`/organizations/${organization}`}
                     className="text-gray-3 hover:text-white hover:underline"
@@ -365,50 +367,52 @@ export function PostItem({
                 </>
               )}
             </p>
-            <Tooltip
-              className="min-w-40"
-              content={
-                (() => {
-                  const rows = buildBeamBreakdown(beamGives, badgeRows)
-                  if (rows.length === 0) {
+            {!isAnnouncement && (
+              <Tooltip
+                className="min-w-40"
+                content={
+                  (() => {
+                    const rows = buildBeamBreakdown(beamGives, badgeRows)
+                    if (rows.length === 0) {
+                      return (
+                        <span className="text-gray-3">
+                          No beam contributions
+                        </span>
+                      )
+                    }
                     return (
-                      <span className="text-gray-3">
-                        No beam contributions
-                      </span>
-                    )
-                  }
-                  return (
-                    <div className="space-y-1">
-                      {rows.map((row) => (
-                        <div
-                          key={row.name}
-                          className="flex justify-between gap-4"
-                        >
-                          <span className="text-white">{row.name}</span>
-                          <span className="text-gray-3 tabular-nums">
-                            {row.score}
+                      <div className="space-y-1">
+                        {rows.map((row) => (
+                          <div
+                            key={row.name}
+                            className="flex justify-between gap-4"
+                          >
+                            <span className="text-white">{row.name}</span>
+                            <span className="text-gray-3 tabular-nums">
+                              {row.score}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="border-gray-2 my-1 border-t" />
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white font-medium">
+                            Total
+                          </span>
+                          <span className="text-white tabular-nums font-medium">
+                            {totalScore}
                           </span>
                         </div>
-                      ))}
-                      <div className="border-gray-2 my-1 border-t" />
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white font-medium">
-                          Total
-                        </span>
-                        <span className="text-white tabular-nums font-medium">
-                          {totalScore}
-                        </span>
                       </div>
-                    </div>
-                  )
-                })()
-              }
-            >
-              <div className="text-gray-3 flex cursor-default gap-0.5">
-                <MdWorkspacePremium className="size-6" />
-                <span className="text-body-2">{totalScore}</span>
-              </div>
-            </Tooltip>
+                    )
+                  })()
+                }
+              >
+                <div className="text-gray-3 flex cursor-default gap-0.5">
+                  <MdWorkspacePremium className="size-6" />
+                  <span className="text-body-2">{totalScore}</span>
+                </div>
+              </Tooltip>
+            )}
           </div>
           {badgeSymbol.length > 0 && (
             <div>
