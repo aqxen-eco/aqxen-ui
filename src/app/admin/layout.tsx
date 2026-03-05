@@ -2,10 +2,7 @@
 
 import { redirect } from 'next/navigation'
 
-// import { BuySubscriptionTable } from '@/components/buy-subscription-table'
-// import { HeaderAdmin, HeaderAdminTitle } from '@/components/header-admin'
 import { useOrganization } from '@/contexts/organization'
-// import { useGetCycle } from '@/hooks/query/use-get-cycle'
 
 export default function AdminLayout({
   children,
@@ -13,9 +10,6 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const { hasOrganization, isPending } = useOrganization()
-  // const { data, query } = useGetSubscription()
-
-  // const { data: cycleData } = useGetCycle()
 
   if (isPending) {
     return (
@@ -25,30 +19,9 @@ export default function AdminLayout({
     )
   }
 
-  // const today = new Date()
-  // const expiryTime = parseISO(data?.active?.[0].expiry_time as string)
-  // const resultInMinutes = differenceInMinutes(expiryTime, today)
-  // const expired = resultInMinutes <= 0
-
   if (!hasOrganization) {
     return redirect('/')
   }
-
-  // if (expired && data?.upcoming.length === 0) {
-  //   return (
-  //     <>
-  //       <HeaderAdmin>
-  //         <HeaderAdminTitle
-  //           title="Subscription"
-  //           tooltip="Lorem ipsum dolor sit amed"
-  //         />
-  //       </HeaderAdmin>
-  //       <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
-  //         <BuySubscriptionTable />
-  //       </div>
-  //     </>
-  //   )
-  // }
 
   return children
 }
