@@ -77,8 +77,10 @@ export default function FaqPage() {
                 <LuMinus className="size-5 shrink-0 group-data-[state=closed]:hidden" />
               </Accordion.Trigger>
             </Accordion.Header>
-            <Accordion.Content className="text-body-2 text-gray-3 pb-4 whitespace-pre-line">
-              {item.content}
+            <Accordion.Content className="text-body-2 text-gray-3 space-y-3 pb-4">
+              {item.content.split('\n').map((line, i) => (
+                <p key={i}>{line}</p>
+              ))}
             </Accordion.Content>
           </Accordion.Item>
         ))}

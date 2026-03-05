@@ -18,9 +18,12 @@ const ChainContext = createContext({} as ChainContext)
 
 const appName = 'reputationsystem'
 
+const chain =
+  process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? Chains.EOS : Chains.Jungle4
+
 const sessionKit = new SessionKit({
   appName,
-  chains: [Chains.Jungle4],
+  chains: [chain],
   ui: new WebRenderer(),
   walletPlugins: [new WalletPluginAnchor()],
 })
