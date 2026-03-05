@@ -74,7 +74,7 @@ export function SeasonalBadgesSection({
   const displayBadges = isLifetime
     ? lifetimeBadges
     : seriesValue?.badges ?? []
-  const displayTotal = isLifetime
+  const _displayTotal = isLifetime
     ? lifetimeTotal
     : displayBadges.reduce((sum, b) => sum + b.balance, 0)
   const dropdownLabel = isLifetime

@@ -1,4 +1,5 @@
-import { test as base, type Page } from '@playwright/test'
+/* eslint-disable react-hooks/rules-of-hooks */
+import { type Page,test as base } from '@playwright/test'
 
 const CHAIN_API_URL = 'https://jungle.eosusa.io/'
 const TEST_ACTOR = 'testaccount1'
