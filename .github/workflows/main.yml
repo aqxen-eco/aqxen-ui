@@ -44,6 +44,8 @@ jobs:
         run: pnpm build
         env:
           DATABASE_URL: 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
+          NEXT_PUBLIC_PINATA_GATEWAY: ${{ vars.NEXT_PUBLIC_PINATA_GATEWAY }}
+          NEXT_PUBLIC_NETWORK: ${{ vars.NEXT_PUBLIC_NETWORK }}
 
       - name: Archive build
         run: tar -czf build.tar.gz --exclude=.git --exclude=build.tar.gz .[!.]* *
@@ -62,17 +64,19 @@ jobs:
         uses: appleboy/ssh-action@v0.1.7
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DATABASE_URL
+          envs: DATABASE_URL,SESSION_SECRET
           script: |
             cd ${{ vars.DEPLOY_FOLDER }}
             tar -xzf build.tar.gz
             export PATH="/root/.local/share/pnpm:$PATH"
             pnpm install --frozen-lockfile
             echo "DATABASE_URL='${DATABASE_URL}'" > .env
+            echo "SESSION_SECRET='${SESSION_SECRET}'" >> .env
             export $(grep DATABASE_URL .env | xargs)
             pnpm prisma migrate deploy
             systemctl restart upscale
