@@ -23,7 +23,7 @@ export function AppBar() {
   const pathname = usePathname()
   const router = useRouter()
 
-  const isReady = !isInitializing && !isOrgPending
+  const isReady = !isInitializing && (!isAuthenticated || !isOrgPending)
 
   function logoutAndGoToHome() {
     logout()
