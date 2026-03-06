@@ -34,7 +34,7 @@ jobs:
         run: pnpm lint
 
       - name: Build
-        run: pnpm build
+        run: pnpm prisma generate && npx next build --webpack
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NEXT_PUBLIC_PINATA_GATEWAY: ${{ vars.NEXT_PUBLIC_PINATA_GATEWAY }}
