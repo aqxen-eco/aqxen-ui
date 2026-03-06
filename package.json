@@ -36,7 +36,7 @@
     "@wharfkit/contract": "^1.2.0",
     "@wharfkit/session": "^1.6.1",
     "@wharfkit/wallet-plugin-anchor": "^1.6.1",
-    "@wharfkit/wallet-plugin-cloudwallet": "^1.6.0",
+    "@wharfkit/wallet-plugin-cloudwallet": "^1.6.2",
     "@wharfkit/web-renderer": "^1.4.3",
     "axios": "^1.13.2",
     "cmdk": "^1.1.1",
