@@ -55,7 +55,6 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
   const restoreSession = useCallback(async () => {
     try {
       const restoredSession = await sessionKit.restore()
-      setSession(restoredSession)
       if (restoredSession) {
         const actor = restoredSession.actor.toString()
         await fetch('/api/auth/login', {
@@ -64,6 +63,7 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ actor }),
         })
       }
+      setSession(restoredSession)
     } catch {
       setSession(undefined)
     } finally {

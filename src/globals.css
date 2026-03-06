@@ -39,6 +39,10 @@
   --spacing-container-lg: 80rem;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 .swiper-pagination-bullet {
   @apply !bg-white;
 }

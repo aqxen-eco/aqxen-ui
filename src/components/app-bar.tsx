@@ -18,10 +18,12 @@ import { useGetUserProfile } from '@/hooks/query/use-get-user-profile'
 export function AppBar() {
   const [showMenu, setShowMenu] = useState(false)
   const { isAuthenticated, isInitializing, login, logout, actor } = useChain()
-  const { hasOrganization } = useOrganization()
+  const { hasOrganization, isPending: isOrgPending } = useOrganization()
   const { data: userProfile } = useGetUserProfile(actor ?? null)
   const pathname = usePathname()
   const router = useRouter()
+
+  const isReady = !isInitializing && !isOrgPending
 
   function logoutAndGoToHome() {
     logout()
@@ -47,107 +49,160 @@ export function AppBar() {
               <span className="truncate">AqXen</span>
             </NextLink>
 
-            <div
-              data-state={showMenu ? 'open' : 'closed'}
-              className="max-md:bg-gray-1 flex items-center justify-between max-md:fixed max-md:inset-0 max-md:z-40 max-md:flex-col max-md:justify-center max-md:gap-2 data-[state=closed]:max-md:hidden"
-            >
+            {/* Desktop nav — always the same wrapper, no layout shift */}
+            <div className="flex items-center justify-between max-md:hidden">
               <Link
                 href="/"
                 variant={pathname === '/' ? 'link' : 'default'}
-                className="max-md:text-2xl"
               >
                 Home
               </Link>
-              {!isInitializing && !isAuthenticated && (
+              {isReady && !isAuthenticated && (
                 <Link
                   href="/about-us"
                   variant={pathname === '/about-us' ? 'link' : 'default'}
-                  className="max-md:text-2xl"
                 >
                   About
                 </Link>
               )}
-              {!isInitializing && !isAuthenticated && (
+              {isReady && !isAuthenticated && (
                 <Link
                   href="/subscriptions"
                   variant={
                     pathname.includes('/subscriptions') ? 'link' : 'default'
                   }
-                  className="max-md:text-2xl"
                 >
                   Pricing
                 </Link>
               )}
-              {!isInitializing && isAuthenticated && (
-                <Link
-                  href="/stream"
-                  variant={pathname === '/stream' ? 'link' : 'default'}
-                  className="max-md:hidden max-md:text-2xl"
-                >
-                  Stream
-                </Link>
-              )}
+              <Link
+                href="/stream"
+                variant={pathname === '/stream' ? 'link' : 'default'}
+              >
+                Stream
+              </Link>
               <Link
                 href="/organizations"
                 variant={
-                  pathname.startsWith('/organizations') ? 'link' : 'default'
-                }
-                className={
-                  isAuthenticated
-                    ? 'max-md:hidden max-md:text-2xl'
-                    : 'max-md:text-2xl'
+                  pathname.startsWith('/organizations')
+                    ? 'link'
+                    : 'default'
                 }
               >
                 Organizations
               </Link>
-              {!isInitializing && !isAuthenticated && (
-                <Link
-                  href="/stream"
-                  variant={pathname === '/stream' ? 'link' : 'default'}
-                  className="max-md:text-2xl"
-                >
-                  Stream
-                </Link>
+              {isReady && !isAuthenticated && (
+                <>
+                  <Link
+                    href="/faq"
+                    variant={pathname === '/faq' ? 'link' : 'default'}
+                  >
+                    FAQ
+                  </Link>
+                  <Link
+                    href="/contact"
+                    variant={pathname === '/contact' ? 'link' : 'default'}
+                  >
+                    Contact
+                  </Link>
+                </>
               )}
-              {!isInitializing && !isAuthenticated && (
-                <Link
-                  href="/faq"
-                  variant={pathname === '/faq' ? 'link' : 'default'}
-                  className="max-md:text-2xl"
-                >
-                  FAQ
-                </Link>
-              )}
-              {!isInitializing && !isAuthenticated && (
-                <Link
-                  href="/contact"
-                  variant={pathname === '/contact' ? 'link' : 'default'}
-                  className="max-md:text-2xl"
-                >
-                  Contact
-                </Link>
-              )}
-              {!isInitializing && isAuthenticated && !hasOrganization && (
+              {isReady && isAuthenticated && !hasOrganization && (
                 <Link
                   href="/subscriptions"
                   variant={
-                    pathname.includes('/subscriptions') ? 'link' : 'default'
+                    pathname.includes('/subscriptions')
+                      ? 'link'
+                      : 'default'
                   }
-                  className="max-md:hidden max-md:text-2xl"
                 >
                   Subscriptions
                 </Link>
               )}
-              <Button
-                variant="default"
-                className="absolute top-4 right-4 md:hidden"
-                onClick={() => setShowMenu(!showMenu)}
-              >
-                <MdClose className="size-6" />
-              </Button>
             </div>
-            {isAuthenticated ? (
-              <div className="flex items-center gap-2">
+
+            {/* Mobile menu overlay — only for unauthenticated users */}
+            {!(isReady && isAuthenticated) && (
+              <div
+                data-state={showMenu ? 'open' : 'closed'}
+                className="max-md:bg-gray-1 max-md:fixed max-md:inset-0 max-md:z-40 max-md:flex max-md:flex-col max-md:items-center max-md:justify-center max-md:gap-2 max-md:data-[state=closed]:hidden md:hidden"
+              >
+                <Link
+                  href="/"
+                  variant={pathname === '/' ? 'link' : 'default'}
+                  className="text-2xl"
+                >
+                  Home
+                </Link>
+                {isReady && (
+                  <Link
+                    href="/about-us"
+                    variant={pathname === '/about-us' ? 'link' : 'default'}
+                    className="text-2xl"
+                  >
+                    About
+                  </Link>
+                )}
+                {isReady && (
+                  <Link
+                    href="/subscriptions"
+                    variant={
+                      pathname.includes('/subscriptions')
+                        ? 'link'
+                        : 'default'
+                    }
+                    className="text-2xl"
+                  >
+                    Pricing
+                  </Link>
+                )}
+                <Link
+                  href="/organizations"
+                  variant={
+                    pathname.startsWith('/organizations')
+                      ? 'link'
+                      : 'default'
+                  }
+                  className="text-2xl"
+                >
+                  Organizations
+                </Link>
+                <Link
+                  href="/stream"
+                  variant={pathname === '/stream' ? 'link' : 'default'}
+                  className="text-2xl"
+                >
+                  Stream
+                </Link>
+                {isReady && (
+                  <>
+                    <Link
+                      href="/faq"
+                      variant={pathname === '/faq' ? 'link' : 'default'}
+                      className="text-2xl"
+                    >
+                      FAQ
+                    </Link>
+                    <Link
+                      href="/contact"
+                      variant={pathname === '/contact' ? 'link' : 'default'}
+                      className="text-2xl"
+                    >
+                      Contact
+                    </Link>
+                  </>
+                )}
+                <Button
+                  variant="default"
+                  className="absolute top-4 right-4"
+                  onClick={() => setShowMenu(!showMenu)}
+                >
+                  <MdClose className="size-6" />
+                </Button>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              {isReady && isAuthenticated ? (
                 <DropdownRoot
                   customTrigger={
                     <button
@@ -195,7 +250,9 @@ export function AppBar() {
                   {!hasOrganization && (
                     <div className="md:hidden">
                       <DropdownItem asChild>
-                        <NextLink href="/subscriptions">Subscriptions</NextLink>
+                        <NextLink href="/subscriptions">
+                          Subscriptions
+                        </NextLink>
                       </DropdownItem>
                     </div>
                   )}
@@ -203,12 +260,14 @@ export function AppBar() {
                     Log out
                   </DropdownItem>
                 </DropdownRoot>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
+              ) : isReady ? (
                 <Button onClick={login} variant="primary">
                   Log in
                 </Button>
+              ) : (
+                <div className="size-12" />
+              )}
+              {!(isReady && isAuthenticated) && (
                 <Button
                   variant="default"
                   className="md:hidden"
@@ -217,8 +276,8 @@ export function AppBar() {
                 >
                   <MdMenu className="size-6" />
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </Box>
         </div>
       </nav>
