@@ -1,10 +1,11 @@
 'use client'
 
 import { BuySubscriptionTable } from '@/components/buy-subscription-table'
+import { Button } from '@/components/ui/button'
 import { useChain } from '@/contexts/chain'
 
 export default function SubscriptionsPage() {
-  const { isAuthenticated } = useChain()
+  const { isAuthenticated, login } = useChain()
 
   return (
     <section className="max-w-container-lg relative mx-auto px-4 py-16">
@@ -22,6 +23,11 @@ export default function SubscriptionsPage() {
             ? 'Sign in with your wallet and buy a package to start using it immediately'
             : 'Sign in with your wallet to purchase a subscription'}
         </p>
+        {!isAuthenticated && (
+          <Button onClick={login} variant="primary" size="lg">
+            Log in to subscribe
+          </Button>
+        )}
       </header>
       <BuySubscriptionTable />
     </section>
