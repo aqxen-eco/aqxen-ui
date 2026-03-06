@@ -32,7 +32,7 @@ export function DropdownRoot({
   const [open, setOpen] = useState(false)
 
   return (
-    <Root open={open} onOpenChange={setOpen}>
+    <Root open={open} onOpenChange={setOpen} modal={false}>
       {customTrigger && <Trigger asChild>{customTrigger}</Trigger>}
       {label && (
         <Trigger asChild>

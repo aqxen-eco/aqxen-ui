@@ -2,6 +2,13 @@ import '@/globals.css'
 
 import type { Metadata } from 'next'
 import { DM_Sans } from 'next/font/google'
+import { ToastContainer } from 'react-toastify'
+
+import { AppBar } from '@/components/app-bar'
+import { Footer } from '@/components/footer'
+import { ChainProvider } from '@/contexts/chain'
+import { OrganizationProvider } from '@/contexts/organization'
+import { QueryProvider } from '@/contexts/query'
 
 const dmSans = DM_Sans({
   weight: ['400', '500'],
@@ -22,7 +29,16 @@ export default function HomeLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.className} bg-black text-white antialiased`}>
-        {children}
+        <QueryProvider>
+          <ChainProvider>
+            <OrganizationProvider>
+              <AppBar />
+              {children}
+              <Footer />
+              <ToastContainer position="bottom-center" theme="dark" />
+            </OrganizationProvider>
+          </ChainProvider>
+        </QueryProvider>
       </body>
     </html>
   )
