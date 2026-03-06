@@ -1,0 +1,85 @@
+name: Deploy Aqxen - Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run ESLint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_PINATA_GATEWAY: ${{ vars.NEXT_PUBLIC_PINATA_GATEWAY }}
+          NEXT_PUBLIC_NETWORK: ${{ vars.NEXT_PUBLIC_NETWORK }}
+
+      - name: Archive build
+        run: tar -czf build.tar.gz --exclude=.git --exclude=node_modules --exclude=build.tar.gz .[!.]* *
+
+      - name: Transfer build to host
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: 'build.tar.gz'
+          target: ${{ vars.DEPLOY_FOLDER }}
+          overwrite: true
+
+      - name: Deploy build and run migrations
+        uses: appleboy/ssh-action@v0.1.7
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          PINATA_JWT: ${{ secrets.PINATA_JWT }}
+          NEXT_PUBLIC_PINATA_GATEWAY: ${{ vars.NEXT_PUBLIC_PINATA_GATEWAY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ vars.RESEND_FROM_EMAIL }}
+          RESEND_TO_EMAIL: ${{ vars.RESEND_TO_EMAIL }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DATABASE_URL,SESSION_SECRET,PINATA_JWT,NEXT_PUBLIC_PINATA_GATEWAY,RESEND_API_KEY,RESEND_FROM_EMAIL,RESEND_TO_EMAIL
+          script_stop: true
+          script: |
+            cd ${{ vars.DEPLOY_FOLDER }}
+            tar -xzf build.tar.gz
+            export PATH="$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node/)/bin:$PATH"
+            pnpm install --frozen-lockfile
+            echo "DATABASE_URL='${DATABASE_URL}'" > .env
+            echo "SESSION_SECRET='${SESSION_SECRET}'" >> .env
+            echo "PINATA_JWT='${PINATA_JWT}'" >> .env
+            echo "NEXT_PUBLIC_PINATA_GATEWAY='${NEXT_PUBLIC_PINATA_GATEWAY}'" >> .env
+            echo "RESEND_API_KEY='${RESEND_API_KEY}'" >> .env
+            echo "RESEND_FROM_EMAIL='${RESEND_FROM_EMAIL}'" >> .env
+            echo "RESEND_TO_EMAIL='${RESEND_TO_EMAIL}'" >> .env
+            pnpm prisma migrate deploy
+            pm2 restart aqxen || pm2 start pnpm --name aqxen -- start
