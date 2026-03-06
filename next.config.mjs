@@ -25,7 +25,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://*.mypinata.cloud https://*.pinata.cloud",
               "font-src 'self'",
-              "connect-src 'self' https://jungle.eosusa.io https://*.pinata.cloud https://anchor.greymass.com https://uploads.pinata.cloud wss://anchor.greymass.com wss://cb.anchor.link",
+              "connect-src 'self' https://jungle.eosusa.io https://jungle4.greymass.com https://*.pinata.cloud https://anchor.greymass.com https://uploads.pinata.cloud wss://anchor.greymass.com wss://cb.anchor.link",
               "frame-src 'none'",
             ].join('; '),
           },
