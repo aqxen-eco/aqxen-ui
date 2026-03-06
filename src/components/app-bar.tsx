@@ -3,7 +3,7 @@
 import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { MdClose } from 'react-icons/md'
+import { MdClose, MdMenu } from 'react-icons/md'
 
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
@@ -47,13 +47,6 @@ export function AppBar() {
               <span className="truncate">AqXen</span>
             </NextLink>
 
-            <Button
-              variant="default"
-              className="md:hidden"
-              onClick={() => setShowMenu(!showMenu)}
-            >
-              Menu
-            </Button>
             <div
               data-state={showMenu ? 'open' : 'closed'}
               className="max-md:bg-gray-1 flex items-center justify-between max-md:fixed max-md:inset-0 max-md:z-40 max-md:flex-col max-md:justify-center max-md:gap-2 data-[state=closed]:max-md:hidden"
@@ -89,7 +82,7 @@ export function AppBar() {
                 <Link
                   href="/stream"
                   variant={pathname === '/stream' ? 'link' : 'default'}
-                  className="max-md:text-2xl"
+                  className="max-md:hidden max-md:text-2xl"
                 >
                   Stream
                 </Link>
@@ -99,7 +92,11 @@ export function AppBar() {
                 variant={
                   pathname.startsWith('/organizations') ? 'link' : 'default'
                 }
-                className="max-md:text-2xl"
+                className={
+                  isAuthenticated
+                    ? 'max-md:hidden max-md:text-2xl'
+                    : 'max-md:text-2xl'
+                }
               >
                 Organizations
               </Link>
@@ -136,7 +133,7 @@ export function AppBar() {
                   variant={
                     pathname.includes('/subscriptions') ? 'link' : 'default'
                   }
-                  className="max-md:text-2xl"
+                  className="max-md:hidden max-md:text-2xl"
                 >
                   Subscriptions
                 </Link>
@@ -172,6 +169,19 @@ export function AppBar() {
                   }
                   align="end"
                 >
+                  <div className="space-y-2 md:hidden">
+                    <DropdownItem asChild>
+                      <NextLink href="/">Home</NextLink>
+                    </DropdownItem>
+                    <DropdownItem asChild>
+                      <NextLink href="/stream">Stream</NextLink>
+                    </DropdownItem>
+                    <DropdownItem asChild>
+                      <NextLink href="/organizations">
+                        Organizations
+                      </NextLink>
+                    </DropdownItem>
+                  </div>
                   <DropdownItem asChild>
                     <NextLink href={`/profile/${actor}`}>Profile</NextLink>
                   </DropdownItem>
@@ -182,15 +192,32 @@ export function AppBar() {
                       </NextLink>
                     </DropdownItem>
                   )}
+                  {!hasOrganization && (
+                    <div className="md:hidden">
+                      <DropdownItem asChild>
+                        <NextLink href="/subscriptions">Subscriptions</NextLink>
+                      </DropdownItem>
+                    </div>
+                  )}
                   <DropdownItem onClick={logoutAndGoToHome}>
                     Log out
                   </DropdownItem>
                 </DropdownRoot>
               </div>
             ) : (
-              <Button onClick={login} variant="primary">
-                Log in
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button onClick={login} variant="primary">
+                  Log in
+                </Button>
+                <Button
+                  variant="default"
+                  className="md:hidden"
+                  onClick={() => setShowMenu(!showMenu)}
+                  square
+                >
+                  <MdMenu className="size-6" />
+                </Button>
+              </div>
             )}
           </Box>
         </div>

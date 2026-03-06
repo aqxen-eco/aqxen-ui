@@ -433,7 +433,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                 <label>
                   <textarea
                     {...register('content')}
-                    placeholder="What do you consider is worth recognition?"
+                    placeholder="Share what you've accomplished that's contributed value to your community."
                     className="text-body-1 placeholder:text-gray-3 mb-6 block min-h-20 w-full resize-none outline-none"
                     rows={4}
                   />

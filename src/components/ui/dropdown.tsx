@@ -52,7 +52,7 @@ export function DropdownRoot({
             <Content
               forceMount
               align={align}
-              className="border-gray-2 bg-gray-1 z-40 mt-1 max-h-72 w-64 space-y-2 overflow-y-auto rounded-2xl border px-2 py-4"
+              className="border-gray-2 bg-gray-1 z-40 mt-1 w-64 space-y-2 rounded-2xl border px-2 py-4"
               asChild
             >
               <motion.div
