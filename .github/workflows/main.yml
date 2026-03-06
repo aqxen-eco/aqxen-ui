@@ -65,11 +65,13 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          PINATA_JWT: ${{ secrets.PINATA_JWT }}
+          NEXT_PUBLIC_PINATA_GATEWAY: ${{ vars.NEXT_PUBLIC_PINATA_GATEWAY }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DATABASE_URL,SESSION_SECRET
+          envs: DATABASE_URL,SESSION_SECRET,PINATA_JWT,NEXT_PUBLIC_PINATA_GATEWAY
           script: |
             cd ${{ vars.DEPLOY_FOLDER }}
             tar -xzf build.tar.gz
@@ -77,6 +79,8 @@ jobs:
             pnpm install --frozen-lockfile
             echo "DATABASE_URL='${DATABASE_URL}'" > .env
             echo "SESSION_SECRET='${SESSION_SECRET}'" >> .env
+            echo "PINATA_JWT='${PINATA_JWT}'" >> .env
+            echo "NEXT_PUBLIC_PINATA_GATEWAY='${NEXT_PUBLIC_PINATA_GATEWAY}'" >> .env
             export $(grep DATABASE_URL .env | xargs)
             pnpm prisma migrate deploy
             systemctl restart upscale
