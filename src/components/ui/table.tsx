@@ -2,7 +2,7 @@ import { twMerge } from 'tailwind-merge'
 
 export function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full overflow-x-auto overflow-y-clip">
       <table className={twMerge('w-full', className)} {...props} />
     </div>
   )
