@@ -74,6 +74,8 @@ jobs:
             tar -xzf build.tar.gz
             export PATH="$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node/)/bin:$PATH"
             pnpm install --frozen-lockfile
+            export DATABASE_URL="${DATABASE_URL}"
+            pnpm prisma generate
             echo "DATABASE_URL='${DATABASE_URL}'" > .env
             echo "SESSION_SECRET='${SESSION_SECRET}'" >> .env
             echo "PINATA_JWT='${PINATA_JWT}'" >> .env
