@@ -33,7 +33,7 @@ jobs:
         shell: bash -l {0}
         run: pnpm prisma generate
         env:
-          DATABASE_URL: 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run ESLint
         shell: bash -l {0}
@@ -43,7 +43,7 @@ jobs:
         shell: bash -l {0}
         run: pnpm build
         env:
-          DATABASE_URL: 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NEXT_PUBLIC_PINATA_GATEWAY: ${{ vars.NEXT_PUBLIC_PINATA_GATEWAY }}
           NEXT_PUBLIC_NETWORK: ${{ vars.NEXT_PUBLIC_NETWORK }}
 
@@ -72,10 +72,12 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: DATABASE_URL,SESSION_SECRET,PINATA_JWT,NEXT_PUBLIC_PINATA_GATEWAY
+          script_stop: true
           script: |
             cd ${{ vars.DEPLOY_FOLDER }}
             tar -xzf build.tar.gz
             export PATH="/root/.local/share/pnpm:$PATH"
+            export CI=true
             pnpm install --frozen-lockfile
             echo "DATABASE_URL='${DATABASE_URL}'" > .env
             echo "SESSION_SECRET='${SESSION_SECRET}'" >> .env
@@ -83,6 +85,6 @@ jobs:
             echo "NEXT_PUBLIC_PINATA_GATEWAY='${NEXT_PUBLIC_PINATA_GATEWAY}'" >> .env
             export $(grep DATABASE_URL .env | xargs)
             pnpm prisma migrate deploy
-            systemctl restart upscale
-            systemctl restart nginx
-            systemctl status upscale --no-pager
+            sudo systemctl restart upscale
+            sudo systemctl restart nginx
+            sudo systemctl status upscale --no-pager
