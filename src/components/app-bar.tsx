@@ -2,7 +2,7 @@
 
 import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MdClose, MdMenu } from 'react-icons/md'
 
 import { Avatar } from '@/components/ui/avatar'
@@ -22,6 +22,10 @@ export function AppBar() {
   const { data: userProfile } = useGetUserProfile(actor ?? null)
   const pathname = usePathname()
   const router = useRouter()
+
+  useEffect(() => {
+    setShowMenu(false)
+  }, [pathname])
 
   const isReady = !isInitializing && (!isAuthenticated || !isOrgPending)
 
