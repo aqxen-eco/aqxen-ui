@@ -1,6 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
 import { type CreateOrganizationProps } from '@/api/model/organization'
-import { Contract } from '@/constants'
+import { COINGECKO_ID, Contract, TOKEN_CONTRACT, TOKEN_SYMBOL } from '@/constants'
 
 function formatTimePointSec(date: Date): string {
   return date.toISOString().replace(/\.\d{3}Z$/, '')
@@ -15,23 +15,23 @@ export async function createOrganization({
   const organizationName = session.actor.toString()
   const organizationCode = organizationName.slice(0, 4)
 
-  const eosValue = await fetch(
-    'https://api.coingecko.com/api/v3/simple/price?ids=eos&vs_currencies=usd'
+  const priceRes = await fetch(
+    `https://api.coingecko.com/api/v3/simple/price?ids=${COINGECKO_ID}&vs_currencies=usd`
   )
-  const data = await eosValue.json()
-  const eosPrice = data.eos.usd
+  const data = await priceRes.json()
+  const tokenPrice = data[COINGECKO_ID].usd
 
   const orgCreationFee = `${(
-    Number(org_creation_fee.replace('USD', '').trim()) / eosPrice
-  ).toFixed(4)} EOS`
+    Number(org_creation_fee.replace('USD', '').trim()) / tokenPrice
+  ).toFixed(4)} ${TOKEN_SYMBOL}`
 
   const memberFee = `${(
-    Number(member_fee.replace('USD', '').trim()) / eosPrice
-  ).toFixed(4)} EOS`
+    Number(member_fee.replace('USD', '').trim()) / tokenPrice
+  ).toFixed(4)} ${TOKEN_SYMBOL}`
 
   await execute(session, [
     {
-      account: 'eosio.token',
+      account: TOKEN_CONTRACT,
       name: 'transfer',
       authorization: [session.permissionLevel],
       data: {
@@ -53,7 +53,7 @@ export async function createOrganization({
       },
     },
     {
-      account: 'eosio.token',
+      account: TOKEN_CONTRACT,
       name: 'transfer',
       authorization: [session.permissionLevel],
       data: {

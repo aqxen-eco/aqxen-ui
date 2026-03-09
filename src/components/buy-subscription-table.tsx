@@ -51,7 +51,10 @@ export function BuySubscriptionTable() {
     org_creation_fee: string
     member_fee: string
   }) {
-    if (!currentCycleId) return
+    if (!currentCycleId) {
+      toast.error('No active billing cycle found')
+      return
+    }
 
     try {
       if (hasOrganization) {
