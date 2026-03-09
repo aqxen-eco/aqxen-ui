@@ -10,6 +10,13 @@ export const CHAIN_API_URL =
     ? 'https://eos.eosusa.io/'
     : 'https://jungle.eosusa.io/'
 
+export const TOKEN_CONTRACT =
+  NETWORK === 'mainnet' ? 'core.vaulta' : 'eosio.token'
+
+export const TOKEN_SYMBOL = NETWORK === 'mainnet' ? 'A' : 'EOS'
+
+export const COINGECKO_ID = NETWORK === 'mainnet' ? 'vaulta' : 'eos'
+
 export const IPFS_IMAGE_SOURCE = `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY}/ipfs/`
 
 export const I64 = 'i64'
