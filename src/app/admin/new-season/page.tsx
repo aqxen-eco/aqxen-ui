@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import z from 'zod'
@@ -18,10 +19,12 @@ import { InputBadges } from '@/components/ui/input-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
 
 const newSeasonSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   symbol: z.string().min(3, 'Symbol is required'),
+  beams: z.array(z.string()).nullish(),
   badges: z.string().array().min(1, 'Badges is required'),
   stats: z.string().array().min(1, 'Stats badges is required'),
 })
@@ -44,26 +47,99 @@ export default function NewSeasonPage() {
     control,
     register,
     handleSubmit,
+    watch,
+    getValues,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<NewSeasonSchema>({
     resolver: zodResolver(newSeasonSchema),
   })
 
-  async function onSubmit({ name, symbol, badges, stats }: NewSeasonSchema) {
+  const prevTrackingRef = useRef<string[]>([])
+
+  const getTrackingSymbols = useCallback(
+    (beams: string[]) => {
+      const orgBadgeSymbols = (badgesQuery.data?.rows ?? []).map(
+        (b) => b.badge_symbol
+      )
+      const allExpanded = getBeamWithTrackingBadges(beams, orgBadgeSymbols)
+      return allExpanded.filter((s) => !beams.includes(s))
+    },
+    [badgesQuery.data]
+  )
+
+  const beamsValue = watch('beams')
+
+  useEffect(() => {
+    const beams = beamsValue ?? []
+    const prevTracking = prevTrackingRef.current
+    const newTracking = getTrackingSymbols(beams)
+
+    const badges = getValues('badges') ?? []
+    const stats = getValues('stats') ?? []
+
+    const removedTracking = prevTracking.filter(
+      (s) => !newTracking.includes(s)
+    )
+    const addedTracking = newTracking.filter(
+      (s) => !prevTracking.includes(s)
+    )
+
+    const updatedBadges = [
+      ...badges.filter((s) => !removedTracking.includes(s)),
+      ...addedTracking.filter((s) => !badges.includes(s)),
+    ]
+    const updatedStats = [
+      ...stats.filter((s) => !removedTracking.includes(s)),
+      ...addedTracking.filter((s) => !stats.includes(s)),
+    ]
+
+    if (
+      updatedBadges.length !== badges.length ||
+      updatedBadges.some((s, i) => s !== badges[i])
+    ) {
+      setValue('badges', updatedBadges)
+    }
+    if (
+      updatedStats.length !== stats.length ||
+      updatedStats.some((s, i) => s !== stats[i])
+    ) {
+      setValue('stats', updatedStats)
+    }
+
+    prevTrackingRef.current = newTracking
+  }, [beamsValue, getTrackingSymbols, getValues, setValue])
+
+  async function onSubmit({
+    name,
+    symbol,
+    beams,
+    badges,
+    stats,
+  }: NewSeasonSchema) {
     try {
+      const orgBadgeSymbols = (badgesQuery.data?.rows ?? []).map(
+        (b) => b.badge_symbol
+      )
+      const beamBadgeSymbols = beams?.length
+        ? getBeamWithTrackingBadges(beams, orgBadgeSymbols)
+        : []
+      const allBadgeSymbols = [...badges, ...beamBadgeSymbols]
+
       await createSeason({
         session: session!,
         agg_symbol: addOrganizationSymbol(symbol),
-        badge_symbols: badges,
+        badge_symbols: allBadgeSymbols,
         stats_badge_symbols: stats,
         ipfs_image: '',
         display_name: name,
         description: '',
       })
+      const aggSymbol = `0,${addOrganizationSymbol(symbol)}`
       toast.success('Season created successfully')
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await queryClient.refetchQueries({ queryKey: ['seasons', orgName] })
-      router.push('/admin/seasons')
+      router.push(`/admin/seasons/${aggSymbol}`)
     } catch {
       toast.error('Failed to create season')
     }
@@ -112,6 +188,21 @@ export default function NewSeasonPage() {
                 {...field}
               />
               <ErrorMessage>{errors['symbol']?.message}</ErrorMessage>
+            </Field>
+          )}
+        />
+        <Controller
+          name="beams"
+          control={control}
+          render={({ field }) => (
+            <Field>
+              <Label>Beams</Label>
+              <InputBadges
+                value={field.value}
+                onChange={field.onChange}
+                beamsOnly
+              />
+              <ErrorMessage>{errors['beams']?.message}</ErrorMessage>
             </Field>
           )}
         />

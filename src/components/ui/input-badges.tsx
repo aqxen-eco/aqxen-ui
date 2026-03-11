@@ -105,10 +105,10 @@ export function InputBadges({
                 {badge.onchain_lookup_data.user.display_name}
               </span>
               {!hideRemoveBadgeButton && (
-                <Button
-                  size="md"
-                  variant="link"
-                  square
+                <span
+                  role="button"
+                  tabIndex={0}
+                  className="inline-flex cursor-pointer items-center justify-center rounded-full p-1"
                   onClick={(e) => {
                     e.stopPropagation()
                     const newValue = value.filter(
@@ -116,9 +116,18 @@ export function InputBadges({
                     )
                     onChange(newValue)
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation()
+                      const newValue = value.filter(
+                        (i) => i !== badgeSymbolSelected
+                      )
+                      onChange(newValue)
+                    }
+                  }}
                 >
                   <MdClose className="size-4" />
-                </Button>
+                </span>
               )}
             </div>
           )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueries } from '@tanstack/react-query'
+import Link from 'next/link'
 import { toast } from 'react-toastify'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
@@ -121,10 +122,10 @@ export default function BadgeAutomationPage() {
         <TableRow>
           <TableHead className="w-10">Sym</TableHead>
           <TableHead>Name</TableHead>
-          <TableHead className="w-40">Emitter criteria</TableHead>
-          <TableHead className="w-40">Emit badges</TableHead>
+          <TableHead>Emitter criteria</TableHead>
+          <TableHead>Emit badges</TableHead>
           <TableHead className="w-32">Status</TableHead>
-          <TableHead className="w-22" />
+          <TableHead className="w-40" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -140,36 +141,52 @@ export default function BadgeAutomationPage() {
               {row.cyclic && <Tag>Cyclic</Tag>}
             </TableCell>
             <TableCell>
-              <div className="flex items-center gap-4">
+              <div className="space-y-1">
                 {row.emitter_criteria.map((badge) => (
-                  <Tooltip
+                  <div
                     key={badge.badge_symbol}
-                    content={`${badge.quantity} ${badge.onchain_lookup_data.user.display_name}`}
+                    className="flex items-center gap-2"
                   >
-                    <div>
-                      <BadgeImage
-                        src={badge.offchain_lookup_data.user.ipfs_image}
-                        size="xs"
-                      />
-                    </div>
-                  </Tooltip>
+                    <BadgeImage
+                      src={badge.offchain_lookup_data.user.ipfs_image}
+                      size="xs"
+                    />
+                    <span className="text-body-2 text-gray-3">
+                      {badge.quantity}
+                    </span>
+                    <Tooltip
+                      content={badge.onchain_lookup_data.user.display_name}
+                    >
+                      <span className="text-body-2 text-white">
+                        {badge.badge_symbol.split(',')[1]}
+                      </span>
+                    </Tooltip>
+                  </div>
                 ))}
               </div>
             </TableCell>
             <TableCell>
-              <div className="flex items-center gap-4">
+              <div className="space-y-1">
                 {row.emit_assets.map((badge) => (
-                  <Tooltip
+                  <div
                     key={badge.badge_symbol}
-                    content={`${badge.quantity} ${badge.onchain_lookup_data.user.display_name}`}
+                    className="flex items-center gap-2"
                   >
-                    <div>
-                      <BadgeImage
-                        src={badge.offchain_lookup_data.user.ipfs_image}
-                        size="xs"
-                      />
-                    </div>
-                  </Tooltip>
+                    <BadgeImage
+                      src={badge.offchain_lookup_data.user.ipfs_image}
+                      size="xs"
+                    />
+                    <span className="text-body-2 text-gray-3">
+                      {badge.quantity}
+                    </span>
+                    <Tooltip
+                      content={badge.onchain_lookup_data.user.display_name}
+                    >
+                      <span className="text-body-2 text-white">
+                        {badge.badge_symbol.split(',')[1]}
+                      </span>
+                    </Tooltip>
+                  </div>
                 ))}
               </div>
             </TableCell>
@@ -179,46 +196,61 @@ export default function BadgeAutomationPage() {
               {row.status === 'deactivate' && <Tag variant="red">Disabled</Tag>}
             </TableCell>
             <TableCell className="text-right">
-              {row.status === 'activate' && (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={async () => {
-                    try {
-                      await disableBadgeAutomation({
-                        session: session!,
-                        emission_symbol: row.emission_symbol,
-                      })
-                      toast.success('Automation rule disabled')
-                      setTimeout(() => badgeAutomationQuery.refetch(), 1000)
-                    } catch {
-                      toast.error('Failed to disable automation rule')
-                    }
-                  }}
-                >
-                  Disable
+              <div className="flex justify-end gap-2">
+                <Button asChild variant="secondary" size="md">
+                  <Link
+                    href={`/admin/new-badge-automation?edit=${encodeURIComponent(row.emission_symbol)}`}
+                  >
+                    Edit
+                  </Link>
                 </Button>
-              )}
-              {(row.status === 'init' || row.status === 'deactivate') && (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={async () => {
-                    try {
-                      await enableBadgeAutomation({
-                        session: session!,
-                        emission_symbol: row.emission_symbol,
-                      })
-                      toast.success('Automation rule enabled')
-                      setTimeout(() => badgeAutomationQuery.refetch(), 1000)
-                    } catch {
-                      toast.error('Failed to enable automation rule')
-                    }
-                  }}
-                >
-                  Enable
-                </Button>
-              )}
+                {row.status === 'activate' && (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={async () => {
+                      try {
+                        await disableBadgeAutomation({
+                          session: session!,
+                          emission_symbol: row.emission_symbol,
+                        })
+                        toast.success('Automation rule disabled')
+                        setTimeout(
+                          () => badgeAutomationQuery.refetch(),
+                          1000
+                        )
+                      } catch {
+                        toast.error('Failed to disable automation rule')
+                      }
+                    }}
+                  >
+                    Disable
+                  </Button>
+                )}
+                {(row.status === 'init' || row.status === 'deactivate') && (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={async () => {
+                      try {
+                        await enableBadgeAutomation({
+                          session: session!,
+                          emission_symbol: row.emission_symbol,
+                        })
+                        toast.success('Automation rule enabled')
+                        setTimeout(
+                          () => badgeAutomationQuery.refetch(),
+                          1000
+                        )
+                      } catch {
+                        toast.error('Failed to enable automation rule')
+                      }
+                    }}
+                  >
+                    Enable
+                  </Button>
+                )}
+              </div>
             </TableCell>
           </TableRow>
         ))}

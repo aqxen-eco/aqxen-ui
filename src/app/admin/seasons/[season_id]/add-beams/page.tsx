@@ -1,12 +1,13 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import z from 'zod'
 
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { addBadgeToSeason } from '@/api/chain/season/add-badge-to-season'
 import { addBadgeToSeries } from '@/api/chain/series/add-badge-to-series'
 import {
@@ -20,6 +21,7 @@ import { ErrorMessage, Field, Label } from '@/components/ui/field'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
 
 const addBeamsSchema = z.object({
   badges: z.string().array().min(1, 'Beams is required'),
@@ -37,6 +39,12 @@ export default function AddBeamsPage() {
 
   const { session } = useChain()
 
+  const badgesQuery = useQuery({
+    queryKey: ['badges', name],
+    queryFn: async () => await listBadge({ scope: name }),
+    enabled: !!name,
+  })
+
   const title = decodeURIComponent(params.season_id as string)
     .split(',')[1]
     .replace(symbol.toUpperCase(), '')
@@ -51,27 +59,35 @@ export default function AddBeamsPage() {
 
   async function onSubmit({ badges }: AddBeamsSchema) {
     try {
+      const orgBadgeSymbols = (badgesQuery.data?.rows ?? []).map(
+        (b) => b.badge_symbol
+      )
+      const allBadgeSymbols = getBeamWithTrackingBadges(
+        badges,
+        orgBadgeSymbols
+      )
+
       if (series) {
         await addBadgeToSeries({
           session: session!,
           agg_symbol: decodeURIComponent(params.season_id as string),
           seq_ids: [Number(series)],
-          badge_symbols: badges,
-        })
-        queryClient.invalidateQueries({
-          queryKey: ['seasons', params.season_id, name],
+          badge_symbols: allBadgeSymbols,
         })
       } else {
         await addBadgeToSeason({
           session: session!,
           agg_symbol: decodeURIComponent(params.season_id as string),
-          badge_symbols: badges,
-        })
-        queryClient.invalidateQueries({
-          queryKey: ['series', params.season_id],
+          badge_symbols: allBadgeSymbols,
         })
       }
       toast.success('Beam added successfully')
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['seasons'] }),
+        queryClient.invalidateQueries({ queryKey: ['series'] }),
+        queryClient.invalidateQueries({ queryKey: ['badges-status', name] }),
+      ])
       router.push(`/admin/seasons/${params.season_id}`)
     } catch {
       toast.error('Failed to add beam')

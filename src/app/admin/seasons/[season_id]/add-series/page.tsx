@@ -1,12 +1,14 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import z from 'zod'
 
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { addSeries } from '@/api/chain/series/add-series'
 import {
   HeaderAdmin,
@@ -21,9 +23,11 @@ import { Input } from '@/components/ui/input'
 import { InputBadges } from '@/components/ui/input-badges'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
 
 const addSeriesSchema = z.object({
   name: z.string().min(1, 'Name is required'),
+  beams: z.array(z.string()).nullish(),
   badges: z.array(z.string()).nullish(),
   start_right_away: z.boolean(),
 })
@@ -48,13 +52,19 @@ export default function AddSeriesPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const { session } = useChain()
-  const { symbol } = useOrganization()
+  const { name, symbol } = useOrganization()
   const router = useRouter()
   const queryClient = useQueryClient()
 
   const title = decodeURIComponent(params.season_id as string)
     .split(',')[1]
     .replace(symbol.toUpperCase(), '')
+
+  const badgesQuery = useQuery({
+    queryKey: ['badges', name],
+    queryFn: async () => await listBadge({ scope: name }),
+    enabled: !!name,
+  })
 
   const lastSeriesId = searchParams.get('last-series-id')
   const nextSeries = nthNumber(lastSeriesId ? Number(lastSeriesId) + 1 : 1)
@@ -63,23 +73,87 @@ export default function AddSeriesPage() {
     control,
     register,
     handleSubmit,
+    watch,
+    getValues,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<AddSeriesSchema>({
     resolver: zodResolver(addSeriesSchema),
   })
 
-  async function onSubmit({ name, badges, start_right_away }: AddSeriesSchema) {
+  const prevTrackingRef = useRef<string[]>([])
+
+  const getTrackingSymbols = useCallback(
+    (beams: string[]) => {
+      const orgBadgeSymbols = (badgesQuery.data?.rows ?? []).map(
+        (b) => b.badge_symbol
+      )
+      const allExpanded = getBeamWithTrackingBadges(beams, orgBadgeSymbols)
+      return allExpanded.filter((s) => !beams.includes(s))
+    },
+    [badgesQuery.data]
+  )
+
+  const beamsValue = watch('beams')
+
+  useEffect(() => {
+    const beams = beamsValue ?? []
+    const prevTracking = prevTrackingRef.current
+    const newTracking = getTrackingSymbols(beams)
+
+    const badges = getValues('badges') ?? []
+
+    const removedTracking = prevTracking.filter(
+      (s) => !newTracking.includes(s)
+    )
+    const addedTracking = newTracking.filter(
+      (s) => !prevTracking.includes(s)
+    )
+
+    const updatedBadges = [
+      ...badges.filter((s) => !removedTracking.includes(s)),
+      ...addedTracking.filter((s) => !badges.includes(s)),
+    ]
+
+    if (
+      updatedBadges.length !== badges.length ||
+      updatedBadges.some((s, i) => s !== badges[i])
+    ) {
+      setValue('badges', updatedBadges)
+    }
+
+    prevTrackingRef.current = newTracking
+  }, [beamsValue, getTrackingSymbols, getValues, setValue])
+
+  async function onSubmit({
+    name,
+    beams,
+    badges,
+    start_right_away,
+  }: AddSeriesSchema) {
     try {
+      const orgBadgeSymbols = (badgesQuery.data?.rows ?? []).map(
+        (b) => b.badge_symbol
+      )
+      const beamBadgeSymbols = beams?.length
+        ? getBeamWithTrackingBadges(beams, orgBadgeSymbols)
+        : []
+      const allBadgeSymbols = [...(badges ?? []), ...beamBadgeSymbols]
+
       await addSeries({
         session: session!,
         agg_symbol: decodeURIComponent(params.season_id as string),
-        badge_symbols: badges ?? [],
+        badge_symbols: allBadgeSymbols,
         sequence_description: name,
         start_right_away,
         seq_ids: [lastSeriesId ? Number(lastSeriesId) + 1 : 1],
       })
       toast.success('Series added successfully')
-      queryClient.invalidateQueries({ queryKey: ['series', params.season_id] })
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['series'] }),
+        queryClient.invalidateQueries({ queryKey: ['badges-status', name] }),
+      ])
       router.push(`/admin/seasons/${params.season_id}`)
     } catch {
       toast.error('Failed to add series')
@@ -113,6 +187,22 @@ export default function AddSeriesPage() {
               />
               <ErrorMessage>{errors['name']?.message}</ErrorMessage>
             </Field>
+
+            <Controller
+              name="beams"
+              control={control}
+              render={({ field }) => (
+                <Field>
+                  <Label>Additional Beams</Label>
+                  <InputBadges
+                    value={field.value}
+                    onChange={field.onChange}
+                    beamsOnly
+                  />
+                  <ErrorMessage>{errors['beams']?.message}</ErrorMessage>
+                </Field>
+              )}
+            />
 
             <Controller
               name="badges"

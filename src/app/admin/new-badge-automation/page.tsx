@@ -1,14 +1,18 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import z from 'zod'
 
+import { listBadge } from '@/api/chain/badge/list-badge'
 import { createBadgeAutomation } from '@/api/chain/badge-automation/create-badge-automation'
+import { disableBadgeAutomation } from '@/api/chain/badge-automation/disable-badge-automation'
+import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-automation'
 import { Badge } from '@/api/model/badge'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Box } from '@/components/ui/box'
@@ -50,12 +54,29 @@ const newBadgeAutomationSchema = z.object({
 type NewBadgeAutomationSchema = z.infer<typeof newBadgeAutomationSchema>
 
 export default function NewBadgeAutomationPage() {
-  const { symbol: organizationSymbol } = useOrganization()
+  const { symbol: organizationSymbol, name: orgName } = useOrganization()
   const router = useRouter()
-  const { session } = useChain()
+  const searchParams = useSearchParams()
+  const { actor, session } = useChain()
+
+  const editEmissionSymbol = searchParams.get('edit')
+  const isEditMode = !!editEmissionSymbol
 
   const [badgesCriteria, setBadgesCriteria] = useState<Badge[]>([])
   const [badgesEmitted, setBadgesEmitted] = useState<Badge[]>([])
+  const [hasLoadedEdit, setHasLoadedEdit] = useState(false)
+
+  const badgesQuery = useQuery({
+    queryKey: ['badges', orgName],
+    queryFn: async () => await listBadge({ scope: orgName }),
+    enabled: !!orgName,
+  })
+
+  const automationQuery = useQuery({
+    queryKey: ['badge-automation-edit', editEmissionSymbol],
+    queryFn: async () => await listBadgeAutomation({ scope: actor }),
+    enabled: isEditMode && !!actor,
+  })
 
   const badgesCriteriaValue = badgesCriteria.reduce(
     (acc: string[], crr) => [...acc, crr.badge_symbol],
@@ -71,10 +92,84 @@ export default function NewBadgeAutomationPage() {
     control,
     register,
     handleSubmit,
+    reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<NewBadgeAutomationSchema>({
     resolver: zodResolver(newBadgeAutomationSchema),
   })
+
+  useEffect(() => {
+    if (
+      !isEditMode ||
+      hasLoadedEdit ||
+      !automationQuery.data ||
+      !badgesQuery.data
+    )
+      return
+
+    const automation = automationQuery.data.rows.find(
+      (r) => r.emission_symbol === editEmissionSymbol
+    )
+    if (!automation) return
+
+    const allBadges = badgesQuery.data.rows
+    const symbolSuffix = editEmissionSymbol
+      .split(',')[1]
+      .replace(organizationSymbol.toUpperCase(), '')
+
+    const criteriaBadges: Badge[] = []
+    const criteriaValues: { badge_symbol: string; quantity: string }[] = []
+    for (const c of automation.emitter_criteria) {
+      const [quantity, sym] = c.value.split(' ')
+      const badge = allBadges.find(
+        (b) => b.badge_symbol.split(',')[1] === sym
+      )
+      if (badge) {
+        criteriaBadges.push(badge)
+        criteriaValues.push({
+          badge_symbol: badge.badge_symbol,
+          quantity,
+        })
+      }
+    }
+
+    const emittedBadges: Badge[] = []
+    const emittedValues: { badge_symbol: string; quantity: string }[] = []
+    for (const e of automation.emit_assets) {
+      const [quantity, sym] = e.emit_asset.split(' ')
+      const badge = allBadges.find(
+        (b) => b.badge_symbol.split(',')[1] === sym
+      )
+      if (badge) {
+        emittedBadges.push(badge)
+        emittedValues.push({
+          badge_symbol: badge.badge_symbol,
+          quantity,
+        })
+      }
+    }
+
+    setBadgesCriteria(criteriaBadges)
+    setBadgesEmitted(emittedBadges)
+    reset({
+      display_name: automation.onchain_lookup_data.user.name,
+      emission_symbol: symbolSuffix,
+      criteria: criteriaValues,
+      emitted: emittedValues,
+      cyclic: !!automation.cyclic,
+    })
+    setHasLoadedEdit(true)
+  }, [
+    isEditMode,
+    hasLoadedEdit,
+    automationQuery.data,
+    badgesQuery.data,
+    editEmissionSymbol,
+    organizationSymbol,
+    reset,
+    setValue,
+  ])
 
   async function onSubmit({
     display_name,
@@ -91,6 +186,18 @@ export default function NewBadgeAutomationPage() {
         (item) => `${item.quantity} ${item.badge_symbol.split(',')[1]}`
       )
 
+      if (isEditMode) {
+        const oldAutomation = automationQuery.data?.rows.find(
+          (r) => r.emission_symbol === editEmissionSymbol
+        )
+        if (oldAutomation && oldAutomation.status === 'activate') {
+          await disableBadgeAutomation({
+            session: session!,
+            emission_symbol: editEmissionSymbol,
+          })
+        }
+      }
+
       await createBadgeAutomation({
         session: session!,
         display_name,
@@ -102,10 +209,18 @@ export default function NewBadgeAutomationPage() {
         cyclic,
       })
 
-      toast.success('Automation rule created successfully')
+      toast.success(
+        isEditMode
+          ? 'Automation rule updated successfully'
+          : 'Automation rule created successfully'
+      )
       router.push('/admin/badges-automation')
     } catch {
-      toast.error('Failed to create automation rule')
+      toast.error(
+        isEditMode
+          ? 'Failed to update automation rule'
+          : 'Failed to create automation rule'
+      )
     }
   }
 
@@ -164,16 +279,19 @@ export default function NewBadgeAutomationPage() {
                   </span>
                 </div>
                 <div className="flex-1">
-                  <input
-                    type="text"
-                    className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
-                    placeholder="Quantity"
+                  <div className="flex items-center gap-2">
+                    <span className="text-body-2 text-gray-3">Qty</span>
+                    <input
+                      type="text"
+                      className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
+                      placeholder="Quantity"
                     {...register(`criteria.${badgeIndex}.quantity`, {
                       onChange: (event) => {
                         event.target.value = numberMask(event.target.value)
                       },
                     })}
-                  />
+                    />
+                  </div>
                 </div>
                 <div className="flex-none">
                   <Button
@@ -226,16 +344,19 @@ export default function NewBadgeAutomationPage() {
                   </span>
                 </div>
                 <div className="flex-1">
-                  <input
-                    type="text"
-                    className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
-                    placeholder="Quantity"
+                  <div className="flex items-center gap-2">
+                    <span className="text-body-2 text-gray-3">Qty</span>
+                    <input
+                      type="text"
+                      className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
+                      placeholder="Quantity"
                     {...register(`emitted.${badgeIndex}.quantity`, {
                       onChange: (event) => {
                         event.target.value = numberMask(event.target.value)
                       },
                     })}
-                  />
+                    />
+                  </div>
                 </div>
                 <div className="flex-none">
                   <Button
@@ -280,7 +401,13 @@ export default function NewBadgeAutomationPage() {
         </Field>
 
         <Button type="submit" variant="primary" size="lg">
-          {isSubmitting ? 'Creating...' : 'Create'}
+          {isSubmitting
+            ? isEditMode
+              ? 'Saving...'
+              : 'Creating...'
+            : isEditMode
+              ? 'Save'
+              : 'Create'}
         </Button>
       </form>
     </Box>
