@@ -6,7 +6,6 @@ import { useMemo, useState } from 'react'
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
 import type { Badge } from '@/api/model/badge'
-import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
 import {
   HeaderAdmin,
   HeaderAdminMenu,
@@ -28,6 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useOrganization } from '@/contexts/organization'
+import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
 
 export default function BadgesPage() {
   const { name, symbol, removeOrganizationSymbol } = useOrganization()
