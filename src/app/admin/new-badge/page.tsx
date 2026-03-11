@@ -35,7 +35,6 @@ export default function NewBadgePage() {
   const {
     name: orgName,
     symbol: organizationSymbol,
-    addOrganizationSymbol: _addOrganizationSymbol,
   } = useOrganization()
   const router = useRouter()
   const { session } = useChain()

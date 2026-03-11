@@ -9,8 +9,6 @@ import { BadgeImage } from '@/components/ui/badge-image'
 import { Combobox, ComboboxEmpty, ComboboxItem } from '@/components/ui/combobox'
 import { useOrganization } from '@/contexts/organization'
 
-import { Button } from './button'
-
 type InputBadgesProps = {
   value?: string[] | null
   onChange: (value: string[]) => void

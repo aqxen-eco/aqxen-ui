@@ -17,8 +17,6 @@ import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { setCycleLength } from '@/api/chain/beams/set-cycle-length'
 import { setCycleSupply } from '@/api/chain/beams/set-cycle-supply'
 import type { Badge } from '@/api/model/badge'
-import { ErrorMessage, Field, Label } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
 import {
   HeaderAdmin,
   HeaderAdminMenu,
@@ -28,6 +26,8 @@ import { TableSkeleton } from '@/components/skeleton'
 import { BadgeDetailModal } from '@/components/ui/badge-detail-modal'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Button } from '@/components/ui/button'
+import { ErrorMessage, Field, Label } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,

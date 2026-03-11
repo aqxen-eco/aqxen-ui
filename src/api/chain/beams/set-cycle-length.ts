@@ -1,6 +1,6 @@
 import { execute } from '@/api/chain/execute-action'
-import { Contract } from '@/constants'
 import type { Session } from '@/api/model'
+import { Contract } from '@/constants'
 
 type SetCycleLengthProps = {
   session: Session
