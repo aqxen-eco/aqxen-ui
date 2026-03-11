@@ -202,9 +202,25 @@ export default function SeasonPage() {
       []
     )
 
+    const allBadges = seriesBadge ?? []
+    const seriesBeams = allBadges.filter((badge) =>
+      beamTemplateNames.has(badge.onchain_lookup_data.user.display_name)
+    )
+    const seriesRegularBadges = allBadges.filter((badge) => {
+      const displayName = badge.onchain_lookup_data.user.display_name
+      if (beamTemplateNames.has(displayName)) return false
+      return !trackingMetrics.some((metric) => {
+        if (!displayName.endsWith(` ${metric}`)) return false
+        const beamName = displayName.slice(0, -(metric.length + 1))
+        return beamTemplateNames.has(beamName)
+      })
+    })
+
     return {
       ...series,
-      badges: seriesBadge ?? [],
+      badges: allBadges,
+      beams: seriesBeams,
+      regularBadges: seriesRegularBadges,
     }
   })
 
@@ -379,6 +395,7 @@ export default function SeasonPage() {
                     <TableRow>
                       <TableHead className="w-10 text-center">ID</TableHead>
                       <TableHead>Name</TableHead>
+                      <TableHead>Additional Beams</TableHead>
                       <TableHead>Additional Badges</TableHead>
                       <TableHead className="w-40">Status</TableHead>
                       <TableHead className="w-40" />
@@ -396,8 +413,44 @@ export default function SeasonPage() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-4">
-                              {seriesItem.badges.length > 0 &&
-                                seriesItem.badges.map((badge) => (
+                              {seriesItem.beams.length > 0 &&
+                                seriesItem.beams.map((badge) => (
+                                  <Tooltip
+                                    key={badge.badge_symbol}
+                                    content={
+                                      badge.onchain_lookup_data.user
+                                        .display_name
+                                    }
+                                  >
+                                    <div>
+                                      <BadgeImage
+                                        src={
+                                          badge.offchain_lookup_data.user
+                                            .ipfs_image
+                                        }
+                                        size="xs"
+                                      />
+                                    </div>
+                                  </Tooltip>
+                                ))}
+                              {seriesItem.seq_status !== 'end' && (
+                                <Tooltip content="Add beam">
+                                  <Link
+                                    href={`/admin/seasons/${season_id}/add-beams?series=${seriesItem.seq_id}`}
+                                    variant="secondary"
+                                    size="md"
+                                    square
+                                  >
+                                    <MdOutlineAdd className="size-6" />
+                                  </Link>
+                                </Tooltip>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-4">
+                              {seriesItem.regularBadges.length > 0 &&
+                                seriesItem.regularBadges.map((badge) => (
                                   <Tooltip
                                     key={badge.badge_symbol}
                                     content={

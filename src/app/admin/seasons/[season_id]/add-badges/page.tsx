@@ -58,20 +58,20 @@ export default function AddBadgesPage() {
           seq_ids: [Number(series)],
           badge_symbols: badges,
         })
-        queryClient.invalidateQueries({
-          queryKey: ['seasons', params.season_id, name],
-        })
       } else {
         await addBadgeToSeason({
           session: session!,
           agg_symbol: decodeURIComponent(params.season_id as string),
           badge_symbols: badges,
         })
-        queryClient.invalidateQueries({
-          queryKey: ['series', params.season_id],
-        })
       }
       toast.success('Badge added successfully')
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['seasons'] }),
+        queryClient.invalidateQueries({ queryKey: ['series'] }),
+        queryClient.invalidateQueries({ queryKey: ['badges-status', name] }),
+      ])
       router.push(`/admin/seasons/${params.season_id}`)
     } catch {
       toast.error('Failed to add badge')

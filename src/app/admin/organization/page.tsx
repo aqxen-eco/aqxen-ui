@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -33,7 +34,8 @@ const organizationSchema = z.object({
 type OrganizationSchema = z.infer<typeof organizationSchema>
 
 export default function OrganizationPage() {
-  const { session } = useChain()
+  const { session, actor } = useChain()
+  const queryClient = useQueryClient()
   const {
     name,
     symbol,
@@ -45,6 +47,7 @@ export default function OrganizationPage() {
   } = useOrganization()
 
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
 
   const {
@@ -103,6 +106,11 @@ export default function OrganizationPage() {
         purpose,
       })
       setPendingFile(null)
+      setPreview(null)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await queryClient.invalidateQueries({
+        queryKey: ['organization', actor],
+      })
       toast.success('Organization details saved successfully.')
     } catch {
       toast.error('Failed to save organization.')
@@ -140,7 +148,10 @@ export default function OrganizationPage() {
           <ImageUpload
             variant="avatar"
             value={logo}
-            onFileSelect={(file) => setPendingFile(file)}
+            onFileSelect={(file) => {
+              setPendingFile(file)
+              setPreview(URL.createObjectURL(file))
+            }}
             isUploading={isUploading}
           />
           <ErrorMessage>{errors['ipfs']?.message}</ErrorMessage>
@@ -195,7 +206,7 @@ export default function OrganizationPage() {
         <div
           className={`mx-auto w-fit rounded-full ${logo ? 'bg-white' : ''}`}
         >
-          <BadgeImage src={logo} />
+          <BadgeImage src={preview ?? logo} />
         </div>
         <p className="text-body-2 mt-2 text-center font-medium text-white">
           {displayName ?? name}

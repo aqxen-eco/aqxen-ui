@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react'
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
 import type { Badge } from '@/api/model/badge'
+import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
 import {
   HeaderAdmin,
   HeaderAdminMenu,
@@ -29,7 +30,7 @@ import {
 import { useOrganization } from '@/contexts/organization'
 
 export default function BadgesPage() {
-  const { name, removeOrganizationSymbol } = useOrganization()
+  const { name, symbol, removeOrganizationSymbol } = useOrganization()
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)
 
   const query = useQuery({
@@ -42,13 +43,21 @@ export default function BadgesPage() {
     queryFn: async () => await listBeamMetadata({ scope: name }),
   })
 
-  const filteredRows = useMemo(() => {
-    if (!query.data?.rows) return []
-    const beamSymbols = new Set(
-      beamsQuery.data?.map((b) => b.badge_symbol) ?? [],
-    )
-    return query.data.rows.filter((row) => !beamSymbols.has(row.badge_symbol))
-  }, [query.data, beamsQuery.data])
+  const beamAndTrackingSymbols = useMemo(() => {
+    if (!query.data?.rows) return new Set<string>()
+
+    const beamSymbols = beamsQuery.data?.map((b) => b.badge_symbol) ?? []
+    const allBadgeSymbols = query.data.rows.map((b) => b.badge_symbol)
+    const excluded = getBeamWithTrackingBadges(beamSymbols, allBadgeSymbols)
+
+    const orgPrefix = symbol.toUpperCase()
+    const reliabilitySuffixes = ['GRL', 'RRL', 'URL']
+    for (const suffix of reliabilitySuffixes) {
+      excluded.push(`0,${orgPrefix}${suffix}`)
+    }
+
+    return new Set(excluded)
+  }, [query.data, beamsQuery.data, symbol])
 
   return (
     <>
@@ -62,7 +71,7 @@ export default function BadgesPage() {
       </HeaderAdmin>
       <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 pb-8">
         {query.isLoading && <TableSkeleton />}
-        {query.isSuccess && filteredRows.length > 0 && (
+        {query.isSuccess && query.data.rows.length > 0 && (
           <Table>
             <TableHeader>
               <TableRow>
@@ -75,7 +84,7 @@ export default function BadgesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredRows.map((row) => (
+              {query.data.rows.map((row) => (
                 <TableRow key={row.badge_symbol}>
                   <TableCell className="text-gray-3">
                     {removeOrganizationSymbol(row.badge_symbol)}
@@ -107,13 +116,15 @@ export default function BadgesPage() {
                       >
                         Details
                       </Button>
-                      <Link
-                        href={`/admin/badges/${row.badge_symbol}/send-badge`}
-                        variant="secondary"
-                        size="md"
-                      >
-                        Send
-                      </Link>
+                      {!beamAndTrackingSymbols.has(row.badge_symbol) && (
+                        <Link
+                          href={`/admin/badges/${row.badge_symbol}/send-badge`}
+                          variant="secondary"
+                          size="md"
+                        >
+                          Send
+                        </Link>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
