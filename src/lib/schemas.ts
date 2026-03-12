@@ -45,7 +45,8 @@ export const processBeamGiveSchema = z.object({
   postId: z.string().uuid(),
   recipientActor: eosActorSchema,
   badgeSymbol: z.string().min(1).max(16),
-  amount: z.number().int().min(1).max(1000),
+  trackingDeltas: z.record(z.string(), z.number()),
+  deltaScore: z.number().int().min(0),
   orgAccount: eosActorSchema,
 })
 

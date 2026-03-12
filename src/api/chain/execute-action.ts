@@ -5,7 +5,7 @@ export async function execute(session: Session, actions: AnyAction[]) {
     return await session.transact(
       { actions },
       {
-        expireSeconds: 30,
+        expireSeconds: 300,
       }
     )
   } catch (e) {

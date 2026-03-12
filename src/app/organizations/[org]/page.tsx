@@ -19,6 +19,7 @@ import {
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
+import { postBeam } from '@/api/chain/beams/post-beam'
 import { announce } from '@/api/chain/organization/announce'
 import { cancelRequest } from '@/api/chain/organization/cancel-request'
 import { listMemberRequests } from '@/api/chain/organization/list-member-requests'
@@ -262,6 +263,16 @@ export default function OrganizationPage() {
         queryClient.invalidateQueries({ queryKey: ['posts'] })
         queryClient.invalidateQueries({ queryKey: ['announcements'] })
       } else {
+        if (session) {
+          await postBeam({
+            session,
+            org,
+            from: actor,
+            post_content: data.content,
+            parsed_content: data.content,
+          })
+        }
+
         await createPost({
           content: data.content,
           organization: org,

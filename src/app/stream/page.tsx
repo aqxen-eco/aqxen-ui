@@ -12,6 +12,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
+import { postBeam } from '@/api/chain/beams/post-beam'
 import { announce } from '@/api/chain/organization/announce'
 import {
   createAnnouncement,
@@ -250,6 +251,16 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
     }
 
     try {
+      if (session && data.organization) {
+        await postBeam({
+          session,
+          org: data.organization,
+          from: actor,
+          post_content: data.content,
+          parsed_content: data.content,
+        })
+      }
+
       await createPost({
         content: data.content,
         organization: data.organization,
