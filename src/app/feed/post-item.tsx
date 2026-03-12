@@ -20,8 +20,13 @@ import { toast } from 'react-toastify'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
 
+import { getRarityCounts } from '@/api/chain/badge/get-rarity-counts'
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
+import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-automation'
+import { giveBeam } from '@/api/chain/beams/give-beam'
+import { getTrackingBadgeSymbols } from '@/api/chain/beams/get-tracking-badge-symbols'
+import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
 import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { Avatar } from '@/components/ui/avatar'
 import { BadgeDetailModal } from '@/components/ui/badge-detail-modal'
@@ -43,15 +48,27 @@ type BeamBreakdownRow = { name: string; score: number }
 function buildBeamBreakdown(
   beamGives: BeamGiveEntry[] | undefined,
   badgeRows:
-    | { badge_symbol: string; onchain_lookup_data: { user: { display_name: string } } }[]
-    | undefined
+    | {
+        badge_symbol: string
+        onchain_lookup_data: {
+          user: { display_name: string }
+        }
+      }[]
+    | undefined,
 ): BeamBreakdownRow[] {
   if (!beamGives || beamGives.length === 0) return []
 
   const grouped = new Map<string, number>()
   for (const g of beamGives) {
-    const total = g.parAmount + g.upaEmitted + g.gpaEmitted + g.rpaEmitted
-    grouped.set(g.badgeSymbol, (grouped.get(g.badgeSymbol) ?? 0) + total)
+    // Use deltaScore for new records, fall back to old fields
+    const total =
+      g.deltaScore > 0
+        ? g.deltaScore
+        : g.parAmount + g.upaEmitted + g.gpaEmitted + g.rpaEmitted
+    grouped.set(
+      g.badgeSymbol,
+      (grouped.get(g.badgeSymbol) ?? 0) + total,
+    )
   }
 
   return Array.from(grouped.entries()).map(([symbol, score]) => {
@@ -68,6 +85,8 @@ type BeamGiveEntry = {
   upaEmitted: number
   gpaEmitted: number
   rpaEmitted: number
+  trackingDeltas: Record<string, number> | null
+  deltaScore: number
 }
 
 type PostItemProps = {
@@ -139,50 +158,76 @@ export function PostItem({
     queryFn: listBeamTemplates,
   })
 
+  const beamMetadataQuery = useQuery({
+    queryKey: ['beam-metadata', badgeScope],
+    queryFn: async () => await listBeamMetadata({ scope: badgeScope }),
+    enabled: !!badgeScope,
+  })
+
+  const automationsQuery = useQuery({
+    queryKey: ['badge-automations', badgeScope],
+    queryFn: async () => await listBadgeAutomation({ scope: badgeScope }),
+    enabled: !!badgeScope,
+  })
+
   const badgeRows = query.data?.rows
   const beamTemplates = beamTemplatesQuery.data
+  const beamMetadata = beamMetadataQuery.data
+  const automations = automationsQuery.data?.rows
 
   const { beamBadges, customBadges } = useMemo(() => {
     if (!badgeRows) {
       return { beamBadges: [], customBadges: [] }
     }
 
-    if (!beamTemplates) {
-      return { beamBadges: [], customBadges: badgeRows }
+    // Top-level beam badge symbols (from beam metadata)
+    const topLevelBeamSymbols = new Set(
+      (beamMetadata ?? []).map((m) => m.badge_symbol.split(',')[1])
+    )
+
+    // All beam-related symbols (top-level + tracking/automation badges)
+    const allBeamSymbols = new Set(topLevelBeamSymbols)
+
+    if (automations) {
+      for (const automation of automations) {
+        for (const criterion of automation.emitter_criteria) {
+          allBeamSymbols.add(criterion.key)
+        }
+        for (const asset of automation.emit_assets) {
+          const symbol = asset.emit_asset.split(' ')[1]
+          if (symbol) allBeamSymbols.add(symbol)
+        }
+      }
     }
 
-    const templateNames = new Set(
-      beamTemplates.map((t) => t.display_name)
-    )
-    const trackingMetrics = ['Giving', 'Rep', 'Uniqueness']
+    if (beamTemplates) {
+      const templateNames = new Set(
+        beamTemplates.map((t) => t.display_name)
+      )
+      for (const badge of badgeRows) {
+        const displayName =
+          badge.onchain_lookup_data.user.display_name
+        if (templateNames.has(displayName)) {
+          const name = badge.badge_symbol.split(',')[1]
+          if (name) allBeamSymbols.add(name)
+        }
+      }
+    }
 
     const beams: typeof badgeRows = []
     const custom: typeof badgeRows = []
 
     for (const badge of badgeRows) {
-      const displayName =
-        badge.onchain_lookup_data.user.display_name
-
-      if (templateNames.has(displayName)) {
+      const symbolName = badge.badge_symbol.split(',')[1]
+      if (symbolName && topLevelBeamSymbols.has(symbolName)) {
         beams.push(badge)
-      } else {
-        const isTracking = trackingMetrics.some((metric) => {
-          if (!displayName.endsWith(` ${metric}`)) return false
-          const beamName = displayName.slice(
-            0,
-            -(metric.length + 1)
-          )
-          return templateNames.has(beamName)
-        })
-
-        if (!isTracking) {
-          custom.push(badge)
-        }
+      } else if (!symbolName || !allBeamSymbols.has(symbolName)) {
+        custom.push(badge)
       }
     }
 
     return { beamBadges: beams, customBadges: custom }
-  }, [badgeRows, beamTemplates])
+  }, [badgeRows, beamTemplates, beamMetadata, automations])
 
   const { actor: currentActor, session } = useChain()
 
@@ -205,15 +250,74 @@ export function PostItem({
 
   async function onRecognize({ content, badges }: RecognizeSchema) {
     try {
-      const data = badges.map((badge) => ({
-        session: session!,
-        badge_symbol: badge,
-        amount: 1,
-        to: actor,
-        memo: content,
-      }))
+      const beamBadgeSymbols = new Set(
+        beamBadges.map((b) => b.badge_symbol),
+      )
+      const selectedBeamBadges = badges.filter((b) =>
+        beamBadgeSymbols.has(b),
+      )
+      const selectedCustomBadges = badges.filter(
+        (b) => !beamBadgeSymbols.has(b),
+      )
 
-      const txResult = await sendMultiBadge(data)
+      // Collect before-rarity-counts for beam badges
+      const beamDeltasMap = new Map<
+        string,
+        { trackingDeltas: Record<string, number>; deltaScore: number }
+      >()
+
+      for (const badge of selectedBeamBadges) {
+        const badgeName = badge.split(',')[1] ?? badge
+        const trackingSymbols = automations
+          ? getTrackingBadgeSymbols(badgeName, automations)
+          : []
+
+        const before = await getRarityCounts(
+          organization ?? badgeScope,
+          trackingSymbols,
+        )
+
+        await giveBeam({
+          session: session!,
+          badge_symbol: badge,
+          amount: 1,
+          from: currentActor!,
+          to: actor,
+          post_content: content,
+          parsed_content: content,
+        })
+
+        const after = await getRarityCounts(
+          organization ?? badgeScope,
+          trackingSymbols,
+        )
+
+        const trackingDeltas: Record<string, number> = {}
+        let deltaScore = 0
+        for (const sym of trackingSymbols) {
+          const delta =
+            (after.get(sym) ?? 0) - (before.get(sym) ?? 0)
+          if (delta > 0) {
+            trackingDeltas[sym] = delta
+            deltaScore += delta
+          }
+        }
+
+        beamDeltasMap.set(badge, { trackingDeltas, deltaScore })
+      }
+
+      // Send custom badges via givesimple
+      let txResult
+      if (selectedCustomBadges.length > 0) {
+        const data = selectedCustomBadges.map((badge) => ({
+          session: session!,
+          badge_symbol: badge,
+          amount: 1,
+          to: actor,
+          memo: content,
+        }))
+        txResult = await sendMultiBadge(data)
+      }
 
       let onChainPostId: string | undefined
       const logAction = txResult?.response?.processed?.action_traces
@@ -225,11 +329,11 @@ export function PostItem({
                 data?: { post_id?: number }
               }
             }[]
-          }) => t.inline_traces ?? []
+          }) => t.inline_traces ?? [],
         )
         ?.find(
           (t: { act?: { name?: string } }) =>
-            t.act?.name === 'logpost'
+            t.act?.name === 'logpost',
         )
       if (logAction?.act?.data?.post_id != null) {
         onChainPostId = String(logAction.act.data.post_id)
@@ -244,22 +348,21 @@ export function PostItem({
       })
 
       if (result.success && result.postId && organization) {
-        const beamBadgeSymbols = new Set(
-          beamBadges.map((b) => b.badge_symbol),
-        )
-
         await Promise.all(
-          badges
-            .filter((b) => beamBadgeSymbols.has(b))
-            .map((badge) =>
-              processBeamGive({
-                postId: result.postId!,
-                recipientActor: actor,
-                badgeSymbol: badge,
-                amount: 1,
-                orgAccount: organization,
-              }),
-            ),
+          selectedBeamBadges.map((badge) => {
+            const deltas = beamDeltasMap.get(badge) ?? {
+              trackingDeltas: {},
+              deltaScore: 0,
+            }
+            return processBeamGive({
+              postId: result.postId!,
+              recipientActor: actor,
+              badgeSymbol: badge,
+              trackingDeltas: deltas.trackingDeltas,
+              deltaScore: deltas.deltaScore,
+              orgAccount: organization,
+            })
+          }),
         )
       }
 

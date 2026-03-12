@@ -239,6 +239,8 @@ export async function getAnnouncements(input: GetAnnouncementsProps) {
             upaEmitted: true,
             gpaEmitted: true,
             rpaEmitted: true,
+            trackingDeltas: true,
+            deltaScore: true,
           },
         },
         children: {
@@ -354,6 +356,8 @@ export async function getPosts(input: GetPostsProps) {
             upaEmitted: true,
             gpaEmitted: true,
             rpaEmitted: true,
+            trackingDeltas: true,
+            deltaScore: true,
           },
         },
         children: {
