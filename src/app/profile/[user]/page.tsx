@@ -19,6 +19,8 @@ import { OrgBadgesSection } from './org-badges-section'
 import { ProfileFeed } from './profile-feed'
 import { ProfileTabs } from './profile-tabs'
 
+export const dynamic = 'force-dynamic'
+
 type ProfilePageProps = {
   params: Promise<{
     user: string
