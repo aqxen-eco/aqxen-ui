@@ -85,7 +85,7 @@ type BeamGiveEntry = {
   upaEmitted: number
   gpaEmitted: number
   rpaEmitted: number
-  trackingDeltas: Record<string, number> | null
+  trackingDeltas: Record<string, number> | unknown
   deltaScore: number
 }
 
