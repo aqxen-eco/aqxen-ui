@@ -287,10 +287,21 @@ export function PostItem({
           parsed_content: content,
         })
 
-        const after = await getRarityCounts(
-          organization ?? badgeScope,
-          trackingSymbols,
-        )
+        // Poll until the API reflects the on-chain state change.
+        // Mainnet API nodes can lag a block or two behind the
+        // confirmed transaction.
+        let after = before
+        if (trackingSymbols.length > 0) {
+          const scope = organization ?? badgeScope
+          for (let attempt = 0; attempt < 5; attempt++) {
+            await new Promise((r) => setTimeout(r, 1000))
+            after = await getRarityCounts(scope, trackingSymbols)
+            const changed = trackingSymbols.some(
+              (s) => (after.get(s) ?? 0) !== (before.get(s) ?? 0),
+            )
+            if (changed) break
+          }
+        }
 
         const trackingDeltas: Record<string, number> = {}
         let deltaScore = 0
