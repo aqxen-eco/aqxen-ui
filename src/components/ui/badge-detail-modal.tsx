@@ -143,7 +143,7 @@ export function BadgeDetailModal({
 
   const allTimeRanksQuery = useQuery({
     queryKey: ['badge-ranks', badgeSymbol],
-    queryFn: () => listBadgeRanks({ badgeSymbol, limit: 3 }),
+    queryFn: () => listBadgeRanks({ badgeSymbol, limit: 10 }),
     enabled: open && !!badgeSymbol,
   })
 
@@ -153,7 +153,7 @@ export function BadgeDetailModal({
     queryFn: () =>
       listBoundedBadgeRanks({
         badgeAggSeqId: selectedBadgeAggSeqId!,
-        limit: 3,
+        limit: 10,
       }),
     enabled: open && selectedBadgeAggSeqId !== undefined,
   })
@@ -182,7 +182,7 @@ export function BadgeDetailModal({
   const awardsQuery = useQuery({
     queryKey: ['badge-awards', badgeSymbol],
     queryFn: () => getPostsByBadge({ badgeSymbol, limit: 3 }),
-    enabled: open,
+    enabled: open && !!badgeSymbol,
   })
 
   const badge = badgeProp ?? badgeQuery.data
@@ -334,88 +334,81 @@ export function BadgeDetailModal({
                         </>
                       )}
 
-                      <div className="bg-gray-2 my-6 h-px" />
+                      {awardsQuery.data && awardsQuery.data.length > 0 && (
+                        <>
+                          <div className="bg-gray-2 my-6 h-px" />
 
-                      <h3 className="text-body-1 mb-4 font-medium text-white">
-                        Recent Recipients
-                      </h3>
+                          <h3 className="text-body-1 mb-4 font-medium text-white">
+                            Recent Recognitions
+                          </h3>
 
-                      {awardsQuery.isLoading ? (
-                        <p className="text-body-2 text-gray-3">
-                          Loading history...
-                        </p>
-                      ) : awardsQuery.data &&
-                        awardsQuery.data.length > 0 ? (
-                        <div className="space-y-4">
-                          {awardsQuery.data.map((post) => (
-                            <div
-                              key={post.id}
-                              className="border-gray-2 rounded-xl border p-4"
-                            >
-                              <div className="flex items-center gap-3">
-                                <Avatar
-                                  size="sm"
-                                  src={
-                                    post.user.avatarIpfs
-                                      ? IPFS_IMAGE_SOURCE +
-                                        post.user.avatarIpfs
-                                      : undefined
-                                  }
-                                >
-                                  {post.user.actor.slice(0, 2)}
-                                </Avatar>
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-body-2 text-white">
-                                    <Link
-                                      href={`/profile/${post.user.actor}`}
-                                      className="hover:underline"
-                                    >
-                                      {post.user.actor}
-                                    </Link>
-                                    {post.mention.length > 0 && (
-                                      <>
-                                        <span className="text-gray-3">
-                                          {' '}
-                                          →{' '}
-                                        </span>
-                                        {post.mention.map((m, i) => (
-                                          <span key={m.id}>
-                                            {i > 0 && (
-                                              <span className="text-gray-3">
-                                                ,{' '}
-                                              </span>
-                                            )}
-                                            <Link
-                                              href={`/profile/${m.user.actor}`}
-                                              className="hover:underline"
-                                            >
-                                              {m.user.actor}
-                                            </Link>
+                          <div className="space-y-4">
+                            {awardsQuery.data.map((post) => (
+                              <div
+                                key={post.id}
+                                className="border-gray-2 rounded-xl border p-4"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Avatar
+                                    size="sm"
+                                    src={
+                                      post.user.avatarIpfs
+                                        ? IPFS_IMAGE_SOURCE +
+                                          post.user.avatarIpfs
+                                        : undefined
+                                    }
+                                  >
+                                    {post.user.actor.slice(0, 2)}
+                                  </Avatar>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-body-2 text-white">
+                                      <Link
+                                        href={`/profile/${post.user.actor}`}
+                                        className="hover:underline"
+                                      >
+                                        {post.user.actor}
+                                      </Link>
+                                      {post.mention.length > 0 && (
+                                        <>
+                                          <span className="text-gray-3">
+                                            {' '}
+                                            →{' '}
                                           </span>
-                                        ))}
-                                      </>
-                                    )}
-                                  </p>
-                                  <p className="text-body-3 text-gray-3">
-                                    {format(
-                                      new Date(post.createdAt),
-                                      'EEE d MMM yyyy'
-                                    )}
-                                  </p>
+                                          {post.mention.map((m, i) => (
+                                            <span key={m.id}>
+                                              {i > 0 && (
+                                                <span className="text-gray-3">
+                                                  ,{' '}
+                                                </span>
+                                              )}
+                                              <Link
+                                                href={`/profile/${m.user.actor}`}
+                                                className="hover:underline"
+                                              >
+                                                {m.user.actor}
+                                              </Link>
+                                            </span>
+                                          ))}
+                                        </>
+                                      )}
+                                    </p>
+                                    <p className="text-body-3 text-gray-3">
+                                      {format(
+                                        new Date(post.createdAt),
+                                        'EEE d MMM yyyy'
+                                      )}
+                                    </p>
+                                  </div>
                                 </div>
+                                {post.content && (
+                                  <p className="text-body-2 text-gray-3 mt-2">
+                                    {post.content}
+                                  </p>
+                                )}
                               </div>
-                              {post.content && (
-                                <p className="text-body-2 text-gray-3 mt-2">
-                                  {post.content}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-body-2 text-gray-3">
-                          No recipients yet for this badge.
-                        </p>
+                            ))}
+                          </div>
+                        </>
                       )}
                     </>
                   ) : (

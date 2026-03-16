@@ -37,7 +37,7 @@ export const getAnnouncementsSchema = z.object({
 })
 
 export const getPostsByBadgeSchema = z.object({
-  badgeSymbol: z.string().min(1).max(16),
+  badgeSymbol: z.string().min(1).max(32),
   limit: z.number().int().min(1).max(100).optional(),
 })
 

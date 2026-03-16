@@ -23,14 +23,16 @@ type LifetimeBadgesSectionProps = {
   badges: LifetimeBadge[]
   showOrgOverlay?: boolean
   label?: string
+  scope?: string
 }
 
 export function LifetimeBadgesSection({
   badges,
   showOrgOverlay,
   label = 'Badges',
+  scope,
 }: LifetimeBadgesSectionProps) {
-  const [selectedBadge, setSelectedBadge] = useState<BadgeType | null>(null)
+  const [selectedBadge, setSelectedBadge] = useState<LifetimeBadge | null>(null)
 
   return (
     <section className="py-8">
@@ -76,6 +78,7 @@ export function LifetimeBadgesSection({
           if (!open) setSelectedBadge(null)
         }}
         badgeSymbol={selectedBadge?.badge_symbol ?? ''}
+        scope={scope ?? selectedBadge?.orgAccountName}
         badge={selectedBadge ?? undefined}
       />
     </section>
