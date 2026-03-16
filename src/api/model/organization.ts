@@ -31,6 +31,8 @@ export type CreateOrganizationProps = {
   org_creation_fee: string
   member_fee: string
   currentCycleId: UInt64
+  memberCount: number
+  timezone: string
 }
 
 export type UpdateOrganizationProps = {

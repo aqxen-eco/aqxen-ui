@@ -293,6 +293,7 @@ type GetPostsByBadgeProps = {
 export async function getPostsByBadge(input: GetPostsByBadgeProps) {
   const { badgeSymbol, limit = 10 } = getPostsByBadgeSchema.parse(input)
 
+  // Direct match: posts where badgeSymbol array contains this symbol
   const posts = await prisma.post.findMany({
     take: limit,
     where: {
@@ -315,7 +316,58 @@ export async function getPostsByBadge(input: GetPostsByBadgeProps) {
     },
   })
 
-  return posts
+  if (posts.length > 0) return posts
+
+  // Fallback: tracking badges are stored in BeamGive.trackingDeltas JSON
+  // Badge symbol format is "0,SYMB" — extract the symbol name
+  const symbolName = badgeSymbol.includes(',')
+    ? badgeSymbol.split(',')[1]
+    : badgeSymbol
+
+  // Also check if the badge was directly given as a beam
+  const beamGives = await prisma.beamGive.findMany({
+    take: limit,
+    where: {
+      OR: [
+        { badgeSymbol },
+        {
+          trackingDeltas: {
+            path: [symbolName],
+            gt: 0,
+          },
+        },
+      ],
+    },
+    include: {
+      post: {
+        include: {
+          user: true,
+          mention: {
+            include: {
+              user: {
+                select: {
+                  actor: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+
+  // Deduplicate by post ID
+  const seen = new Set<string>()
+  return beamGives
+    .map((bg) => bg.post)
+    .filter((post) => {
+      if (seen.has(post.id)) return false
+      seen.add(post.id)
+      return true
+    })
 }
 
 type GetPostsProps = {

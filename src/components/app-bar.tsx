@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { MdClose, MdMenu } from 'react-icons/md'
 
+import { ClaimableBeamsAlert } from '@/components/claimable-beams-alert'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
@@ -67,9 +68,9 @@ export function AppBar() {
               )}
               {isReady && !isAuthenticated && (
                 <Link
-                  href="/subscriptions"
+                  href="/pricing"
                   variant={
-                    pathname.includes('/subscriptions') ? 'link' : 'default'
+                    pathname.includes('/pricing') ? 'link' : 'default'
                   }
                 >
                   Pricing
@@ -108,16 +109,11 @@ export function AppBar() {
                 </>
               )}
               {isReady && isAuthenticated && !hasOrganization && (
-                <Link
-                  href="/subscriptions"
-                  variant={
-                    pathname.includes('/subscriptions')
-                      ? 'link'
-                      : 'default'
-                  }
-                >
-                  Subscriptions
-                </Link>
+                <Button asChild variant="primary">
+                  <NextLink href="/pricing">
+                    Create Organization
+                  </NextLink>
+                </Button>
               )}
             </div>
 
@@ -145,9 +141,9 @@ export function AppBar() {
                 )}
                 {isReady && (
                   <Link
-                    href="/subscriptions"
+                    href="/pricing"
                     variant={
-                      pathname.includes('/subscriptions')
+                      pathname.includes('/pricing')
                         ? 'link'
                         : 'default'
                     }
@@ -202,6 +198,7 @@ export function AppBar() {
               </div>
             )}
             <div className="flex items-center gap-2">
+              {isReady && isAuthenticated && <ClaimableBeamsAlert />}
               {isReady && isAuthenticated ? (
                 <DropdownRoot
                   customTrigger={
@@ -250,8 +247,8 @@ export function AppBar() {
                   {!hasOrganization && (
                     <div className="md:hidden">
                       <DropdownItem asChild>
-                        <NextLink href="/subscriptions">
-                          Subscriptions
+                        <NextLink href="/pricing">
+                          Create Organization
                         </NextLink>
                       </DropdownItem>
                     </div>

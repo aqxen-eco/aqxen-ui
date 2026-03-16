@@ -24,9 +24,11 @@ import { getRarityCounts } from '@/api/chain/badge/get-rarity-counts'
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
 import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-automation'
+import { postBeam } from '@/api/chain/beams/post-beam'
 import { getTrackingBadgeSymbols } from '@/api/chain/beams/get-tracking-badge-symbols'
-import { giveBeam } from '@/api/chain/beams/give-beam'
+import { giveBeamsBatch } from '@/api/chain/beams/give-beams-batch'
 import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
+import { listBeamStats } from '@/api/chain/beams/list-beam-stats'
 import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { Avatar } from '@/components/ui/avatar'
 import { BadgeDetailModal } from '@/components/ui/badge-detail-modal'
@@ -231,6 +233,13 @@ export function PostItem({
 
   const { actor: currentActor, session } = useChain()
 
+  const beamStatsQuery = useQuery({
+    queryKey: ['beam-stats', currentActor],
+    queryFn: () => listBeamStats({ scope: currentActor! }),
+    enabled: !!currentActor,
+  })
+  const beamStats = beamStatsQuery.data ?? []
+
   const isOwnPost = currentActor === actor
   const isOrgPost = !!organization && actor === organization
 
@@ -260,61 +269,71 @@ export function PostItem({
         (b) => !beamBadgeSymbols.has(b),
       )
 
-      // Collect before-rarity-counts for beam badges
+      // Collect before-rarity-counts for all beam badges
       const beamDeltasMap = new Map<
         string,
         { trackingDeltas: Record<string, number>; deltaScore: number }
       >()
 
-      for (const badge of selectedBeamBadges) {
-        const badgeName = badge.split(',')[1] ?? badge
-        const trackingSymbols = automations
-          ? getTrackingBadgeSymbols(badgeName, automations)
-          : []
+      if (selectedBeamBadges.length > 0) {
+        // Gather all tracking symbols and snapshot before-counts
+        const scope = organization ?? badgeScope
+        const perBadgeTracking = selectedBeamBadges.map((badge) => {
+          const badgeName = badge.split(',')[1] ?? badge
+          const trackingSymbols = automations
+            ? getTrackingBadgeSymbols(badgeName, automations)
+            : []
+          return { badge, trackingSymbols }
+        })
 
-        const before = await getRarityCounts(
-          organization ?? badgeScope,
-          trackingSymbols,
-        )
+        const allTrackingSymbols = [
+          ...new Set(
+            perBadgeTracking.flatMap((b) => b.trackingSymbols),
+          ),
+        ]
 
-        await giveBeam({
+        const before = await getRarityCounts(scope, allTrackingSymbols)
+
+        // Execute all givebeam actions in a single transaction
+        await giveBeamsBatch({
           session: session!,
-          badge_symbol: badge,
-          amount: 1,
+          beams: selectedBeamBadges.map((badge) => ({
+            badge_symbol: badge,
+            amount: 1,
+          })),
           from: currentActor!,
           to: actor,
           post_content: content,
           parsed_content: content,
         })
 
-        // Poll until the API reflects the on-chain state change.
-        // Mainnet API nodes can lag a block or two behind the
-        // confirmed transaction.
+        // Poll until the API reflects the on-chain state changes
         let after = before
-        if (trackingSymbols.length > 0) {
-          const scope = organization ?? badgeScope
+        if (allTrackingSymbols.length > 0) {
           for (let attempt = 0; attempt < 5; attempt++) {
             await new Promise((r) => setTimeout(r, 1000))
-            after = await getRarityCounts(scope, trackingSymbols)
-            const changed = trackingSymbols.some(
+            after = await getRarityCounts(scope, allTrackingSymbols)
+            const changed = allTrackingSymbols.some(
               (s) => (after.get(s) ?? 0) !== (before.get(s) ?? 0),
             )
             if (changed) break
           }
         }
 
-        const trackingDeltas: Record<string, number> = {}
-        let deltaScore = 0
-        for (const sym of trackingSymbols) {
-          const delta =
-            (after.get(sym) ?? 0) - (before.get(sym) ?? 0)
-          if (delta > 0) {
-            trackingDeltas[sym] = delta
-            deltaScore += delta
+        // Compute per-badge deltas from the combined before/after
+        for (const { badge, trackingSymbols } of perBadgeTracking) {
+          const trackingDeltas: Record<string, number> = {}
+          let deltaScore = 0
+          for (const sym of trackingSymbols) {
+            const delta =
+              (after.get(sym) ?? 0) - (before.get(sym) ?? 0)
+            if (delta > 0) {
+              trackingDeltas[sym] = delta
+              deltaScore += delta
+            }
           }
+          beamDeltasMap.set(badge, { trackingDeltas, deltaScore })
         }
-
-        beamDeltasMap.set(badge, { trackingDeltas, deltaScore })
       }
 
       // Send custom badges via givesimple
@@ -391,6 +410,16 @@ export function PostItem({
 
   async function onComment({ content }: CommentSchema) {
     try {
+      if (session && organization && currentActor) {
+        await postBeam({
+          session,
+          org: organization,
+          from: currentActor,
+          post_content: content,
+          parsed_content: content,
+        })
+      }
+
       await createPost({
         parentId: id,
         content,
@@ -685,6 +714,34 @@ export function PostItem({
                               />
                               <span className="text-body-2 font-medium text-white">
                                 {badge.onchain_lookup_data.user.display_name}
+                                {(() => {
+                                  const symbolName =
+                                    badge.badge_symbol.split(',')[1]
+                                  const meta = beamMetadata?.find(
+                                    (m) =>
+                                      (m.badge_symbol.includes(',')
+                                        ? m.badge_symbol.split(',')[1]
+                                        : m.badge_symbol) === symbolName,
+                                  )
+                                  const stat = beamStats.find(
+                                    (s) =>
+                                      s.badge_asset.split(' ')[1] ===
+                                      symbolName,
+                                  )
+                                  const balance = stat
+                                    ? parseInt(
+                                        stat.badge_asset.split(' ')[0],
+                                        10,
+                                      ) || 0
+                                    : 0
+                                  const supply =
+                                    meta?.supply_per_cycle ?? 0
+                                  return (
+                                    <span className="text-gray-3 ml-1">
+                                      {balance} / {supply}
+                                    </span>
+                                  )
+                                })()}
                               </span>
                             </button>
                           )

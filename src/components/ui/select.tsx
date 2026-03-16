@@ -42,12 +42,12 @@ export function Select({
         <PrimitiveSelect.Content
           position="popper"
           sideOffset={8}
-          className="border-gray-2 bg-gray-1 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border"
+          className="border-gray-2 bg-gray-1 z-70 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border"
         >
           <PrimitiveSelect.ScrollUpButton className="cursor-default items-center justify-center">
             <MdKeyboardArrowUp className="size-6" />
           </PrimitiveSelect.ScrollUpButton>
-          <PrimitiveSelect.Viewport>
+          <PrimitiveSelect.Viewport className="max-h-60 overflow-y-auto">
             <PrimitiveSelect.Group>
               <PrimitiveSelect.Label className="text-body-3 text-gray-3 px-[calc(1rem-1px)] py-[calc(0.5rem-1px)]">
                 {label}

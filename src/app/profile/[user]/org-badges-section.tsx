@@ -29,6 +29,7 @@ type OrgBadgesSectionProps = {
 }
 
 export function OrgBadgesSection({
+  orgAccount,
   displayName,
   ipfsImage,
   badges,
@@ -51,7 +52,7 @@ export function OrgBadgesSection({
       </header>
 
       {badges.length > 0 && (
-        <LifetimeBadgesSection badges={badges} label={label} />
+        <LifetimeBadgesSection badges={badges} label={label} scope={orgAccount} />
       )}
 
       {seasons
@@ -67,6 +68,7 @@ export function OrgBadgesSection({
             name={season.onchain_lookup_data.user.display_name}
             series={season.series}
             label={label}
+            scope={orgAccount}
           />
         ))}
 

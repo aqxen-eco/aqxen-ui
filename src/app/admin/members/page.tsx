@@ -9,8 +9,6 @@ import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
 
-import { addActionAuth } from '@/api/chain/badge/add-action-auth'
-import { delActionAuth } from '@/api/chain/badge/del-action-auth'
 import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
 import { listFees } from '@/api/chain/billing/list-fees'
 import { transferToken } from '@/api/chain/billing/transfer-token'
@@ -132,12 +130,6 @@ export default function MembersPage() {
     setIsSubmitting(true)
     try {
       await addMember({ session, org: name, user: account.trim(), memo })
-      await addActionAuth({
-        session,
-        org: name,
-        action: 'givesimple',
-        authorizedAccount: account.trim(),
-      })
       setAccount('')
       setMemo('')
       setShowAddForm(false)
@@ -165,12 +157,6 @@ export default function MembersPage() {
 
     try {
       await acceptMember({ session, org: name, user, memo: '' })
-      await addActionAuth({
-        session,
-        org: name,
-        action: 'givesimple',
-        authorizedAccount: user,
-      })
       await refetchAfterChainAction([['members', name], ['member-requests', name]])
       toast.success(`${user} has been accepted.`)
     } catch (error) {
@@ -198,16 +184,6 @@ export default function MembersPage() {
     if (!session) return
     try {
       await removeMember({ session, org: name, user, memo: '' })
-      try {
-        await delActionAuth({
-          session,
-          org: name,
-          action: 'givesimple',
-          authorizedAccount: user,
-        })
-      } catch {
-        // Member may not have been in the action auth table
-      }
       await refetchAfterChainAction([['members', name], ['member-requests', name]])
       toast.success(`${user} has been removed.`)
     } catch {
@@ -357,7 +333,7 @@ export default function MembersPage() {
               maxMembers !== undefined &&
               memberCount >= maxMembers && (
                 <Button asChild variant="primary" size="md">
-                  <Link href="/admin/buy-subscription">
+                  <Link href="/pricing">
                     Buy Additional Seats
                   </Link>
                 </Button>

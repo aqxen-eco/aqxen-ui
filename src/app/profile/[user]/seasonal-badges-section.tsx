@@ -24,6 +24,7 @@ type SeasonalBadgesSectionProps = {
     badges: ({ balance: number } & BadgeType)[]
   })[]
   label?: string
+  scope?: string
 }
 
 export function SeasonalBadgesSection({
@@ -31,6 +32,7 @@ export function SeasonalBadgesSection({
   orgDisplayName,
   series,
   label = 'Badges',
+  scope,
 }: SeasonalBadgesSectionProps) {
   const [selectedSeries, setSelectedSeries] = useState<
     number | typeof LIFETIME_KEY
@@ -140,6 +142,7 @@ export function SeasonalBadgesSection({
               if (!open) setSelectedBadge(null)
             }}
             badgeSymbol={selectedBadge?.badge_symbol ?? ''}
+            scope={scope}
             badge={selectedBadge ?? undefined}
           />
         </>

@@ -221,9 +221,6 @@ export function ClaimBeamsSection({
         <h3 className="text-title-2 flex items-center gap-2 text-white">
           <MdElectricBolt className="size-5" />
           Beams
-          <span className="text-gray-3 text-body-2 font-normal">
-            ({allClaimable.length} available)
-          </span>
         </h3>
 
         {allClaimable.length > 0 && (
@@ -232,7 +229,7 @@ export function ClaimBeamsSection({
             disabled={isClaiming}
             onClick={handleClaimAll}
           >
-            {isClaiming ? 'Claiming...' : 'Claim All Beams'}
+            {isClaiming ? 'Claiming...' : 'Claim All'}
           </Button>
         )}
       </header>
@@ -263,15 +260,6 @@ export function ClaimBeamsSection({
                         size="xs"
                       />
                       {getDisplayName(beam.badge_symbol, badgesBySymbol)}
-                      <span className="text-gray-3">
-                        {beam.balance}
-                        {beam.claimable && ` (+${beam.supply_per_cycle})`}
-                      </span>
-                      <span
-                        className={`size-2 rounded-full ${
-                          beam.claimable ? 'bg-green-500' : 'bg-red-500'
-                        }`}
-                      />
                     </div>
                   </Tooltip>
                 )
