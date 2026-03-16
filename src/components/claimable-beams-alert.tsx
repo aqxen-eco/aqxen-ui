@@ -4,6 +4,7 @@ import NextLink from 'next/link'
 import { useEffect, useState } from 'react'
 import { MdElectricBolt } from 'react-icons/md'
 
+import { Tooltip } from '@/components/ui/tooltip'
 import { useChain } from '@/contexts/chain'
 import { useHasClaimableBeams } from '@/hooks/use-has-claimable-beams'
 
@@ -58,9 +59,11 @@ export function ClaimableBeamsAlert() {
   }
 
   return (
-    <div className="text-body-2 text-gray-3 flex items-center gap-1 font-medium">
-      <MdElectricBolt className="size-5 flex-none text-white" />
-      <span className="font-mono tabular-nums max-md:hidden">{formatCountdown(countdown ?? 0)}</span>
-    </div>
+    <Tooltip content="Beams claimable in">
+      <div className="text-body-2 text-gray-3 flex items-center gap-1 font-medium">
+        <MdElectricBolt className="size-5 flex-none text-white" />
+        <span className="font-mono tabular-nums max-md:hidden">{formatCountdown(countdown ?? 0)}</span>
+      </div>
+    </Tooltip>
   )
 }

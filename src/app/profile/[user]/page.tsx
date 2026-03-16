@@ -240,10 +240,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                       >
                         {initials}
                       </Avatar>
-                      <span className="text-body-2 font-medium text-white">
+                      <span className="text-body-2 flex items-center gap-1 font-medium text-white">
                         {displayName}
-                        <span className="text-gray-3">
-                          {' '}({reputation.perOrg[org.org] ?? 0})
+                        <span className="text-gray-3 flex items-center gap-0.5">
+                          <MdWorkspacePremium className="size-4" />
+                          {reputation.perOrg[org.org] ?? 0}
                         </span>
                       </span>
                       {org.isOwner && (
