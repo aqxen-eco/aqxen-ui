@@ -1,9 +1,9 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { UInt64 } from '@wharfkit/antelope'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useQueryClient } from '@tanstack/react-query'
+import type { UInt64 } from '@wharfkit/antelope'
 import { AnimatePresence, motion } from 'motion/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
