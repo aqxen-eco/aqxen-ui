@@ -12,10 +12,12 @@ import {
   getUserOrganizations,
   getUserPosts,
   getUserProfile,
+  getReputationBreakdown,
   getUserReputation,
 } from './functions'
 import { LifetimeBadgesSection } from './lifetime-badges-section'
 import { OrgBadgesSection } from './org-badges-section'
+import { ReputationTooltip } from './reputation-tooltip'
 import { ProfileFeed } from './profile-feed'
 import { ProfileTabs } from './profile-tabs'
 
@@ -30,12 +32,13 @@ type ProfilePageProps = {
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { user } = await params
 
-  const [profile, { badges, seasons, beamBadges, beamSeasons }, userOrgs, posts, reputation] = await Promise.all([
+  const [profile, { badges, seasons, beamBadges, beamSeasons }, userOrgs, posts, reputation, reputationBreakdown] = await Promise.all([
     getUserProfile({ actor: user }),
     getUserBadges({ user }),
     getUserOrganizations({ user }),
     getUserPosts({ user }),
     getUserReputation({ user }),
+    getReputationBreakdown({ user }),
   ])
 
   if (!user) {
@@ -176,10 +179,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   user
                 )}
               </h1>
-              <span className="text-gray-3 flex items-center gap-0.5">
-                <MdWorkspacePremium className="size-5" />
-                <span className="text-body-2">{reputation.total}</span>
-              </span>
+              <ReputationTooltip
+                total={reputation.total}
+                breakdown={reputationBreakdown}
+              />
             </div>
             <div className="flex max-md:flex-col md:flex-wrap md:items-center md:gap-4">
               {profile?.location && (

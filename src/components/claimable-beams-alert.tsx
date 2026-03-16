@@ -53,7 +53,7 @@ export function ClaimableBeamsAlert() {
         className="text-body-2 flex items-center gap-1 font-medium text-yellow-400 hover:underline"
       >
         <MdElectricBolt className="size-5 flex-none" />
-        <span className="max-md:hidden">Beams Claimable</span>
+        <span>Beams Claimable</span>
       </NextLink>
     )
   }
@@ -62,7 +62,7 @@ export function ClaimableBeamsAlert() {
     <Tooltip content="Beams claimable in">
       <div className="text-body-2 text-gray-3 flex items-center gap-1 font-medium">
         <MdElectricBolt className="size-5 flex-none text-white" />
-        <span className="font-mono tabular-nums max-md:hidden">{formatCountdown(countdown ?? 0)}</span>
+        <span className="font-mono tabular-nums">{formatCountdown(countdown ?? 0)}</span>
       </div>
     </Tooltip>
   )

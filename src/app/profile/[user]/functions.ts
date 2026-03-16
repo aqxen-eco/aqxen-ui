@@ -338,6 +338,53 @@ export async function getUserReputation({ user }: { user: string }) {
   return { perOrg, total: Math.round(total * 100) / 100 }
 }
 
+export type ReputationBreakdown = { name: string; score: number }[]
+
+export async function getReputationBreakdown({
+  user,
+}: {
+  user: string
+}): Promise<ReputationBreakdown> {
+  const rows = await prisma.beamGive.groupBy({
+    by: ['badgeSymbol', 'orgAccount'],
+    where: { recipientActor: user },
+    _sum: { deltaScore: true },
+  })
+
+  if (rows.length === 0) return []
+
+  // Collect unique org accounts to fetch badge definitions
+  const orgAccounts = [...new Set(rows.map((r) => r.orgAccount))]
+  const badgeResults = await Promise.all(
+    orgAccounts.map((org) => listBadge({ scope: org })),
+  )
+  const badgesBySymbol = new Map(
+    badgeResults.flatMap((r) =>
+      r.rows.map((b) => [b.badge_symbol, b] as const),
+    ),
+  )
+
+  // Aggregate by badge symbol across orgs
+  const grouped = new Map<string, number>()
+  for (const row of rows) {
+    const score = row._sum.deltaScore ?? 0
+    grouped.set(
+      row.badgeSymbol,
+      (grouped.get(row.badgeSymbol) ?? 0) + score,
+    )
+  }
+
+  return Array.from(grouped.entries())
+    .map(([symbol, score]) => {
+      const badge = badgesBySymbol.get(symbol)
+      const name =
+        badge?.onchain_lookup_data.user.display_name ?? symbol
+      return { name, score: Math.round(score * 100) / 100 }
+    })
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+}
+
 export async function getOrgMemberReputation({
   orgAccount,
 }: {
