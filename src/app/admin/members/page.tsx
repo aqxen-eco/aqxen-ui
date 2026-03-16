@@ -200,6 +200,7 @@ export default function MembersPage() {
         session,
         quantity: fee.member_fee,
         currentCycleId,
+        memberCount: 1,
       })
       await refetchAfterChainAction([['billing-detail']])
       setPendingAction(null)
