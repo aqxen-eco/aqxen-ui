@@ -29,8 +29,10 @@ export function ClaimableBeamsAlert() {
     setCountdown(secondsUntilNextClaim)
   }, [secondsUntilNextClaim])
 
+  const isCountingDown = countdown !== null && countdown > 0
+
   useEffect(() => {
-    if (countdown === null || countdown <= 0) return
+    if (!isCountingDown) return
 
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -40,7 +42,7 @@ export function ClaimableBeamsAlert() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [countdown !== null && countdown > 0])
+  }, [isCountingDown])
 
   if (isLoading || secondsUntilNextClaim === null) return null
 

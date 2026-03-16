@@ -8,18 +8,18 @@ import { IPFS_IMAGE_SOURCE } from '@/constants'
 
 import { ClaimBeamsSection } from './claim-beams-section'
 import {
+  getReputationBreakdown,
   getUserBadges,
   getUserOrganizations,
   getUserPosts,
   getUserProfile,
-  getReputationBreakdown,
   getUserReputation,
 } from './functions'
 import { LifetimeBadgesSection } from './lifetime-badges-section'
 import { OrgBadgesSection } from './org-badges-section'
-import { ReputationTooltip } from './reputation-tooltip'
 import { ProfileFeed } from './profile-feed'
 import { ProfileTabs } from './profile-tabs'
+import { ReputationTooltip } from './reputation-tooltip'
 
 export const dynamic = 'force-dynamic'
 
