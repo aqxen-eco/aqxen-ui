@@ -24,6 +24,7 @@ import { getRarityCounts } from '@/api/chain/badge/get-rarity-counts'
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
 import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-automation'
+import { postBeam } from '@/api/chain/beams/post-beam'
 import { getTrackingBadgeSymbols } from '@/api/chain/beams/get-tracking-badge-symbols'
 import { giveBeam } from '@/api/chain/beams/give-beam'
 import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
@@ -399,6 +400,16 @@ export function PostItem({
 
   async function onComment({ content }: CommentSchema) {
     try {
+      if (session && organization && currentActor) {
+        await postBeam({
+          session,
+          org: organization,
+          from: currentActor,
+          post_content: content,
+          parsed_content: content,
+        })
+      }
+
       await createPost({
         parentId: id,
         content,
