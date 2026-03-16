@@ -13,6 +13,7 @@ import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { postBeam } from '@/api/chain/beams/post-beam'
+import { ClaimableBeamsAlert } from '@/components/claimable-beams-alert'
 import { announce } from '@/api/chain/organization/announce'
 import {
   createAnnouncement,
@@ -328,6 +329,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
 
   return (
     <div className="max-w-container-md mx-auto space-y-4 px-4 py-8">
+      <ClaimableBeamsAlert />
       <header className="flex items-center justify-between">
         <h1 className="text-title-1 text-white">Stream</h1>
         <DropdownRoot label={sort.description} align="end">

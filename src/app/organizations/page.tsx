@@ -10,6 +10,7 @@ import { listMemberRequests } from '@/api/chain/organization/list-member-request
 import { listMembers } from '@/api/chain/organization/list-members'
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { requestJoin } from '@/api/chain/organization/request-join'
+import { ClaimableBeamsAlert } from '@/components/claimable-beams-alert'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
@@ -100,6 +101,7 @@ export default function OrganizationsPage() {
 
   return (
     <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 py-12">
+      <ClaimableBeamsAlert />
       <div className="mb-12 text-center">
         <h1 className="text-title-1 mb-2 text-white">
           Welcome to AqXen Orgs: Building Momentum Together
