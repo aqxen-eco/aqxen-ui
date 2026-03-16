@@ -27,6 +27,7 @@ import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-aut
 import { getTrackingBadgeSymbols } from '@/api/chain/beams/get-tracking-badge-symbols'
 import { giveBeam } from '@/api/chain/beams/give-beam'
 import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
+import { listBeamStats } from '@/api/chain/beams/list-beam-stats'
 import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { Avatar } from '@/components/ui/avatar'
 import { BadgeDetailModal } from '@/components/ui/badge-detail-modal'
@@ -230,6 +231,13 @@ export function PostItem({
   }, [badgeRows, beamTemplates, beamMetadata, automations])
 
   const { actor: currentActor, session } = useChain()
+
+  const beamStatsQuery = useQuery({
+    queryKey: ['beam-stats', currentActor],
+    queryFn: () => listBeamStats({ scope: currentActor! }),
+    enabled: !!currentActor,
+  })
+  const beamStats = beamStatsQuery.data ?? []
 
   const isOwnPost = currentActor === actor
   const isOrgPost = !!organization && actor === organization
@@ -685,6 +693,34 @@ export function PostItem({
                               />
                               <span className="text-body-2 font-medium text-white">
                                 {badge.onchain_lookup_data.user.display_name}
+                                {(() => {
+                                  const symbolName =
+                                    badge.badge_symbol.split(',')[1]
+                                  const meta = beamMetadata?.find(
+                                    (m) =>
+                                      (m.badge_symbol.includes(',')
+                                        ? m.badge_symbol.split(',')[1]
+                                        : m.badge_symbol) === symbolName,
+                                  )
+                                  const stat = beamStats.find(
+                                    (s) =>
+                                      s.badge_asset.split(' ')[1] ===
+                                      symbolName,
+                                  )
+                                  const balance = stat
+                                    ? parseInt(
+                                        stat.badge_asset.split(' ')[0],
+                                        10,
+                                      ) || 0
+                                    : 0
+                                  const supply =
+                                    meta?.supply_per_cycle ?? 0
+                                  return (
+                                    <span className="text-gray-3 ml-1">
+                                      {balance} / {supply}
+                                    </span>
+                                  )
+                                })()}
                               </span>
                             </button>
                           )
