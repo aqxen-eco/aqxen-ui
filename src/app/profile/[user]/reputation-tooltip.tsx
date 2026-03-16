@@ -3,6 +3,7 @@
 import { MdWorkspacePremium } from 'react-icons/md'
 
 import { Tooltip } from '@/components/ui/tooltip'
+
 import type { ReputationBreakdown } from './functions'
 
 type ReputationTooltipProps = {
