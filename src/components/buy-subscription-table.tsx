@@ -9,12 +9,7 @@ import { toast } from 'react-toastify'
 import { getCurrentCycle } from '@/api/chain/billing/get-current-cycle'
 import { listFees } from '@/api/chain/billing/list-fees'
 import { transferToken } from '@/api/chain/billing/transfer-token'
-import { createOrganization } from '@/api/chain/organization/create-organization'
-import {
-  ensureOrgBadgePinataGroup,
-  ensureOrgBeamsPinataGroup,
-  ensureOrgPinataGroup,
-} from '@/app/admin/organization/actions'
+import { CreateOrgModal } from '@/components/create-org-modal'
 import { TableSkeleton } from '@/components/skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -55,6 +50,12 @@ export function BuySubscriptionTable({
     isRenewalMode ? existingSeats : 1,
   )
   const minMembers = isRenewalMode ? Math.max(1, activeMembers) : 1
+
+  const [createOrgModal, setCreateOrgModal] = useState<{
+    open: boolean
+    orgCreationFee: string
+    memberFee: string
+  }>({ open: false, orgCreationFee: '', memberFee: '' })
 
   const query = useQuery({
     queryKey: ['fees'],
@@ -102,32 +103,27 @@ export function BuySubscriptionTable({
       return
     }
 
-    try {
-      if (hasOrganization) {
+    if (hasOrganization) {
+      try {
         await transferToken({
           session: session!,
           quantity: member_fee,
           currentCycleId,
           memberCount,
         })
-      } else {
-        await createOrganization({
-          session: session!,
-          org_creation_fee,
-          member_fee,
-          currentCycleId,
-          memberCount,
-        })
-        await ensureOrgPinataGroup(session!.actor.toString())
-        await ensureOrgBadgePinataGroup(session!.actor.toString())
-        await ensureOrgBeamsPinataGroup(session!.actor.toString())
+        toast.success('Subscription purchased successfully')
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await queryClient.refetchQueries({ queryKey: ['billing-detail'] })
+        router.push('/admin/subscription')
+      } catch {
+        toast.error('Failed to purchase subscription')
       }
-      toast.success('Subscription purchased successfully')
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      await queryClient.refetchQueries({ queryKey: ['billing-detail'] })
-      router.push(hasOrganization ? '/admin/subscription' : '/admin/organization')
-    } catch {
-      toast.error('Failed to purchase subscription')
+    } else {
+      setCreateOrgModal({
+        open: true,
+        orgCreationFee: org_creation_fee,
+        memberFee: member_fee,
+      })
     }
   }
 
@@ -140,6 +136,7 @@ export function BuySubscriptionTable({
   }
 
   return (
+    <>
     <Table>
       <TableHeader>
         <TableRow>
@@ -264,7 +261,7 @@ export function BuySubscriptionTable({
                       })
                     }
                   >
-                    {isRenewalMode ? 'Renew' : 'Buy'}
+                    {isRenewalMode ? 'Renew' : hasOrganization ? 'Buy' : 'Create Org'}
                   </Button>
                 )}
               </TableCell>
@@ -273,5 +270,18 @@ export function BuySubscriptionTable({
         })}
       </TableBody>
     </Table>
+    {currentCycleId && (
+      <CreateOrgModal
+        open={createOrgModal.open}
+        onOpenChange={(open) =>
+          setCreateOrgModal((prev) => ({ ...prev, open }))
+        }
+        orgCreationFee={createOrgModal.orgCreationFee}
+        memberFee={createOrgModal.memberFee}
+        currentCycleId={currentCycleId}
+        memberCount={memberCount}
+      />
+    )}
+    </>
   )
 }

@@ -32,6 +32,7 @@ export type CreateOrganizationProps = {
   member_fee: string
   currentCycleId: UInt64
   memberCount: number
+  timezone: string
 }
 
 export type UpdateOrganizationProps = {

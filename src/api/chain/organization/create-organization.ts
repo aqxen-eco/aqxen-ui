@@ -6,12 +6,34 @@ function formatTimePointSec(date: Date): string {
   return date.toISOString().replace(/\.\d{3}Z$/, '')
 }
 
+function getStartOfDayInTimezone(timezone: string): Date {
+  const now = new Date()
+  const localDateStr = now.toLocaleDateString('en-CA', { timeZone: timezone })
+  const [year, month, day] = localDateStr.split('-').map(Number)
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    timeZoneName: 'shortOffset',
+  })
+  const parts = formatter.formatToParts(now)
+  const offsetPart = parts.find((p) => p.type === 'timeZoneName')?.value ?? ''
+  const match = offsetPart.match(/GMT([+-]\d{1,2})(?::(\d{2}))?/)
+  let offsetMinutes = 0
+  if (match) {
+    const hours = parseInt(match[1], 10)
+    const mins = parseInt(match[2] || '0', 10)
+    offsetMinutes = hours * 60 + (hours < 0 ? -mins : mins)
+  }
+  const utcMidnight = Date.UTC(year, month - 1, day) - offsetMinutes * 60_000
+  return new Date(utcMidnight)
+}
+
 export async function createOrganization({
   session,
   org_creation_fee,
   member_fee,
   currentCycleId,
   memberCount,
+  timezone,
 }: CreateOrganizationProps) {
   const organizationName = session.actor.toString()
   const organizationCode = organizationName.slice(0, 4)
@@ -69,9 +91,7 @@ export async function createOrganization({
       authorization: [session.permissionLevel],
       data: {
         org: organizationName,
-        starttime: formatTimePointSec(
-          new Date(Date.now() + 5 * 60 * 1000),
-        ),
+        starttime: formatTimePointSec(getStartOfDayInTimezone(timezone)),
       },
     },
   ])
