@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { MdOutlineInterests, MdOutlineLocationOn, MdStar, MdWorkspacePremium } from 'react-icons/md'
 
-import { ClaimableBeamsAlert } from '@/components/claimable-beams-alert'
 import { ProfileForm } from '@/components/profile-form'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
@@ -141,7 +140,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <div className="max-w-container-md mx-auto space-y-8 py-8 max-md:pt-0 md:px-4">
-      <ClaimableBeamsAlert />
       <Box className="divide-gray-2 divide-y overflow-hidden p-0 max-md:rounded-none max-md:border-0 max-md:bg-black">
         <div className={`relative h-52 w-full overflow-hidden ${profile?.coverIpfs ? 'bg-white' : 'bg-linear-(--gradient)'}`}>
           {profile?.coverIpfs && (

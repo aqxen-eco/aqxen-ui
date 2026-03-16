@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { MdClose, MdMenu } from 'react-icons/md'
 
+import { ClaimableBeamsAlert } from '@/components/claimable-beams-alert'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
@@ -197,6 +198,7 @@ export function AppBar() {
               </div>
             )}
             <div className="flex items-center gap-2">
+              {isReady && isAuthenticated && <ClaimableBeamsAlert />}
               {isReady && isAuthenticated ? (
                 <DropdownRoot
                   customTrigger={

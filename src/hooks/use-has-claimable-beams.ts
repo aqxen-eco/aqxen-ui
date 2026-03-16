@@ -12,6 +12,12 @@ import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { getUserOrganizations } from '@/app/profile/[user]/functions'
 import { useChain } from '@/contexts/chain'
 
+function getSymbol(meta: BeamMetadata) {
+  return meta.badge_symbol.includes(',')
+    ? meta.badge_symbol.split(',')[1]
+    : meta.badge_symbol
+}
+
 function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
   const now = Date.now() / 1000
   const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
@@ -23,15 +29,36 @@ function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
   const currentCycleStart =
     starttime + Math.floor(elapsed / cycleLength) * cycleLength
 
-  const symbol = meta.badge_symbol.includes(',')
-    ? meta.badge_symbol.split(',')[1]
-    : meta.badge_symbol
+  const symbol = getSymbol(meta)
   const stat = stats.find((s) => s.badge_asset.split(' ')[1] === symbol)
   if (!stat) return true
 
   const lastClaimed =
     new Date(`${stat.last_claimed_time}Z`).getTime() / 1000
   return lastClaimed < currentCycleStart
+}
+
+function getSecondsUntilClaimable(meta: BeamMetadata, stats: BeamStats[]) {
+  const now = Date.now() / 1000
+  const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
+  const cycleLength = meta.cycle_length
+
+  if (cycleLength <= 0 || now < starttime) return Infinity
+
+  const elapsed = now - starttime
+  const currentCycleStart =
+    starttime + Math.floor(elapsed / cycleLength) * cycleLength
+
+  const symbol = getSymbol(meta)
+  const stat = stats.find((s) => s.badge_asset.split(' ')[1] === symbol)
+  if (!stat) return 0
+
+  const lastClaimed =
+    new Date(`${stat.last_claimed_time}Z`).getTime() / 1000
+  if (lastClaimed < currentCycleStart) return 0
+
+  const nextCycleStart = currentCycleStart + cycleLength
+  return Math.max(0, Math.round(nextCycleStart - now))
 }
 
 export function useHasClaimableBeams() {
@@ -81,7 +108,9 @@ export function useHasClaimableBeams() {
     badgeQueries.some((q) => q.isLoading) ||
     beamTemplatesQuery.isLoading
 
-  if (isLoading) return { hasClaimable: false, isLoading: true }
+  if (isLoading) {
+    return { hasClaimable: false, secondsUntilNextClaim: null, isLoading: true }
+  }
 
   const templateNames = new Set(
     beamTemplatesQuery.data?.map((t) => t.display_name) ?? [],
@@ -93,16 +122,27 @@ export function useHasClaimableBeams() {
     ),
   )
 
-  const hasClaimable = orgNames.some((_, i) => {
+  const allBeamMeta = orgNames.flatMap((_, i) => {
     const metadata = metadataQueries[i]?.data ?? []
-    return metadata.some((meta) => {
+    return metadata.filter((meta) => {
       const badge = badgesBySymbol.get(meta.badge_symbol)
       if (!badge) return false
-      if (!templateNames.has(badge.onchain_lookup_data.user.display_name))
-        return false
-      return isClaimable(meta, stats)
+      return templateNames.has(badge.onchain_lookup_data.user.display_name)
     })
   })
 
-  return { hasClaimable, isLoading: false }
+  const hasClaimable = allBeamMeta.some((meta) => isClaimable(meta, stats))
+
+  // Find the shortest time until any beam becomes claimable
+  let minSeconds = Infinity
+  for (const meta of allBeamMeta) {
+    const s = getSecondsUntilClaimable(meta, stats)
+    if (s < minSeconds) minSeconds = s
+  }
+
+  return {
+    hasClaimable,
+    secondsUntilNextClaim: minSeconds === Infinity ? null : minSeconds,
+    isLoading: false,
+  }
 }

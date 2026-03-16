@@ -34,7 +34,6 @@ import {
 } from '@/app/feed/actions'
 import { PostItem, PostItemComment } from '@/app/feed/post-item'
 import { getOrgMemberReputation } from '@/app/profile/[user]/functions'
-import { ClaimableBeamsAlert } from '@/components/claimable-beams-alert'
 import { TableSkeleton } from '@/components/skeleton'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -294,7 +293,6 @@ export default function OrganizationPage() {
 
   return (
     <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 py-12">
-      <ClaimableBeamsAlert />
       <section className="mb-12 flex flex-col items-center gap-4 text-center">
         {orgQuery.isLoading && (
           <div className="animate-pulse">
