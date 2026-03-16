@@ -11,6 +11,7 @@ export async function createOrganization({
   org_creation_fee,
   member_fee,
   currentCycleId,
+  memberCount,
 }: CreateOrganizationProps) {
   const organizationName = session.actor.toString()
   const organizationCode = organizationName.slice(0, 4)
@@ -25,9 +26,8 @@ export async function createOrganization({
     Number(org_creation_fee.replace('USD', '').trim()) / tokenPrice
   ).toFixed(4)} ${TOKEN_SYMBOL}`
 
-  const memberFee = `${(
-    Number(member_fee.replace('USD', '').trim()) / tokenPrice
-  ).toFixed(4)} ${TOKEN_SYMBOL}`
+  const totalMemberUsd = Number(member_fee.replace('USD', '').trim()) * memberCount
+  const memberFee = `${(totalMemberUsd / tokenPrice).toFixed(4)} ${TOKEN_SYMBOL}`
 
   await execute(session, [
     {
@@ -60,7 +60,7 @@ export async function createOrganization({
         from: session.actor,
         to: Contract.BILLING,
         quantity: memberFee,
-        memo: `bill:${organizationName}:${currentCycleId}:1`,
+        memo: `bill:${organizationName}:${currentCycleId}:${memberCount}`,
       },
     },
     {

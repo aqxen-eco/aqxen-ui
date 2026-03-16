@@ -6,6 +6,7 @@ export async function transferToken({
   session,
   quantity,
   currentCycleId,
+  memberCount,
 }: TransferTokenProps) {
   const organizationName = session.actor.toString()
 
@@ -15,7 +16,8 @@ export async function transferToken({
   const data = await priceRes.json()
   const tokenPrice = data[COINGECKO_ID].usd
 
-  const memberFee = `${(Number(quantity.replace('USD', '').trim()) / tokenPrice).toFixed(4)} ${TOKEN_SYMBOL}`
+  const totalUsd = Number(quantity.replace('USD', '').trim()) * memberCount
+  const memberFee = `${(totalUsd / tokenPrice).toFixed(4)} ${TOKEN_SYMBOL}`
 
   await execute(session, [
     {
@@ -26,7 +28,7 @@ export async function transferToken({
         from: session.actor,
         to: Contract.BILLING,
         quantity: memberFee,
-        memo: `bill:${organizationName}:${currentCycleId}:1`,
+        memo: `bill:${organizationName}:${currentCycleId}:${memberCount}`,
       },
     },
   ])

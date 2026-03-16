@@ -67,9 +67,9 @@ export function AppBar() {
               )}
               {isReady && !isAuthenticated && (
                 <Link
-                  href="/subscriptions"
+                  href="/pricing"
                   variant={
-                    pathname.includes('/subscriptions') ? 'link' : 'default'
+                    pathname.includes('/pricing') ? 'link' : 'default'
                   }
                 >
                   Pricing
@@ -108,16 +108,11 @@ export function AppBar() {
                 </>
               )}
               {isReady && isAuthenticated && !hasOrganization && (
-                <Link
-                  href="/subscriptions"
-                  variant={
-                    pathname.includes('/subscriptions')
-                      ? 'link'
-                      : 'default'
-                  }
-                >
-                  Subscriptions
-                </Link>
+                <Button asChild variant="primary">
+                  <NextLink href="/pricing">
+                    Create Organization
+                  </NextLink>
+                </Button>
               )}
             </div>
 
@@ -145,9 +140,9 @@ export function AppBar() {
                 )}
                 {isReady && (
                   <Link
-                    href="/subscriptions"
+                    href="/pricing"
                     variant={
-                      pathname.includes('/subscriptions')
+                      pathname.includes('/pricing')
                         ? 'link'
                         : 'default'
                     }
@@ -250,8 +245,8 @@ export function AppBar() {
                   {!hasOrganization && (
                     <div className="md:hidden">
                       <DropdownItem asChild>
-                        <NextLink href="/subscriptions">
-                          Subscriptions
+                        <NextLink href="/pricing">
+                          Create Organization
                         </NextLink>
                       </DropdownItem>
                     </div>

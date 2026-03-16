@@ -357,7 +357,7 @@ export default function MembersPage() {
               maxMembers !== undefined &&
               memberCount >= maxMembers && (
                 <Button asChild variant="primary" size="md">
-                  <Link href="/admin/buy-subscription">
+                  <Link href="/pricing">
                     Buy Additional Seats
                   </Link>
                 </Button>

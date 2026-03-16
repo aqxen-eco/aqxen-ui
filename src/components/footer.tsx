@@ -15,7 +15,7 @@ export function Footer() {
             About
           </NextLink>
           <NextLink
-            href="/subscriptions"
+            href="/pricing"
             className="text-gray-3 hover:text-white"
           >
             Pricing

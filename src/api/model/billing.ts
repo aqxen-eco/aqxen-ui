@@ -29,4 +29,5 @@ export type TransferTokenProps = {
   session: Session
   quantity: string
   currentCycleId: UInt64
+  memberCount: number
 }

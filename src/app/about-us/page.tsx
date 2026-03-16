@@ -53,7 +53,7 @@ export default function AboutUs() {
             Learn how to integrate AqXen Socials into your organization&apos;s
             strategy.
           </h2>
-          <Link href="/subscriptions" variant="primary" size="lg">
+          <Link href="/pricing" variant="primary" size="lg">
             Get Started
           </Link>
         </div>
