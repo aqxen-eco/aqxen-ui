@@ -565,6 +565,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                     organization={comment.organization}
                     totalScore={comment.totalScore}
                     beamGives={comment.beamGives}
+                    hideScore={post.isAnnouncement}
                   />
                 ))}
               </PostItem>

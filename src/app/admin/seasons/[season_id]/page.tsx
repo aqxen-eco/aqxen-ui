@@ -277,6 +277,8 @@ export default function SeasonPage() {
                             <BadgeImage
                               src={badge.offchain_lookup_data.user.ipfs_image}
                               size="xs"
+                              badgeSymbol={badge.badge_symbol}
+                              displayName={badge.onchain_lookup_data.user.display_name}
                             />
                             <span className="text-body-2 font-sans font-medium text-nowrap text-white">
                               {badge.onchain_lookup_data.user.display_name}
@@ -304,7 +306,7 @@ export default function SeasonPage() {
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
               <h2 className="text-title-2 text-white">Badges</h2>
-              <Tooltip content="Lorem ipsum dolor sit amed">
+              <Tooltip content="Standalone badges linked to this season. These are awarded manually or through automations independently of beam cycles.">
                 <Button variant="link" size="md" square>
                   <MdOutlineInfo className="size-6" />
                 </Button>
@@ -344,6 +346,8 @@ export default function SeasonPage() {
                             <BadgeImage
                               src={badge.offchain_lookup_data.user.ipfs_image}
                               size="xs"
+                              badgeSymbol={badge.badge_symbol}
+                              displayName={badge.onchain_lookup_data.user.display_name}
                             />
                             <span className="text-body-2 font-sans font-medium text-nowrap text-white">
                               {badge.onchain_lookup_data.user.display_name}
@@ -371,7 +375,7 @@ export default function SeasonPage() {
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
               <h2 className="text-title-2 text-white">Series</h2>
-              <Tooltip content="Lorem ipsum dolor sit amed">
+              <Tooltip content="Time-bound periods within this season. Each series can include its own beams and badges, and tracks awards separately.">
                 <Button variant="link" size="md" square>
                   <MdOutlineInfo className="size-6" />
                 </Button>
@@ -412,7 +416,7 @@ export default function SeasonPage() {
                             {seriesItem.sequence_description}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-wrap items-center gap-2">
                               {seriesItem.beams.length > 0 &&
                                 seriesItem.beams.map((badge) => (
                                   <Tooltip
@@ -429,6 +433,8 @@ export default function SeasonPage() {
                                             .ipfs_image
                                         }
                                         size="xs"
+                                        badgeSymbol={badge.badge_symbol}
+                                        displayName={badge.onchain_lookup_data.user.display_name}
                                       />
                                     </div>
                                   </Tooltip>
@@ -448,7 +454,7 @@ export default function SeasonPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-wrap items-center gap-2">
                               {seriesItem.regularBadges.length > 0 &&
                                 seriesItem.regularBadges.map((badge) => (
                                   <Tooltip
@@ -465,6 +471,8 @@ export default function SeasonPage() {
                                             .ipfs_image
                                         }
                                         size="xs"
+                                        badgeSymbol={badge.badge_symbol}
+                                        displayName={badge.onchain_lookup_data.user.display_name}
                                       />
                                     </div>
                                   </Tooltip>

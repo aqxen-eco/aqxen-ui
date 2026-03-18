@@ -77,7 +77,7 @@ export function SeasonalBadgesSection({
     ? lifetimeBadges
     : seriesValue?.badges ?? []
   const dropdownLabel = isLifetime
-    ? 'Lifetime'
+    ? 'All Series'
     : seriesValue?.sequence_description
 
   return (
@@ -100,7 +100,7 @@ export function SeasonalBadgesSection({
               isSelected={isLifetime}
               onClick={() => setSelectedSeries(LIFETIME_KEY)}
             >
-              Lifetime ({lifetimeTotal})
+              All Series ({lifetimeTotal})
             </DropdownItem>
             {series.map((s) => (
               <DropdownItem
@@ -130,6 +130,8 @@ export function SeasonalBadgesSection({
                       balance={String(badge.balance)}
                       ipfs={badge.offchain_lookup_data.user.ipfs_image}
                       label={label === 'Beams' ? 'beam' : 'badge'}
+                      balanceLabel={label === 'Beams' ? 'rep' : undefined}
+                      badgeSymbol={badge.badge_symbol}
                     />
                   </button>
                 </BadgeSwiperSlide>

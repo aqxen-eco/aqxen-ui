@@ -232,6 +232,8 @@ export function BadgeDetailModal({
                         <BadgeImage
                           src={badge.offchain_lookup_data.user.ipfs_image}
                           size="lg"
+                          badgeSymbol={badge.badge_symbol}
+                          displayName={badge.onchain_lookup_data.user.display_name}
                         />
                         <Dialog.Title className="text-title-2 mt-4 text-white">
                           {badge.onchain_lookup_data.user.display_name}

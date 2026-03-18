@@ -517,6 +517,7 @@ export default function OrganizationPage() {
                       organization={comment.organization}
                       totalScore={comment.totalScore}
                       beamGives={comment.beamGives}
+                      hideScore={post.isAnnouncement}
                     />
                   ))}
                 </PostItem>
@@ -574,13 +575,19 @@ export default function OrganizationPage() {
                     <TableHead>Account</TableHead>
                     <TableHead>Reputation</TableHead>
                     <TableHead>Joined</TableHead>
-                    <TableHead className="w-28" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {membersQuery.data.rows.map((row) => (
                     <TableRow key={row.account}>
-                      <TableCell>{row.account}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/profile/${row.account}`}
+                          className="hover:underline"
+                        >
+                          {row.account}
+                        </Link>
+                      </TableCell>
                       <TableCell className="text-gray-3">
                         {reputationQuery.data?.[row.account] ?? 0}
                       </TableCell>
@@ -589,13 +596,6 @@ export default function OrganizationPage() {
                           new Date(row.joined_at),
                           'EEE d MMM yyyy'
                         )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button asChild variant="primary" size="md">
-                          <Link href={`/profile/${row.account}`}>
-                            View Profile
-                          </Link>
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -641,6 +641,7 @@ export default function OrganizationPage() {
                       organization={comment.organization}
                       totalScore={comment.totalScore}
                       beamGives={comment.beamGives}
+                      hideScore
                     />
                   ))}
                 </PostItem>

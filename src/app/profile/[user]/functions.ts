@@ -101,6 +101,17 @@ export async function getUserBadges({
   const beamTemplateNames = new Set(beamTemplates.map((t) => t.display_name))
   const trackingMetrics = ['Giving', 'Rep', 'Uniqueness']
 
+  function getTrackingSymbols(beamSymbol: string): string[] {
+    const [precision, code] = beamSymbol.split(',')
+    if (!code) return []
+    const suffix = code.slice(-3)
+    const orgCode = code.slice(0, -3)
+    const shortSuffix = suffix.slice(0, 2)
+    return ['G', 'R', 'U'].map(
+      (p) => `${precision},${orgCode}${p}${shortSuffix}`,
+    )
+  }
+
   function isBeamOrTrackingBadge(badge: Badge) {
     if (beamBadgeSymbols.has(badge.badge_symbol)) return true
 
@@ -165,6 +176,8 @@ export async function getUserBadges({
         orgAccountName: matchingOrg?.org || '',
       }
 
+      if (entry.balance <= 0) return acc
+
       if (isTopLevelBeam(currentValue)) {
         acc.beamLifetimeBadges.push(entry)
       } else if (!isBeamOrTrackingBadge(currentValue)) {
@@ -176,16 +189,48 @@ export async function getUserBadges({
     { lifeTimeBadges: [], beamLifetimeBadges: [] },
   )
 
+  // Replace beam emit counts with reputation scores from tracking badges
+  const balanceBySymbol = new Map(
+    lifetimeBadgesBalanceSymbol.map((b) => [b.badge_symbol, b.balance]),
+  )
+  for (const beam of beamLifetimeBadges) {
+    const trackingSymbols = getTrackingSymbols(beam.badge_symbol)
+    const reputationScore = trackingSymbols.reduce(
+      (sum, sym) => sum + (balanceBySymbol.get(sym) ?? 0),
+      0,
+    )
+    beam.balance = reputationScore
+  }
+
   const seriesPerSeason = await Promise.all(
     seasons.map((season) =>
       listSeries({ scope: season.agg_symbol.split(',')[1] })
     )
   )
 
-  function buildSeasonData(filterFn: (badge: Badge) => boolean) {
+  function buildSeasonData(
+    filterFn: (badge: Badge) => boolean,
+    useTrackingReputation = false,
+  ) {
     return seasons.map((season, seasonIndex) => {
       const seasonSeries = seriesPerSeason[seasonIndex].rows.map(
         (seriesItem) => {
+          // Build a map of all badge balances in this series for tracking lookup
+          const seriesBalanceMap = new Map<string, number>()
+          if (useTrackingReputation) {
+            for (const crr of badgesStatus) {
+              if (
+                crr.seq_id === seriesItem.seq_id &&
+                crr.agg_symbol === season.agg_symbol
+              ) {
+                const sb = seasonalBadges.find(
+                  (item) => item.badge_agg_seq_id === crr.badge_agg_seq_id,
+                )
+                if (sb) seriesBalanceMap.set(crr.badge_symbol, sb.count)
+              }
+            }
+          }
+
           const seriesBadge = badgesStatus.reduce<
             ({ balance: number } & Badge)[]
           >((acc, crr: BadgeStatus) => {
@@ -200,11 +245,24 @@ export async function getUserBadges({
                 (item) => item.badge_agg_seq_id === crr.badge_agg_seq_id
               )
 
+              const rawBalance = seasonalBadgeBalance?.count ?? 0
               if (badge && filterFn(badge)) {
-                acc.push({
-                  ...badge,
-                  balance: seasonalBadgeBalance?.count ?? 0,
-                })
+                let balance = rawBalance
+                if (useTrackingReputation) {
+                  const trackingSymbols = getTrackingSymbols(
+                    badge.badge_symbol,
+                  )
+                  balance = trackingSymbols.reduce(
+                    (sum, sym) => sum + (seriesBalanceMap.get(sym) ?? 0),
+                    0,
+                  )
+                }
+                if (balance > 0) {
+                  acc.push({
+                    ...badge,
+                    balance,
+                  })
+                }
               }
             }
 
@@ -241,7 +299,7 @@ export async function getUserBadges({
   const seasonsWithBadgesAndSeries = buildSeasonData(
     (badge) => !isBeamOrTrackingBadge(badge),
   )
-  const beamSeasonsData = buildSeasonData(isTopLevelBeam)
+  const beamSeasonsData = buildSeasonData(isTopLevelBeam, true)
 
   return {
     badges: lifeTimeBadges,
