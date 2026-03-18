@@ -77,7 +77,7 @@ export function SeasonalBadgesSection({
     ? lifetimeBadges
     : seriesValue?.badges ?? []
   const dropdownLabel = isLifetime
-    ? 'Lifetime'
+    ? 'All Series'
     : seriesValue?.sequence_description
 
   return (
@@ -100,7 +100,7 @@ export function SeasonalBadgesSection({
               isSelected={isLifetime}
               onClick={() => setSelectedSeries(LIFETIME_KEY)}
             >
-              Lifetime ({lifetimeTotal})
+              All Series ({lifetimeTotal})
             </DropdownItem>
             {series.map((s) => (
               <DropdownItem

@@ -165,6 +165,8 @@ export async function getUserBadges({
         orgAccountName: matchingOrg?.org || '',
       }
 
+      if (entry.balance <= 0) return acc
+
       if (isTopLevelBeam(currentValue)) {
         acc.beamLifetimeBadges.push(entry)
       } else if (!isBeamOrTrackingBadge(currentValue)) {
@@ -200,10 +202,11 @@ export async function getUserBadges({
                 (item) => item.badge_agg_seq_id === crr.badge_agg_seq_id
               )
 
-              if (badge && filterFn(badge)) {
+              const balance = seasonalBadgeBalance?.count ?? 0
+              if (badge && filterFn(badge) && balance > 0) {
                 acc.push({
                   ...badge,
-                  balance: seasonalBadgeBalance?.count ?? 0,
+                  balance,
                 })
               }
             }
