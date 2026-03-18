@@ -8,6 +8,7 @@ type BadgeProps = {
   orgOverlaySrc?: string
   orgOverlayInitials?: string
   label?: string
+  balanceLabel?: string
   badgeSymbol?: string
 }
 
@@ -18,6 +19,7 @@ export function Badge({
   orgOverlaySrc,
   orgOverlayInitials,
   label = 'badge',
+  balanceLabel,
   badgeSymbol,
 }: BadgeProps) {
   return (
@@ -34,7 +36,9 @@ export function Badge({
       </div>
       <p className="text-body-2 mt-2 font-medium text-white">{name}</p>
       <p className="text-body-2 text-gray-3">
-        {balance} {label}{Number(balance) === 1 ? '' : 's'}
+        {balanceLabel
+          ? `${balance} ${balanceLabel}`
+          : `${balance} ${label}${Number(balance) === 1 ? '' : 's'}`}
       </p>
     </div>
   )

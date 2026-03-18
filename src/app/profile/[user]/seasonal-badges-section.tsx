@@ -130,6 +130,7 @@ export function SeasonalBadgesSection({
                       balance={String(badge.balance)}
                       ipfs={badge.offchain_lookup_data.user.ipfs_image}
                       label={label === 'Beams' ? 'beam' : 'badge'}
+                      balanceLabel={label === 'Beams' ? 'rep' : undefined}
                       badgeSymbol={badge.badge_symbol}
                     />
                   </button>
