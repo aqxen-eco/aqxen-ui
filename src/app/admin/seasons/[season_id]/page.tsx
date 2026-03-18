@@ -306,7 +306,7 @@ export default function SeasonPage() {
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
               <h2 className="text-title-2 text-white">Badges</h2>
-              <Tooltip content="Lorem ipsum dolor sit amed">
+              <Tooltip content="Standalone badges linked to this season. These are awarded manually or through automations independently of beam cycles.">
                 <Button variant="link" size="md" square>
                   <MdOutlineInfo className="size-6" />
                 </Button>
@@ -375,7 +375,7 @@ export default function SeasonPage() {
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
               <h2 className="text-title-2 text-white">Series</h2>
-              <Tooltip content="Lorem ipsum dolor sit amed">
+              <Tooltip content="Time-bound periods within this season. Each series can include its own beams and badges, and tracks awards separately.">
                 <Button variant="link" size="md" square>
                   <MdOutlineInfo className="size-6" />
                 </Button>
