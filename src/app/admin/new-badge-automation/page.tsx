@@ -268,6 +268,8 @@ export default function NewBadgeAutomationPage() {
                   <BadgeImage
                     src={badge.offchain_lookup_data.user.ipfs_image}
                     size="xs"
+                    badgeSymbol={badge.badge_symbol}
+                    displayName={badge.onchain_lookup_data.user.display_name}
                   />
                   <input
                     type="hidden"
@@ -333,6 +335,8 @@ export default function NewBadgeAutomationPage() {
                   <BadgeImage
                     src={badge.offchain_lookup_data.user.ipfs_image}
                     size="xs"
+                    badgeSymbol={badge.badge_symbol}
+                    displayName={badge.onchain_lookup_data.user.display_name}
                   />
                   <input
                     type="hidden"

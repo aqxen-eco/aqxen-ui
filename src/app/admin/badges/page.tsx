@@ -98,6 +98,8 @@ export default function BadgesPage() {
                       <BadgeImage
                         src={row.offchain_lookup_data.user.ipfs_image}
                         size="xs"
+                        badgeSymbol={row.badge_symbol}
+                        displayName={row.onchain_lookup_data.user.display_name}
                       />
                       <span className="text-body-2 font-sans font-medium text-nowrap text-white hover:underline">
                         {row.onchain_lookup_data.user.display_name}

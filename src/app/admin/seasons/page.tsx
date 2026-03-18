@@ -108,6 +108,8 @@ export default function SeasonsPage() {
                                     badge.offchain_lookup_data.user.ipfs_image
                                   }
                                   size="xs"
+                                  badgeSymbol={badge.badge_symbol}
+                                  displayName={badge.onchain_lookup_data.user.display_name}
                                   alt={
                                     badge.onchain_lookup_data.user.display_name
                                   }

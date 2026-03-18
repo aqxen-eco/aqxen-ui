@@ -576,6 +576,8 @@ export function PostItem({
                           <BadgeImage
                             src={row.offchain_lookup_data.user.ipfs_image}
                             size="xs"
+                            badgeSymbol={row.badge_symbol}
+                            displayName={row.onchain_lookup_data.user.display_name}
                           />
                         </Button>
                       </Tooltip>
@@ -711,6 +713,8 @@ export function PostItem({
                                   badge.offchain_lookup_data.user.ipfs_image
                                 }
                                 size="xs"
+                                badgeSymbol={badge.badge_symbol}
+                                displayName={badge.onchain_lookup_data.user.display_name}
                               />
                               <span className="text-body-2 font-medium text-white">
                                 {badge.onchain_lookup_data.user.display_name}
@@ -769,6 +773,8 @@ export function PostItem({
                                   badge.offchain_lookup_data.user.ipfs_image
                                 }
                                 size="xs"
+                                badgeSymbol={badge.badge_symbol}
+                                displayName={badge.onchain_lookup_data.user.display_name}
                               />
                               <span className="text-body-2 font-medium text-white">
                                 {badge.onchain_lookup_data.user.display_name}
@@ -869,6 +875,8 @@ export function PostItem({
                                               .ipfs_image
                                           }
                                           size="xs"
+                                          badgeSymbol={badge.badge_symbol}
+                                          displayName={badge.onchain_lookup_data.user.display_name}
                                         />
                                         <span className="text-body-2 font-medium">
                                           {
@@ -1082,6 +1090,8 @@ export function PostItemComment({
                     <BadgeImage
                       src={row.offchain_lookup_data.user.ipfs_image}
                       size="xs"
+                      badgeSymbol={row.badge_symbol}
+                      displayName={row.onchain_lookup_data.user.display_name}
                     />
                   </Button>
                 </Tooltip>

@@ -8,6 +8,7 @@ type BadgeProps = {
   orgOverlaySrc?: string
   orgOverlayInitials?: string
   label?: string
+  badgeSymbol?: string
 }
 
 export function Badge({
@@ -17,11 +18,12 @@ export function Badge({
   orgOverlaySrc,
   orgOverlayInitials,
   label = 'badge',
+  badgeSymbol,
 }: BadgeProps) {
   return (
     <div className="text-center">
       <div className="relative mx-auto w-fit">
-        <BadgeImage src={ipfs} className="mx-auto" />
+        <BadgeImage src={ipfs} className="mx-auto" badgeSymbol={badgeSymbol} displayName={name} />
         {(orgOverlaySrc || orgOverlayInitials) && (
           <div className="absolute -right-1 -bottom-1">
             <Avatar size="sm" color="blue" src={orgOverlaySrc}>

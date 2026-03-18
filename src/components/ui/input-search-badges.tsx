@@ -93,6 +93,8 @@ export function InputSearchBadges({
             <BadgeImage
               src={badge.offchain_lookup_data.user.ipfs_image}
               size="xs"
+              badgeSymbol={badge.badge_symbol}
+              displayName={badge.onchain_lookup_data.user.display_name}
             />
             <span className="text-body-2 font-sans font-medium text-nowrap text-white">
               {badge.onchain_lookup_data.user.display_name}
