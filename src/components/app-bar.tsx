@@ -188,6 +188,15 @@ export function AppBar() {
                     </Link>
                   </>
                 )}
+                <Button asChild variant="secondary" className="text-2xl">
+                  <a
+                    href="https://vaulta.gitbook.io/vaulta-guides/user-guides/getting-started-on-vaulta/wallet-and-account-setup"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Create Account
+                  </a>
+                </Button>
                 <Button
                   variant="default"
                   className="absolute top-4 right-4"
@@ -258,9 +267,20 @@ export function AppBar() {
                   </DropdownItem>
                 </DropdownRoot>
               ) : isReady ? (
-                <Button onClick={login} variant="primary">
-                  Log in
-                </Button>
+                <>
+                  <Button onClick={login} variant="primary">
+                    Log in
+                  </Button>
+                  <Button asChild variant="secondary" className="max-md:hidden">
+                    <a
+                      href="https://vaulta.gitbook.io/vaulta-guides/user-guides/getting-started-on-vaulta/wallet-and-account-setup"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Create Account
+                    </a>
+                  </Button>
+                </>
               ) : (
                 <div className="size-12" />
               )}

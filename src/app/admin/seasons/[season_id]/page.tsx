@@ -412,7 +412,7 @@ export default function SeasonPage() {
                             {seriesItem.sequence_description}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-wrap items-center gap-2">
                               {seriesItem.beams.length > 0 &&
                                 seriesItem.beams.map((badge) => (
                                   <Tooltip
@@ -448,7 +448,7 @@ export default function SeasonPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-wrap items-center gap-2">
                               {seriesItem.regularBadges.length > 0 &&
                                 seriesItem.regularBadges.map((badge) => (
                                   <Tooltip

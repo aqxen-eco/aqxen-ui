@@ -42,9 +42,20 @@ export default function PricingPage() {
               : 'Create your organization to issue blockchain-backed badges, track achievements, and grow your community\'s reputation'}
         </p>
         {!isAuthenticated && (
-          <Button onClick={login} variant="primary" size="lg">
-            Log in to subscribe
-          </Button>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button onClick={login} variant="primary" size="lg">
+              Log In To Create Org
+            </Button>
+            <Button asChild variant="secondary" size="lg">
+              <a
+                href="https://vaulta.gitbook.io/vaulta-guides/user-guides/getting-started-on-vaulta/wallet-and-account-setup"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Create Vaulta Account
+              </a>
+            </Button>
+          </div>
         )}
       </header>
       {hasOrganization && (

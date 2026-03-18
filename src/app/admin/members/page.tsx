@@ -291,7 +291,14 @@ export default function MembersPage() {
                 <TableBody>
                   {requestsQuery.data.rows.map((row) => (
                     <TableRow key={row.account}>
-                      <TableCell>{row.account}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/profile/${row.account}`}
+                          className="hover:underline"
+                        >
+                          {row.account}
+                        </Link>
+                      </TableCell>
                       <TableCell className="text-gray-3">
                         {row.memo || '-'}
                       </TableCell>
@@ -353,13 +360,20 @@ export default function MembersPage() {
                     <TableHead>Account</TableHead>
                     <TableHead>Reputation</TableHead>
                     <TableHead>Joined at</TableHead>
-                    <TableHead className="w-44" />
+                    <TableHead className="w-28" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {membersQuery.data.rows.map((row) => (
                     <TableRow key={row.account}>
-                      <TableCell>{row.account}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/profile/${row.account}`}
+                          className="hover:underline"
+                        >
+                          {row.account}
+                        </Link>
+                      </TableCell>
                       <TableCell className="text-gray-3">
                         {reputationQuery.data?.[row.account] ?? 0}
                       </TableCell>
@@ -367,20 +381,13 @@ export default function MembersPage() {
                         {format(new Date(row.joined_at), 'EEE d MMM yyyy')}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button asChild variant="primary" size="md">
-                            <Link href={`/profile/${row.account}`}>
-                              View Profile
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="md"
-                            onClick={() => handleRemove(row.account)}
-                          >
-                            Remove
-                          </Button>
-                        </div>
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          onClick={() => handleRemove(row.account)}
+                        >
+                          Remove
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
