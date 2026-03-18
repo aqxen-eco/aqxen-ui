@@ -957,6 +957,7 @@ type PostItemCommentProps = {
   organization?: string | null
   totalScore?: number
   beamGives?: BeamGiveEntry[]
+  hideScore?: boolean
 }
 
 export function PostItemComment({
@@ -968,6 +969,7 @@ export function PostItemComment({
   organization,
   totalScore,
   beamGives,
+  hideScore,
 }: PostItemCommentProps) {
   const { name } = useOrganization()
   const badgeScope = organization || name
@@ -1017,53 +1019,55 @@ export function PostItemComment({
               • {format(new Date(createdAt), 'EEE d MMM')}
             </span>
           </div>
-          <Tooltip
-            className="min-w-40"
-            content={
-              (() => {
-                const rows = buildBeamBreakdown(
-                  beamGives,
-                  badgesQuery.data?.rows
-                )
-                if (rows.length === 0) {
-                  return (
-                    <span className="text-gray-3">
-                      No beam contributions
-                    </span>
+          {!hideScore && (
+            <Tooltip
+              className="min-w-40"
+              content={
+                (() => {
+                  const rows = buildBeamBreakdown(
+                    beamGives,
+                    badgesQuery.data?.rows
                   )
-                }
-                return (
-                  <div className="space-y-1">
-                    {rows.map((row) => (
-                      <div
-                        key={row.name}
-                        className="flex justify-between gap-4"
-                      >
-                        <span className="text-white">{row.name}</span>
-                        <span className="text-gray-3 tabular-nums">
-                          {row.score}
+                  if (rows.length === 0) {
+                    return (
+                      <span className="text-gray-3">
+                        No beam contributions
+                      </span>
+                    )
+                  }
+                  return (
+                    <div className="space-y-1">
+                      {rows.map((row) => (
+                        <div
+                          key={row.name}
+                          className="flex justify-between gap-4"
+                        >
+                          <span className="text-white">{row.name}</span>
+                          <span className="text-gray-3 tabular-nums">
+                            {row.score}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="border-gray-2 my-1 border-t" />
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white font-medium">
+                          Total
+                        </span>
+                        <span className="text-white tabular-nums font-medium">
+                          {totalScore ?? 0}
                         </span>
                       </div>
-                    ))}
-                    <div className="border-gray-2 my-1 border-t" />
-                    <div className="flex justify-between gap-4">
-                      <span className="text-white font-medium">
-                        Total
-                      </span>
-                      <span className="text-white tabular-nums font-medium">
-                        {totalScore ?? 0}
-                      </span>
                     </div>
-                  </div>
-                )
-              })()
-            }
-          >
-            <div className="text-gray-3 flex cursor-default gap-0.5">
-              <MdWorkspacePremium className="size-6" />
-              <span className="text-body-2">{totalScore ?? 0}</span>
-            </div>
-          </Tooltip>
+                  )
+                })()
+              }
+            >
+              <div className="text-gray-3 flex cursor-default gap-0.5">
+                <MdWorkspacePremium className="size-6" />
+                <span className="text-body-2">{totalScore ?? 0}</span>
+              </div>
+            </Tooltip>
+          )}
         </div>
         {badgeSymbol.length > 0 && badgesQuery.isSuccess && (
           <div className="flex flex-wrap gap-1">

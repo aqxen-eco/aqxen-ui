@@ -517,6 +517,7 @@ export default function OrganizationPage() {
                       organization={comment.organization}
                       totalScore={comment.totalScore}
                       beamGives={comment.beamGives}
+                      hideScore={post.isAnnouncement}
                     />
                   ))}
                 </PostItem>
@@ -641,6 +642,7 @@ export default function OrganizationPage() {
                       organization={comment.organization}
                       totalScore={comment.totalScore}
                       beamGives={comment.beamGives}
+                      hideScore
                     />
                   ))}
                 </PostItem>
