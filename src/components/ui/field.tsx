@@ -1,5 +1,4 @@
 import { Children, type ReactNode } from 'react'
-
 import { twMerge } from 'tailwind-merge'
 
 export function Field({ className, ...props }: React.ComponentProps<'div'>) {
@@ -16,7 +15,7 @@ export function Field({ className, ...props }: React.ComponentProps<'div'>) {
 function insertZwnj(children: ReactNode): ReactNode {
   return Children.map(children, (child) => {
     if (typeof child === 'string' && child.length > 1) {
-      return child[0] + '\u200C' + child.slice(1)
+      return `${child[0]}\u200C${child.slice(1)}`
     }
     return child
   })
