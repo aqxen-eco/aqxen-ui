@@ -34,11 +34,11 @@ type BadgeImageProps = React.ComponentProps<'img'> &
   }
 
 const BEAM_SUFFIX_FALLBACKS: Record<string, string> = {
-  CHA: '/img/badges/badge_3.png',
+  CHA: '/img/badges/badge_1.png',
   TRA: '/img/badges/badge_4.png',
   REL: '/img/badges/badge_2.png',
-  PAR: '/img/badges/badge_1.png',
-  RES: '/img/badges/badge_0.png',
+  PAR: '/img/badges/badge_0.png',
+  RES: '/img/badges/badge_3.png',
 }
 
 // Tracking badge suffixes use the first 2 letters of the beam suffix
@@ -47,16 +47,16 @@ const BEAM_SUFFIX_FALLBACKS: Record<string, string> = {
 // distinguish them from the symbol alone, so tracking badges only map
 // for unambiguous prefixes.
 const TRACKING_SUFFIX_FALLBACKS: Record<string, string> = {
-  CH: '/img/badges/badge_3.png', // CHA
+  CH: '/img/badges/badge_1.png', // CHA
   TR: '/img/badges/badge_4.png', // TRA
-  PA: '/img/badges/badge_1.png', // PAR
+  PA: '/img/badges/badge_0.png', // PAR
 }
 
 // Maps beam display names to their fallback images for disambiguating
 // tracking badges whose symbol suffixes collide (e.g., REL/RES → RE).
 const BEAM_NAME_FALLBACKS: Record<string, string> = {
   Reliability: '/img/badges/badge_2.png',
-  Responsibility: '/img/badges/badge_0.png',
+  Responsibility: '/img/badges/badge_3.png',
 }
 
 function getFallbackImage(badgeSymbol?: string, displayName?: string) {

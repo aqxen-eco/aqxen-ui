@@ -1,7 +1,6 @@
 'use client'
 
 import { useQueries } from '@tanstack/react-query'
-import { MdKeyboardArrowRight } from 'react-icons/md'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { listSeason } from '@/api/chain/season/list-season'
@@ -73,11 +72,10 @@ export default function SeasonsPage() {
               <TableRow>
                 <TableHead className="w-10">Sym</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Badges</TableHead>
+                <TableHead className="max-w-[17rem]">Badges</TableHead>
                 <TableHead>Last created series</TableHead>
                 <TableHead>Last started series</TableHead>
                 <TableHead>Last ended series</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -87,10 +85,16 @@ export default function SeasonsPage() {
                     {removeOrganizationSymbol(season.agg_symbol)}
                   </TableCell>
                   <TableCell>
-                    {season.onchain_lookup_data.user.display_name}
+                    <Link
+                      href={`/admin/seasons/${season.agg_symbol}`}
+                      variant="link"
+                      size="md"
+                    >
+                      {season.onchain_lookup_data.user.display_name}
+                    </Link>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
+                  <TableCell className="max-w-[17rem]">
+                    <div className="flex flex-wrap gap-2">
                       {badgesQuery?.data?.rows.map(
                         (badge) =>
                           season.init_badge_symbols.includes(
@@ -140,16 +144,6 @@ export default function SeasonsPage() {
                         season.end_seq_ids.at(-1) === serie.seq_id &&
                         serie.sequence_description
                     )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Link
-                      href={`/admin/seasons/${season.agg_symbol}`}
-                      size="md"
-                      variant="secondary"
-                      square
-                    >
-                      <MdKeyboardArrowRight className="size-6" />
-                    </Link>
                   </TableCell>
                 </TableRow>
               ))}

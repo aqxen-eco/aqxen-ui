@@ -1,5 +1,7 @@
 'use client'
 
+import type { UInt64 } from '@wharfkit/antelope'
+
 import { TableSkeleton } from '@/components/skeleton'
 import { Box } from '@/components/ui/box'
 import {
@@ -11,7 +13,32 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useGetBillingDetail } from '@/hooks/query/use-get-billing-detail'
+import { decodeActionKey } from '@/utils/decode-action-key'
 import { formatUsd } from '@/utils/intl-format'
+
+function ActionList({
+  actions,
+}: {
+  actions: Array<{ pair_name: string; uint64: UInt64 }>
+}) {
+  if (actions.length === 0) return <span className="text-gray-3">None</span>
+
+  return (
+    <ul className="inline-block space-y-1 text-left">
+      {actions.map((entry) => {
+        const { contract, action } = decodeActionKey(entry.pair_name)
+        return (
+          <li key={entry.pair_name}>
+            <span className="text-gray-2">{contract}</span>
+            <span className="text-gray-3">::</span>
+            <span>{action}</span>
+            <span className="text-gray-3"> ({String(entry.uint64)})</span>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
 
 export function SubscriptionContent() {
   const billing = useGetBillingDetail()
@@ -53,10 +80,10 @@ export function SubscriptionContent() {
                           {String(row.members_paid_for)}
                         </TableCell>
                         <TableCell className="py-6 text-center">
-                          {String(row.allowed_actions)}
+                          <ActionList actions={row.allowed_actions} />
                         </TableCell>
                         <TableCell className="py-6 text-center">
-                          {String(row.used_actions)}
+                          <ActionList actions={row.used_actions} />
                         </TableCell>
                       </TableRow>
                     ))}
