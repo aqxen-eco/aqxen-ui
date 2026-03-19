@@ -399,8 +399,12 @@ export default function SeasonPage() {
                     <TableRow>
                       <TableHead className="w-10 text-center">ID</TableHead>
                       <TableHead>Name</TableHead>
-                      <TableHead>Additional Beams</TableHead>
-                      <TableHead>Additional Badges</TableHead>
+                      <TableHead className="max-w-[17rem]">
+                        Additional Beams
+                      </TableHead>
+                      <TableHead className="max-w-[17rem]">
+                        Additional Badges
+                      </TableHead>
                       <TableHead className="w-40">Status</TableHead>
                       <TableHead className="w-40" />
                     </TableRow>
@@ -415,7 +419,7 @@ export default function SeasonPage() {
                           <TableCell>
                             {seriesItem.sequence_description}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="max-w-[17rem]">
                             <div className="flex flex-wrap items-center gap-2">
                               {seriesItem.beams.length > 0 &&
                                 seriesItem.beams.map((badge) => (
@@ -453,7 +457,7 @@ export default function SeasonPage() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="max-w-[17rem]">
                             <div className="flex flex-wrap items-center gap-2">
                               {seriesItem.regularBadges.length > 0 &&
                                 seriesItem.regularBadges.map((badge) => (
