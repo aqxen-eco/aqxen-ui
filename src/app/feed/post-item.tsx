@@ -103,6 +103,7 @@ type PostItemProps = {
   totalScore: number
   beamGives?: BeamGiveEntry[]
   isAnnouncement?: boolean
+  hideActions?: boolean
   children: React.ReactNode
 }
 
@@ -131,6 +132,7 @@ export function PostItem({
   totalScore,
   beamGives,
   isAnnouncement,
+  hideActions,
   children,
 }: PostItemProps) {
   const [showRecognize, setShowRecognize] = useState(false)
@@ -594,7 +596,7 @@ export function PostItem({
             </div>
           )}
           <p className="text-body-2 text-gray-3">{content}</p>
-          {currentActor && (
+          {currentActor && !hideActions && (
             <AnimatePresence>
               {!showRecognize && (
                 <motion.div
