@@ -501,6 +501,7 @@ export default function OrganizationPage() {
                   organization={post.organization}
                   totalScore={post.totalScore}
                   isAnnouncement={post.isAnnouncement}
+                  hideActions={!isMember && !isOrgOwner}
                   beamGives={[
                     ...post.beamGives,
                     ...post.children.flatMap((c) => c.beamGives),
@@ -625,6 +626,7 @@ export default function OrganizationPage() {
                   organization={post.organization}
                   totalScore={post.totalScore}
                   isAnnouncement
+                  hideActions={!isMember && !isOrgOwner}
                   beamGives={[
                     ...post.beamGives,
                     ...post.children.flatMap((c) => c.beamGives),
