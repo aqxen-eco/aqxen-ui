@@ -12,13 +12,14 @@ const contactLimiter = createRateLimiter({ windowMs: 60_000, max: 3 })
 type ContactInput = {
   name: string
   email: string
-  organizationName?: string
+  organizationName: string
+  subject: string
   message: string
 }
 
 export async function sendContactEmail(input: ContactInput) {
   try {
-    const { name, email, organizationName, message } =
+    const { name, email, organizationName, subject, message } =
       contactSchema.parse(input)
 
     const limit = contactLimiter.check(email)
@@ -29,8 +30,8 @@ export async function sendContactEmail(input: ContactInput) {
     return resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'delivered@resend.dev',
       to: process.env.RESEND_TO_EMAIL || 'delivered@resend.dev',
-      subject: 'Contact form',
-      text: `Name: ${name}\nEmail: ${email}\nOrganization Name: ${organizationName ?? 'N/A'}\nMessage: ${message}`,
+      subject: `Contact: ${subject}`,
+      text: `Name: ${name}\nEmail: ${email}\nOrganization: ${organizationName}\nSubject: ${subject}\nMessage: ${message}`,
     })
   } catch {
     return {

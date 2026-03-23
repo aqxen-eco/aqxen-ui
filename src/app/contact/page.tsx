@@ -16,7 +16,8 @@ import { sendContactEmail } from './functions'
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Email is invalid'),
-  organizationName: z.string().optional(),
+  organizationName: z.string().min(1, 'Organization name is required'),
+  subject: z.string().min(1, 'Subject is required'),
   message: z.string().min(1, 'Message is required'),
 })
 
@@ -39,12 +40,14 @@ export default function Contact() {
     name,
     email,
     organizationName,
+    subject,
     message,
   }: ContactSchema) {
     const result = await sendContactEmail({
       name,
       email,
       organizationName,
+      subject,
       message,
     })
 
@@ -101,6 +104,16 @@ export default function Contact() {
               aria-invalid={!!errors['organizationName']}
             />
             <ErrorMessage>{errors['organizationName']?.message}</ErrorMessage>
+          </Field>
+          <Field>
+            <Label htmlFor="subject">{t('subjectLabel')}</Label>
+            <Input
+              id="subject"
+              {...register('subject')}
+              placeholder={t('subjectPlaceholder')}
+              aria-invalid={!!errors['subject']}
+            />
+            <ErrorMessage>{errors['subject']?.message}</ErrorMessage>
           </Field>
           <Field>
             <Label htmlFor="message">{t('messageLabel')}</Label>
