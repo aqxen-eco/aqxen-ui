@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
@@ -6,6 +7,7 @@ import type { Badge } from '@/api/model/badge'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Combobox, ComboboxEmpty, ComboboxItem } from '@/components/ui/combobox'
 import { useOrganization } from '@/contexts/organization'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
 type InputSearchBadgesProps = {
   value?: string[]
@@ -17,6 +19,8 @@ export function InputSearchBadges({
   onChange,
 }: InputSearchBadgesProps) {
   const { name } = useOrganization()
+  const tc = useTranslations('common')
+  const translateBadgeName = useTranslateBadgeName()
 
   const badgesQuery = useQuery({
     queryKey: ['badges', name],
@@ -78,7 +82,7 @@ export function InputSearchBadges({
   }
 
   return (
-    <Combobox title="Search badges" filter={handleFilter}>
+    <Combobox title={tc('searchBadges')} filter={handleFilter}>
       <ComboboxEmpty />
 
       {badgesQuery?.data?.rows.map((badge) => (
@@ -97,7 +101,7 @@ export function InputSearchBadges({
               displayName={badge.onchain_lookup_data.user.display_name}
             />
             <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-              {badge.onchain_lookup_data.user.display_name}
+              {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
             </span>
           </div>
         </ComboboxItem>

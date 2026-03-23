@@ -2,11 +2,13 @@
 
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
-import { listFormat } from '@/utils/intl-format'
+import { useDateLocale, useIntlLocale } from '@/hooks/use-date-locale'
+import { getListFormat } from '@/utils/intl-format'
 
 type Post = {
   id: string
@@ -37,10 +39,14 @@ type ProfileFeedProps = {
 }
 
 export function ProfileFeed({ posts }: ProfileFeedProps) {
+  const t = useTranslations('profile')
+  const dateLocale = useDateLocale()
+  const intlLocale = useIntlLocale()
+
   if (posts.length === 0) {
     return (
       <div className="px-8 py-8 max-md:px-4">
-        <p className="text-body-2 text-gray-3">No posts yet.</p>
+        <p className="text-body-2 text-gray-3">{t('noPostsYet')}</p>
       </div>
     )
   }
@@ -71,8 +77,8 @@ export function ProfileFeed({ posts }: ProfileFeedProps) {
                 {post.mention.length > 0 && (
                   <>
                     {' '}
-                    <span className="text-gray-3">recognized</span>{' '}
-                    {listFormat
+                    <span className="text-gray-3">{t('recognized')}</span>{' '}
+                    {getListFormat(intlLocale)
                       .formatToParts(post.mention.map((m) => m.user.actor))
                       .map(({ type, value }) =>
                         type === 'element' ? (
@@ -93,7 +99,7 @@ export function ProfileFeed({ posts }: ProfileFeedProps) {
                 )}
                 <span className="text-gray-3">
                   {' '}
-                  &bull; {format(new Date(post.createdAt), 'EEE d MMM')}
+                  &bull; {format(new Date(post.createdAt), 'EEE d MMM', { locale: dateLocale })}
                 </span>
               </p>
               <p className="text-body-2 text-gray-3 mt-1">{post.content}</p>
@@ -124,7 +130,7 @@ export function ProfileFeed({ posts }: ProfileFeedProps) {
                       <span className="text-gray-3">
                         {' '}
                         &bull;{' '}
-                        {format(new Date(comment.createdAt), 'EEE d MMM')}
+                        {format(new Date(comment.createdAt), 'EEE d MMM', { locale: dateLocale })}
                       </span>
                     </p>
                     <p className="text-body-2 text-gray-3 mt-0.5">

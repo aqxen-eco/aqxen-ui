@@ -1,6 +1,7 @@
 'use client'
 
 import type { UInt64 } from '@wharfkit/antelope'
+import { useTranslations } from 'next-intl'
 
 import { TableSkeleton } from '@/components/skeleton'
 import { Box } from '@/components/ui/box'
@@ -13,15 +14,18 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useGetBillingDetail } from '@/hooks/query/use-get-billing-detail'
+import { useCurrency } from '@/hooks/use-currency'
+import { useIntlLocale } from '@/hooks/use-date-locale'
 import { decodeActionKey } from '@/utils/decode-action-key'
-import { formatUsd } from '@/utils/intl-format'
+import { formatNumber } from '@/utils/intl-format'
 
 function ActionList({
   actions,
 }: {
   actions: Array<{ pair_name: string; uint64: UInt64 }>
 }) {
-  if (actions.length === 0) return <span className="text-gray-3">None</span>
+  const tc = useTranslations('admin.common')
+  if (actions.length === 0) return <span className="text-gray-3">{tc('none')}</span>
 
   return (
     <ul className="inline-block space-y-1 text-left">
@@ -41,6 +45,9 @@ function ActionList({
 }
 
 export function SubscriptionContent() {
+  const t = useTranslations('admin.subscription')
+  const intlLocale = useIntlLocale()
+  const { formatPriceFromString } = useCurrency()
   const billing = useGetBillingDetail()
 
   return (
@@ -54,16 +61,16 @@ export function SubscriptionContent() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-10">Bill cycle ID</TableHead>
-                      <TableHead>Amount paid</TableHead>
+                      <TableHead className="w-10">{t('billCycleId')}</TableHead>
+                      <TableHead>{t('amountPaid')}</TableHead>
                       <TableHead className="text-center">
-                        Members paid for
+                        {t('membersPaidFor')}
                       </TableHead>
                       <TableHead className="text-center">
-                        Allowed actions
+                        {t('allowedActions')}
                       </TableHead>
                       <TableHead className="text-center">
-                        Used actions
+                        {t('usedActions')}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -74,10 +81,10 @@ export function SubscriptionContent() {
                           {String(row.bill_cycle_id)}
                         </TableCell>
                         <TableCell className="py-6">
-                          {formatUsd(row.amount_paid)}
+                          {formatPriceFromString(row.amount_paid)}
                         </TableCell>
                         <TableCell className="py-6 text-center">
-                          {String(row.members_paid_for)}
+                          {formatNumber(Number(row.members_paid_for), intlLocale)}
                         </TableCell>
                         <TableCell className="py-6 text-center">
                           <ActionList actions={row.allowed_actions} />
@@ -92,7 +99,7 @@ export function SubscriptionContent() {
               ) : (
                 <Box className="flex w-full items-center justify-center text-center">
                   <p className="text-body-2 text-gray-3">
-                    No Subscriptions activated
+                    {t('noSubscriptions')}
                   </p>
                 </Box>
               )}

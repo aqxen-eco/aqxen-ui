@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
@@ -34,6 +35,8 @@ const organizationSchema = z.object({
 type OrganizationSchema = z.infer<typeof organizationSchema>
 
 export default function OrganizationPage() {
+  const t = useTranslations('admin.organization')
+  const tc = useTranslations('admin.common')
   const { session, actor } = useChain()
   const queryClient = useQueryClient()
   const {
@@ -111,9 +114,9 @@ export default function OrganizationPage() {
       await queryClient.invalidateQueries({
         queryKey: ['organization', actor],
       })
-      toast.success('Organization details saved successfully.')
+      toast.success(t('saveSuccess'))
     } catch {
-      toast.error('Failed to save organization.')
+      toast.error(t('saveFailed'))
     }
   }
 
@@ -134,7 +137,7 @@ export default function OrganizationPage() {
         className="space-y-8 p-8 max-md:p-0 md:col-span-4"
       >
         <Field>
-          <Label htmlFor="displayName">Name</Label>
+          <Label htmlFor="displayName">{tc('name')}</Label>
           <Input
             id="displayName"
             {...register('displayName')}
@@ -144,7 +147,7 @@ export default function OrganizationPage() {
           <ErrorMessage>{errors['displayName']?.message}</ErrorMessage>
         </Field>
         <Field>
-          <Label>Logo</Label>
+          <Label>{t('logo')}</Label>
           <ImageUpload
             variant="avatar"
             value={logo}
@@ -156,15 +159,15 @@ export default function OrganizationPage() {
           />
           <ErrorMessage>{errors['ipfs']?.message}</ErrorMessage>
           <span className="text-body-3 text-gray-3 mt-1 block">
-            Recommended: 400 x 400px
+            {tc('recommendedSize')}
           </span>
         </Field>
         <Field>
-          <Label htmlFor="shortDescription">Short Description</Label>
+          <Label htmlFor="shortDescription">{t('shortDescription')}</Label>
           <Textarea
             id="shortDescription"
             {...register('shortDescription')}
-            placeholder="A brief tagline for your organization"
+            placeholder={t('shortDescriptionPlaceholder')}
             maxLength={255}
             aria-invalid={!!errors['shortDescription']}
             className="min-h-32"
@@ -173,21 +176,21 @@ export default function OrganizationPage() {
           <ErrorMessage>{errors['shortDescription']?.message}</ErrorMessage>
         </Field>
         <Field>
-          <Label htmlFor="about">About Organization</Label>
+          <Label htmlFor="about">{t('aboutOrganization')}</Label>
           <Textarea
             id="about"
             {...register('about')}
-            placeholder="Tell people about your organization"
+            placeholder={t('aboutPlaceholder')}
             className="min-h-48"
             disabled={isSubmitting || isUploading}
           />
         </Field>
         <Field>
-          <Label htmlFor="purpose">Organization Purpose</Label>
+          <Label htmlFor="purpose">{t('organizationPurpose')}</Label>
           <Textarea
             id="purpose"
             {...register('purpose')}
-            placeholder="What is your organization's purpose?"
+            placeholder={t('purposePlaceholder')}
             className="min-h-48"
             disabled={isSubmitting || isUploading}
           />
@@ -198,11 +201,11 @@ export default function OrganizationPage() {
           size="lg"
           disabled={isSubmitting || isUploading}
         >
-          {isSubmitting || isUploading ? 'Saving...' : 'Save'}
+          {isSubmitting || isUploading ? tc('saving') : tc('save')}
         </Button>
       </form>
       <div className="border-gray-2 max-md:bg-gray-1 space-y-4 border-l p-8 max-md:rounded-2xl max-md:border max-md:p-4 md:col-span-2">
-        <h2 className="text-title-2 text-white">Organization preview</h2>
+        <h2 className="text-title-2 text-white">{t('preview')}</h2>
         <div
           className={`mx-auto w-fit rounded-full ${logo ? 'bg-white' : ''}`}
         >
@@ -216,7 +219,7 @@ export default function OrganizationPage() {
         </p>
         <div className="text-center">
           <Button asChild variant="primary" size="md">
-            <Link href={`/organizations/${name}`}>View</Link>
+            <Link href={`/organizations/${name}`}>{tc('view')}</Link>
           </Button>
         </div>
       </div>

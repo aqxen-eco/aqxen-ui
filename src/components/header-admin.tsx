@@ -1,4 +1,7 @@
+'use client'
+
 import type { LinkProps } from 'next/link'
+import { useTranslations } from 'next-intl'
 import { MdKeyboardArrowLeft } from 'react-icons/md'
 import { MdOutlineInfo } from 'react-icons/md'
 import { twMerge } from 'tailwind-merge'
@@ -9,31 +12,31 @@ import { Tooltip } from '@/components/ui/tooltip'
 
 export const navLinks = [
   {
-    label: 'Organization',
+    labelKey: 'organization',
     href: '/admin/organization',
   },
   {
-    label: 'Members',
+    labelKey: 'members',
     href: '/admin/members',
   },
   {
-    label: 'Beams',
+    labelKey: 'beams',
     href: '/admin/beams',
   },
   {
-    label: 'Badges',
+    labelKey: 'badges',
     href: '/admin/badges',
   },
   {
-    label: 'Badge Automation',
+    labelKey: 'badgeAutomation',
     href: '/admin/badges-automation',
   },
   {
-    label: 'Seasons',
+    labelKey: 'seasons',
     href: '/admin/seasons',
   },
   {
-    label: 'Subscription',
+    labelKey: 'subscription',
     href: '/admin/subscription',
   },
 ] as const
@@ -51,6 +54,7 @@ type HeaderAdminMenuProps = {
 }
 
 export function HeaderAdminMenu({ activeHref }: HeaderAdminMenuProps) {
+  const t = useTranslations('admin.nav')
   return (
     <div className="max-w-container-lg mx-auto md:px-4">
       <nav className="border-gray-2 overflow-x-auto border-b pb-2">
@@ -61,7 +65,7 @@ export function HeaderAdminMenu({ activeHref }: HeaderAdminMenuProps) {
                 href={link.href}
                 variant={activeHref === link.href ? 'link' : 'default'}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             </li>
           ))}

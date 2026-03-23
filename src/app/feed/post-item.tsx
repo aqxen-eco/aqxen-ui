@@ -7,6 +7,7 @@ import { Command } from 'cmdk'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Children, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import {
@@ -40,7 +41,9 @@ import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { useGetOrganization } from '@/hooks/query/use-get-organization'
-import { listFormat } from '@/utils/intl-format'
+import { useDateLocale, useIntlLocale } from '@/hooks/use-date-locale'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
+import { formatNumber, getListFormat } from '@/utils/intl-format'
 
 import { createPost } from './actions'
 import { processBeamGive } from './reputation'
@@ -135,6 +138,10 @@ export function PostItem({
   hideActions,
   children,
 }: PostItemProps) {
+  const tp = useTranslations('postItem')
+  const translateBadgeName = useTranslateBadgeName()
+  const dateLocale = useDateLocale()
+  const intlLocale = useIntlLocale()
   const [showRecognize, setShowRecognize] = useState(false)
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
   const [addBadgeOpen, setAddBadgeOpen] = useState(false)
@@ -244,6 +251,7 @@ export function PostItem({
 
   const isOwnPost = currentActor === actor
   const isOrgPost = !!organization && actor === organization
+  const isOrgOwner = !!organization && currentActor === organization
 
   const recognizeForm = useForm<RecognizeSchema>({
     resolver: zodResolver(recognizeSchema),
@@ -398,7 +406,7 @@ export function PostItem({
         )
       }
 
-      toast('Recognition published!')
+      toast(tp('recognitionPublished'))
       recognizeForm.reset()
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setShowRecognize(false)
@@ -406,7 +414,7 @@ export function PostItem({
         queryClient.invalidateQueries({ queryKey: ['beam-stats'] })
       }, 1000)
     } catch {
-      toast.error('Failed to send badge')
+      toast.error(tp('recognitionFailed'))
     }
   }
 
@@ -427,12 +435,12 @@ export function PostItem({
         content,
       })
 
-      toast('Comment published!')
+      toast(tp('commentPublished'))
       commentForm.reset()
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       setShowRecognize(false)
     } catch {
-      toast.error('Failed to post comment')
+      toast.error(tp('commentFailed'))
     }
   }
 
@@ -466,7 +474,7 @@ export function PostItem({
                 <span className="text-yellow-400 mr-1 inline-flex items-center gap-0.5">
                   <MdOutlineCampaign className="size-4" />
                   <span className="text-caption font-medium">
-                    Announcement
+                    {tp('announcement')}
                   </span>
                 </span>
               )}
@@ -478,8 +486,8 @@ export function PostItem({
               {mentions && mentions.length > 0 && (
                 <>
                   {' '}
-                  <span className="text-gray-3">recognize</span>{' '}
-                  {listFormat.formatToParts(mentions).map(({ type, value }) =>
+                  <span className="text-gray-3">{tp('recognize').toLowerCase()}</span>{' '}
+                  {getListFormat(intlLocale).formatToParts(mentions).map(({ type, value }) =>
                     type === 'element' ? (
                       <Link
                         key={value}
@@ -498,7 +506,7 @@ export function PostItem({
               )}
               <span className="text-gray-3 mx-1">•</span>
               <span className="text-gray-3">
-                {format(new Date(createdAt), 'EEE d MMM')}
+                {format(new Date(createdAt), 'EEE d MMM', { locale: dateLocale })}
               </span>
               {organization && orgDisplayName && (
                 <>
@@ -521,7 +529,7 @@ export function PostItem({
                     if (rows.length === 0) {
                       return (
                         <span className="text-gray-3">
-                          No beam contributions
+                          {tp('noBeamContributions')}
                         </span>
                       )
                     }
@@ -532,19 +540,19 @@ export function PostItem({
                             key={row.name}
                             className="flex justify-between gap-4"
                           >
-                            <span className="text-white">{row.name}</span>
+                            <span className="text-white">{translateBadgeName(row.name)}</span>
                             <span className="text-gray-3 tabular-nums">
-                              {row.score}
+                              {formatNumber(row.score, intlLocale)}
                             </span>
                           </div>
                         ))}
                         <div className="border-gray-2 my-1 border-t" />
                         <div className="flex justify-between gap-4">
                           <span className="text-white font-medium">
-                            Total
+                            {tp('total')}
                           </span>
                           <span className="text-white tabular-nums font-medium">
-                            {totalScore}
+                            {formatNumber(totalScore, intlLocale)}
                           </span>
                         </div>
                       </div>
@@ -554,7 +562,7 @@ export function PostItem({
               >
                 <div className="text-gray-3 flex cursor-default gap-0.5">
                   <MdWorkspacePremium className="size-6" />
-                  <span className="text-body-2">{totalScore}</span>
+                  <span className="text-body-2">{formatNumber(totalScore, intlLocale)}</span>
                 </div>
               </Tooltip>
             )}
@@ -567,7 +575,7 @@ export function PostItem({
                     badgeSymbol.includes(row.badge_symbol) && (
                       <Tooltip
                         key={row.badge_symbol}
-                        content={row.onchain_lookup_data.user.display_name}
+                        content={translateBadgeName(row.onchain_lookup_data.user.display_name)}
                       >
                         <Button
                           square
@@ -610,18 +618,18 @@ export function PostItem({
                     className="mt-2 items-center"
                     onClick={() => setShowRecognize(true)}
                   >
-                    {isOwnPost || isOrgPost ? (
-                      'Comment'
+                    {isOwnPost || isOrgPost || isOrgOwner ? (
+                      tp('comment')
                     ) : (
                       <>
                         <MdStar className="size-4" />
-                        Recognize
+                        {tp('recognize')}
                       </>
                     )}
                   </Button>
                 </motion.div>
               )}
-              {showRecognize && (isOwnPost || isOrgPost) && (
+              {showRecognize && (isOwnPost || isOrgPost || isOrgOwner) && (
                 <motion.form
                   onSubmit={commentForm.handleSubmit(onComment)}
                   initial={{ opacity: 0, y: 16 }}
@@ -632,12 +640,12 @@ export function PostItem({
                 >
                   <div>
                     <span className="text-body-2 mb-1 block font-medium text-white">
-                      Comment
+                      {tp('comment')}
                     </span>
                     <label className="bg-gray-1 border-gray-2 block rounded-xl border p-4">
                       <textarea
                         {...commentForm.register('content')}
-                        placeholder="Add a comment to your post."
+                        placeholder={tp('commentPlaceholder')}
                         className="text-body-2 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
                         rows={1}
                       />
@@ -649,7 +657,7 @@ export function PostItem({
                       className="mr-2"
                       onClick={() => setShowRecognize(false)}
                     >
-                      Cancel
+                      {tp('cancel')}
                     </Button>
                     <Button
                       type="submit"
@@ -658,12 +666,12 @@ export function PostItem({
                         !commentContent || commentContent.length === 0
                       }
                     >
-                      Post
+                      {tp('post')}
                     </Button>
                   </div>
                 </motion.form>
               )}
-              {showRecognize && !isOwnPost && !isOrgPost && (
+              {showRecognize && !isOwnPost && !isOrgPost && !isOrgOwner && (
                 <motion.form
                   onSubmit={recognizeForm.handleSubmit(onRecognize)}
                   initial={{ opacity: 0, y: 16 }}
@@ -675,7 +683,7 @@ export function PostItem({
                   {beamBadges.length > 0 && (
                     <div>
                       <span className="text-body-2 mb-1 block font-medium text-white">
-                        Beams
+                        {tp('beams')}
                       </span>
                       <div className="flex flex-wrap gap-2">
                         {beamBadges.map((badge) => {
@@ -719,7 +727,7 @@ export function PostItem({
                                 displayName={badge.onchain_lookup_data.user.display_name}
                               />
                               <span className="text-body-2 font-medium text-white">
-                                {badge.onchain_lookup_data.user.display_name}
+                                {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                                 {(() => {
                                   const symbolName =
                                     badge.badge_symbol.split(',')[1]
@@ -758,7 +766,7 @@ export function PostItem({
                   {customBadges.length > 0 && (
                     <div>
                       <span className="text-body-2 mb-1 block font-medium text-white">
-                        {beamBadges.length > 0 ? 'Other Badges' : 'Badges'}
+                        {beamBadges.length > 0 ? tp('otherBadges') : tp('badges')}
                       </span>
                       <div className="flex flex-wrap gap-2">
                         {customBadges
@@ -779,7 +787,7 @@ export function PostItem({
                                 displayName={badge.onchain_lookup_data.user.display_name}
                               />
                               <span className="text-body-2 font-medium text-white">
-                                {badge.onchain_lookup_data.user.display_name}
+                                {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                               </span>
                               <button
                                 type="button"
@@ -810,7 +818,7 @@ export function PostItem({
                               className="border-gray-2 bg-gray-1 inline-flex items-center gap-2 rounded-xl border px-3 py-2 transition-colors hover:border-white"
                             >
                               <span className="text-body-2 font-medium text-white">
-                                + Add Badge
+                                {tp('addBadge')}
                               </span>
                             </button>
                           </Popover.Trigger>
@@ -836,12 +844,12 @@ export function PostItem({
                                 }}
                               >
                                 <Command.Input
-                                  placeholder="Search badges"
+                                  placeholder={tp('searchBadges')}
                                   className="text-body-2 placeholder:text-gray-3 w-full bg-transparent px-2 py-1.5 text-white outline-none"
                                 />
                                 <Command.List className="mt-1 max-h-48 overflow-y-auto [&_[cmdk-list-sizer]]:space-y-1">
                                   <Command.Empty className="text-body-2 text-gray-3 py-4 text-center">
-                                    No badges found.
+                                    {tp('noBadgesFound')}
                                   </Command.Empty>
                                   {customBadges
                                     .filter(
@@ -881,10 +889,10 @@ export function PostItem({
                                           displayName={badge.onchain_lookup_data.user.display_name}
                                         />
                                         <span className="text-body-2 font-medium">
-                                          {
+                                          {translateBadgeName(
                                             badge.onchain_lookup_data.user
-                                              .display_name
-                                          }
+                                              .display_name,
+                                          )}
                                         </span>
                                       </Command.Item>
                                     ))}
@@ -898,12 +906,12 @@ export function PostItem({
                   )}
                   <div>
                     <span className="text-body-2 mb-1 block font-medium text-white">
-                      Message
+                      {tp('message')}
                     </span>
                     <label className="bg-gray-1 border-gray-2 block rounded-xl border p-4">
                       <textarea
                         {...recognizeForm.register('content')}
-                        placeholder="Recognize your colleague for their hard work and dedication."
+                        placeholder={tp('messagePlaceholder')}
                         className="text-body-2 placeholder:text-gray-3 block field-sizing-content w-full resize-none outline-none"
                         rows={1}
                       />
@@ -915,7 +923,7 @@ export function PostItem({
                       className="mr-2"
                       onClick={() => setShowRecognize(false)}
                     >
-                      Cancel
+                      {tp('cancel')}
                     </Button>
                     <Button
                       type="submit"
@@ -927,7 +935,7 @@ export function PostItem({
                         badgesWatched.length === 0
                       }
                     >
-                      Post
+                      {tp('post')}
                     </Button>
                   </div>
                 </motion.form>
@@ -949,7 +957,7 @@ export function PostItem({
           </div>
           <div className="flex items-center justify-start">
             <Button variant="secondary" onClick={() => setShowMore(false)}>
-              Show More
+              {tp('showMore')}
             </Button>
           </div>
         </div>
@@ -981,6 +989,10 @@ export function PostItemComment({
   beamGives,
   hideScore,
 }: PostItemCommentProps) {
+  const tp = useTranslations('postItem')
+  const translateBadgeName = useTranslateBadgeName()
+  const dateLocale = useDateLocale()
+  const intlLocale = useIntlLocale()
   const { name } = useOrganization()
   const badgeScope = organization || name
 
@@ -1026,7 +1038,7 @@ export function PostItemComment({
             </p>
             <span className="text-gray-3">
               {' '}
-              • {format(new Date(createdAt), 'EEE d MMM')}
+              • {format(new Date(createdAt), 'EEE d MMM', { locale: dateLocale })}
             </span>
           </div>
           {!hideScore && (
@@ -1041,7 +1053,7 @@ export function PostItemComment({
                   if (rows.length === 0) {
                     return (
                       <span className="text-gray-3">
-                        No beam contributions
+                        {tp('noBeamContributions')}
                       </span>
                     )
                   }
@@ -1052,19 +1064,19 @@ export function PostItemComment({
                           key={row.name}
                           className="flex justify-between gap-4"
                         >
-                          <span className="text-white">{row.name}</span>
+                          <span className="text-white">{translateBadgeName(row.name)}</span>
                           <span className="text-gray-3 tabular-nums">
-                            {row.score}
+                            {formatNumber(row.score, intlLocale)}
                           </span>
                         </div>
                       ))}
                       <div className="border-gray-2 my-1 border-t" />
                       <div className="flex justify-between gap-4">
                         <span className="text-white font-medium">
-                          Total
+                          {tp('total')}
                         </span>
                         <span className="text-white tabular-nums font-medium">
-                          {totalScore ?? 0}
+                          {formatNumber(totalScore ?? 0, intlLocale)}
                         </span>
                       </div>
                     </div>
@@ -1074,7 +1086,7 @@ export function PostItemComment({
             >
               <div className="text-gray-3 flex cursor-default gap-0.5">
                 <MdWorkspacePremium className="size-6" />
-                <span className="text-body-2">{totalScore ?? 0}</span>
+                <span className="text-body-2">{formatNumber(totalScore ?? 0, intlLocale)}</span>
               </div>
             </Tooltip>
           )}
@@ -1086,7 +1098,7 @@ export function PostItemComment({
               .map((row) => (
                 <Tooltip
                   key={row.badge_symbol}
-                  content={row.onchain_lookup_data.user.display_name}
+                  content={translateBadgeName(row.onchain_lookup_data.user.display_name)}
                 >
                   <Button square>
                     <BadgeImage

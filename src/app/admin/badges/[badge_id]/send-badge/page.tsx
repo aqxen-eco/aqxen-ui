@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
@@ -41,6 +42,9 @@ const sendBadgeSchema = z.object({
 type SendBadgeSchema = z.infer<typeof sendBadgeSchema>
 
 export default function SendBadgePage() {
+  const t = useTranslations('admin.sendBadge')
+  const tc = useTranslations('admin.common')
+  const tn = useTranslations('admin.nav')
   const params = useParams()
   const { session } = useChain()
   const router = useRouter()
@@ -80,21 +84,21 @@ export default function SendBadgePage() {
         to,
         memo: message,
       })
-      toast.success('Badge sent successfully')
+      toast.success(t('sendSuccess'))
       router.push('/admin/badges')
     } catch {
-      toast.error('Failed to send badge')
+      toast.error(t('sendFailed'))
     }
   }
 
   return (
     <>
       <HeaderAdmin>
-        <HeaderAdminBack href="/admin/badges">Badges</HeaderAdminBack>
+        <HeaderAdminBack href="/admin/badges">{tn('badges')}</HeaderAdminBack>
         <HeaderAdminTitle
           title={
             <>
-              Send badge{' '}
+              {t('title')}{' '}
               <span className="text-gray-3">
                 ({removeOrganizationSymbol(badgeIdDecoded)})
               </span>
@@ -115,7 +119,7 @@ export default function SendBadgePage() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <Label htmlFor="badges">Badges</Label>
+                  <Label htmlFor="badges">{tn('badges')}</Label>
                   <InputBadges
                     value={field.value}
                     onChange={field.onChange}
@@ -127,7 +131,7 @@ export default function SendBadgePage() {
               )}
             />
             <Field>
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount">{t('amount')}</Label>
               <Input
                 id="amount"
                 {...register('amount', {
@@ -145,9 +149,9 @@ export default function SendBadgePage() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <Label htmlFor="to">To</Label>
+                  <Label htmlFor="to">{t('to')}</Label>
                   <Combobox
-                    title="Search members"
+                    title={t('searchMembers')}
                     closeOnSelect
                     triggerContent={
                       field.value ? (
@@ -212,7 +216,7 @@ export default function SendBadgePage() {
               )}
             />
             <Field>
-              <Label htmlFor="message">Message</Label>
+              <Label htmlFor="message">{t('message')}</Label>
               <Input
                 id="message"
                 {...register('message')}
@@ -222,7 +226,7 @@ export default function SendBadgePage() {
               <ErrorMessage>{errors['message']?.message}</ErrorMessage>
             </Field>
             <Button type="submit" variant="primary" size="lg">
-              {isSubmitting ? 'Sending...' : 'Send'}
+              {isSubmitting ? tc('sending') : tc('send')}
             </Button>
           </form>
         </Box>

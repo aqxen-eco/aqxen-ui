@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
@@ -32,6 +33,8 @@ const newBadgeSchema = z.object({
 type NewBadgeSchema = z.infer<typeof newBadgeSchema>
 
 export default function NewBadgePage() {
+  const t = useTranslations('admin.newBadge')
+  const tc = useTranslations('admin.common')
   const {
     name: orgName,
     symbol: organizationSymbol,
@@ -96,10 +99,10 @@ export default function NewBadgePage() {
         lifetime_stats: lifetimeStats,
         memo: description,
       })
-      toast.success('Badge created successfully')
+      toast.success(t('createSuccess'))
       router.push('/admin/badges')
     } catch {
-      toast.error('Failed to create badge')
+      toast.error(t('createFailed'))
     }
   }
 
@@ -110,7 +113,7 @@ export default function NewBadgePage() {
         className="space-y-8 p-8 max-md:p-0 md:col-span-4"
       >
         <Field>
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">{tc('name')}</Label>
           <Input
             id="name"
             {...register('name')}
@@ -123,7 +126,7 @@ export default function NewBadgePage() {
           control={control}
           render={({ field }) => (
             <Field>
-              <Label htmlFor="symbol">Symbol</Label>
+              <Label htmlFor="symbol">{tc('symbol')}</Label>
               <InputSymbol
                 id="symbol"
                 aria-invalid={!!errors['symbol']}
@@ -135,7 +138,7 @@ export default function NewBadgePage() {
           )}
         />
         <Field>
-          <Label>Image</Label>
+          <Label>{tc('image')}</Label>
           <ImageUpload
             variant="avatar"
             value={image}
@@ -147,11 +150,11 @@ export default function NewBadgePage() {
           />
           <ErrorMessage>{errors['image']?.message}</ErrorMessage>
           <span className="text-body-3 text-gray-3 mt-1 block">
-            Recommended: 400 x 400px
+            {tc('recommendedSize')}
           </span>
         </Field>
         <Field>
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{tc('description')}</Label>
           <Input
             id="description"
             {...register('description')}
@@ -162,7 +165,7 @@ export default function NewBadgePage() {
         <Field>
           <CheckboxWrapper>
             <Label htmlFor="lifetimeAggregate" className="flex-1">
-              Lifetime Aggregate
+              {tc('lifetimeAggregate')}
             </Label>
             <Checkbox
               id="lifetimeAggregate"
@@ -175,7 +178,7 @@ export default function NewBadgePage() {
         <Field>
           <CheckboxWrapper>
             <Label htmlFor="lifetimeStats" className="flex-1">
-              Lifetime Stats
+              {tc('lifetimeStats')}
             </Label>
             <Checkbox
               id="lifetimeStats"
@@ -192,15 +195,15 @@ export default function NewBadgePage() {
           size="lg"
           disabled={isSubmitting || isUploading}
         >
-          {isSubmitting || isUploading ? 'Creating...' : 'Create'}
+          {isSubmitting || isUploading ? tc('creating') : tc('create')}
         </Button>
       </form>
       <div className="border-gray-2 max-md:bg-gray-1 space-y-4 border-l p-8 max-md:rounded-2xl max-md:border max-md:p-4 md:col-span-2">
-        <h2 className="text-title-2 text-white">Badge preview</h2>
+        <h2 className="text-title-2 text-white">{t('preview')}</h2>
         <Badge
           ipfs={preview ?? image}
-          name={name ? name : 'Badge Name'}
-          balance={symbol ? symbol.toUpperCase() : 'BDG'}
+          name={name ? name : t('badgeNamePlaceholder')}
+          balance={symbol ? symbol.toUpperCase() : t('badgeSymbolPlaceholder')}
         />
       </div>
     </Box>

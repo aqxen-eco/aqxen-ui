@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import type { Badge as BadgeType } from '@/api/model/badge'
@@ -11,6 +12,7 @@ import {
   BadgeSwiperWrapper,
 } from '@/components/ui/badge-swiper'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
 type LifetimeBadge = {
   balance: number
@@ -32,14 +34,16 @@ export function LifetimeBadgesSection({
   label = 'Badges',
   scope,
 }: LifetimeBadgesSectionProps) {
+  const t = useTranslations('profile')
+  const translateBadgeName = useTranslateBadgeName()
   const [selectedBadge, setSelectedBadge] = useState<LifetimeBadge | null>(null)
 
   return (
     <section className="py-8">
       <header className="mb-4 px-8 max-md:px-4">
         <h3 className="text-title-2 text-white">
-          Lifetime {label}{' '}
-          <span className="text-gray-3">({badges.length} {label.toLowerCase()} earned)</span>
+          {t('lifetime', { label })}{' '}
+          <span className="text-gray-3">{t('earned', { count: badges.length, label: label.toLowerCase() })}</span>
         </h3>
       </header>
       <BadgeSwiper>
@@ -52,11 +56,11 @@ export function LifetimeBadgesSection({
                 onClick={() => setSelectedBadge(badge)}
               >
                 <Badge
-                  name={badge.onchain_lookup_data.user.display_name}
+                  name={translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                   balance={String(badge.balance)}
                   ipfs={badge.offchain_lookup_data.user.ipfs_image}
-                  label={label === 'Beams' ? 'beam' : 'badge'}
-                  balanceLabel={label === 'Beams' ? 'rep' : undefined}
+                  label={label === t('tabBeams') ? t('beam') : t('badge')}
+                  balanceLabel={label === t('tabBeams') ? t('rep') : undefined}
                   badgeSymbol={badge.badge_symbol}
                   orgOverlaySrc={
                     showOrgOverlay && badge.orgIpfsImage

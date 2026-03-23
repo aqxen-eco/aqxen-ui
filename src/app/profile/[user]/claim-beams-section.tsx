@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { MdElectricBolt } from 'react-icons/md'
 import { toast } from 'react-toastify'
@@ -18,6 +19,7 @@ import { BadgeImage } from '@/components/ui/badge-image'
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useChain } from '@/contexts/chain'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
 function getDisplayName(
   badgeSymbol: string,
@@ -67,12 +69,13 @@ function getBalance(meta: BeamMetadata, stats: BeamStats[]) {
   return parseInt(stat.badge_asset.split(' ')[0], 10) || 0
 }
 
-function getNextClaimableLabel(meta: BeamMetadata, stats: BeamStats[]) {
+function getNextClaimableRaw(meta: BeamMetadata, stats: BeamStats[]) {
   const now = Date.now() / 1000
   const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
   const cycleLength = meta.cycle_length
 
-  if (cycleLength <= 0 || now < starttime) return 'Not yet started'
+  if (cycleLength <= 0 || now < starttime)
+    return { key: 'notYetStarted' as const }
 
   const elapsed = now - starttime
   const currentCycleStart =
@@ -80,20 +83,33 @@ function getNextClaimableLabel(meta: BeamMetadata, stats: BeamStats[]) {
 
   const stat = findStat(meta, stats)
 
-  if (!stat) return 'Claimable now'
+  if (!stat) return { key: 'claimableNow' as const }
 
   const lastClaimed =
     new Date(`${stat.last_claimed_time}Z`).getTime() / 1000
 
-  if (lastClaimed < currentCycleStart) return 'Claimable now'
+  if (lastClaimed < currentCycleStart)
+    return { key: 'claimableNow' as const }
 
   const nextCycleStart = currentCycleStart + cycleLength
   const secondsUntil = Math.max(0, Math.round(nextCycleStart - now))
 
-  if (secondsUntil < 60) return `Claimable in ${secondsUntil}s`
-  if (secondsUntil < 3600) return `Claimable in ${Math.ceil(secondsUntil / 60)}m`
-  if (secondsUntil < 86400) return `Claimable in ${Math.ceil(secondsUntil / 3600)}h`
-  return `Claimable in ${Math.ceil(secondsUntil / 86400)}d`
+  if (secondsUntil < 60)
+    return { key: 'claimableInSeconds' as const, count: secondsUntil }
+  if (secondsUntil < 3600)
+    return {
+      key: 'claimableInMinutes' as const,
+      count: Math.ceil(secondsUntil / 60),
+    }
+  if (secondsUntil < 86400)
+    return {
+      key: 'claimableInHours' as const,
+      count: Math.ceil(secondsUntil / 3600),
+    }
+  return {
+    key: 'claimableInDays' as const,
+    count: Math.ceil(secondsUntil / 86400),
+  }
 }
 
 type ClaimBeamsSectionProps = {
@@ -107,6 +123,8 @@ export function ClaimBeamsSection({
   userOrgNames,
   orgDisplayNames = {},
 }: ClaimBeamsSectionProps) {
+  const t = useTranslations('profile')
+  const translateBadgeName = useTranslateBadgeName()
   const { actor, session } = useChain()
   const queryClient = useQueryClient()
   const [isClaiming, setIsClaiming] = useState(false)
@@ -175,7 +193,12 @@ export function ClaimBeamsSection({
           org,
           claimable: isClaimable(meta, stats),
           balance: getBalance(meta, stats),
-          nextClaimableLabel: getNextClaimableLabel(meta, stats),
+          nextClaimableLabel: (() => {
+            const raw = getNextClaimableRaw(meta, stats)
+            if ('count' in raw && raw.count !== undefined)
+              return t(raw.key, { count: raw.count })
+            return t(raw.key)
+          })(),
         }))
       return { org, beams }
     })
@@ -196,7 +219,7 @@ export function ClaimBeamsSection({
         session,
         badgeSymbols: allClaimable.map((b) => b.badge_symbol),
       })
-      toast.success('Beams claimed successfully!')
+      toast.success(t('claimSuccess'))
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await queryClient.invalidateQueries({ queryKey: ['beam-stats'] })
       for (const org of userOrgNames) {
@@ -209,7 +232,7 @@ export function ClaimBeamsSection({
       }
     } catch (e) {
       console.error('Failed to claim beams', e)
-      toast.error('Failed to claim beams. Please try again.')
+      toast.error(t('claimFailed'))
     } finally {
       setIsClaiming(false)
     }
@@ -220,7 +243,7 @@ export function ClaimBeamsSection({
       <header className="flex items-center justify-between">
         <h3 className="text-title-2 flex items-center gap-2 text-white">
           <MdElectricBolt className="size-5" />
-          Beams
+          {t('claimBeamsTitle')}
         </h3>
 
         {allClaimable.length > 0 && (
@@ -229,7 +252,7 @@ export function ClaimBeamsSection({
             disabled={isClaiming}
             onClick={handleClaimAll}
           >
-            {isClaiming ? 'Claiming...' : 'Claim All'}
+            {isClaiming ? t('claiming') : t('claimAll')}
           </Button>
         )}
       </header>
@@ -261,7 +284,7 @@ export function ClaimBeamsSection({
                         badgeSymbol={beam.badge_symbol}
                         displayName={badge?.onchain_lookup_data.user.display_name}
                       />
-                      {getDisplayName(beam.badge_symbol, badgesBySymbol)}
+                      {translateBadgeName(getDisplayName(beam.badge_symbol, badgesBySymbol))}
                     </div>
                   </Tooltip>
                 )

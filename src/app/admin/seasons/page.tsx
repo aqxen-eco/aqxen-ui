@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueries } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
 import { listSeason } from '@/api/chain/season/list-season'
@@ -25,9 +26,14 @@ import {
 } from '@/components/ui/table'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useOrganization } from '@/contexts/organization'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
 export default function SeasonsPage() {
+  const t = useTranslations('admin.seasonsPage')
+  const tc = useTranslations('admin.common')
+  const tn = useTranslations('admin.nav')
   const { name, removeOrganizationSymbol } = useOrganization()
+  const translateBadgeName = useTranslateBadgeName()
 
   const [seasonsQuery, badgesQuery] = useQueries({
     queries: [
@@ -57,9 +63,9 @@ export default function SeasonsPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/seasons" />
-        <HeaderAdminTitle title="Seasons" tooltip="Review your active and historical seasons. Seasons allow you to track and reset user reputation over set timeframes.">
+        <HeaderAdminTitle title={t('title')} tooltip={t('tooltip')}>
           <Link href="/admin/new-season" variant="primary" size="md">
-            New season
+            {t('newSeason')}
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
@@ -70,12 +76,12 @@ export default function SeasonsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">Sym</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="max-w-[17rem]">Badges</TableHead>
-                <TableHead>Last created series</TableHead>
-                <TableHead>Last started series</TableHead>
-                <TableHead>Last ended series</TableHead>
+                <TableHead className="w-10">{tc('sym')}</TableHead>
+                <TableHead>{tc('name')}</TableHead>
+                <TableHead className="max-w-[17rem]">{tn('badges')}</TableHead>
+                <TableHead>{t('lastCreatedSeries')}</TableHead>
+                <TableHead>{t('lastStartedSeries')}</TableHead>
+                <TableHead>{t('lastEndedSeries')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -102,7 +108,7 @@ export default function SeasonsPage() {
                           ) && (
                             <Tooltip
                               content={
-                                badge.onchain_lookup_data.user.display_name
+                                translateBadgeName(badge.onchain_lookup_data.user.display_name)
                               }
                               key={badge.badge_symbol}
                             >
@@ -155,15 +161,15 @@ export default function SeasonsPage() {
                     colSpan={Object.keys(seasonsQuery.data.rows[0]).length + 1}
                   >
                     <div className="text-body-2 flex items-center justify-center gap-2 pt-8 text-white">
-                      Page
-                      <Select label="Page" placeholder="Page" defaultValue="1">
+                      {tc('page')}
+                      <Select label={tc('page')} placeholder={tc('page')} defaultValue="1">
                         {['1', '2', '3', '4', '5', '6'].map((item) => (
                           <SelectItem key={item} value={item}>
                             {item}
                           </SelectItem>
                         ))}
                       </Select>
-                      of 6
+                      {tc('ofPages', { count: 6 })}
                     </div>
                   </TableCell>
                 </TableRow>

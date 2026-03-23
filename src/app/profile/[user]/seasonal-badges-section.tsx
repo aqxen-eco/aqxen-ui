@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import type { Badge as BadgeType } from '@/api/model/badge'
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/badge-swiper'
 import { Box } from '@/components/ui/box'
 import { DropdownItem, DropdownRoot } from '@/components/ui/dropdown'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
 const LIFETIME_KEY = '__lifetime__'
 
@@ -34,6 +36,8 @@ export function SeasonalBadgesSection({
   label = 'Badges',
   scope,
 }: SeasonalBadgesSectionProps) {
+  const t = useTranslations('profile')
+  const translateBadgeName = useTranslateBadgeName()
   const [selectedSeries, setSelectedSeries] = useState<
     number | typeof LIFETIME_KEY
   >(LIFETIME_KEY)
@@ -77,7 +81,7 @@ export function SeasonalBadgesSection({
     ? lifetimeBadges
     : seriesValue?.badges ?? []
   const dropdownLabel = isLifetime
-    ? 'All Series'
+    ? t('allSeries')
     : seriesValue?.sequence_description
 
   return (
@@ -90,7 +94,7 @@ export function SeasonalBadgesSection({
           )}{' '}
           <span className="text-gray-3">
             {displayBadges.length > 0
-              ? `(${displayBadges.length} ${label.toLowerCase()} earned)`
+              ? t('earned', { count: displayBadges.length, label: label.toLowerCase() })
               : null}
           </span>
         </h3>
@@ -100,7 +104,7 @@ export function SeasonalBadgesSection({
               isSelected={isLifetime}
               onClick={() => setSelectedSeries(LIFETIME_KEY)}
             >
-              All Series ({lifetimeTotal})
+              {t('allSeries')} ({lifetimeTotal})
             </DropdownItem>
             {series.map((s) => (
               <DropdownItem
@@ -126,11 +130,11 @@ export function SeasonalBadgesSection({
                     onClick={() => setSelectedBadge(badge)}
                   >
                     <Badge
-                      name={badge.onchain_lookup_data.user.display_name}
+                      name={translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                       balance={String(badge.balance)}
                       ipfs={badge.offchain_lookup_data.user.ipfs_image}
-                      label={label === 'Beams' ? 'beam' : 'badge'}
-                      balanceLabel={label === 'Beams' ? 'rep' : undefined}
+                      label={label === t('tabBeams') ? t('beam') : t('badge')}
+                      balanceLabel={label === t('tabBeams') ? t('rep') : undefined}
                       badgeSymbol={badge.badge_symbol}
                     />
                   </button>
@@ -151,7 +155,7 @@ export function SeasonalBadgesSection({
       ) : (
         <div className="px-8 max-md:px-4">
           <Box className="flex h-50 w-full items-center justify-center text-center">
-            <p className="text-body-2 text-gray-3">No {label.toLowerCase()} received yet</p>
+            <p className="text-body-2 text-gray-3">{t('noItemsReceived', { label: label.toLowerCase() })}</p>
           </Box>
         </div>
       )}

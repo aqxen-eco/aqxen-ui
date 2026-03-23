@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
@@ -22,21 +23,21 @@ import { useOrganization } from '@/contexts/organization'
 import { uploadFile } from '@/lib/upload-file'
 
 const CYCLE_UNITS = [
-  { label: 'Seconds', value: 1 },
-  { label: 'Minutes', value: 60 },
-  { label: 'Hours', value: 3600 },
-  { label: 'Days', value: 86400 },
-  { label: 'Years', value: 31536000 },
-] as const
+  { labelKey: 'seconds' as const, value: 1 },
+  { labelKey: 'minutes' as const, value: 60 },
+  { labelKey: 'hours' as const, value: 3600 },
+  { labelKey: 'days' as const, value: 86400 },
+  { labelKey: 'years' as const, value: 31536000 },
+]
 
 const CYCLE_PRESETS = [
-  { label: '1 day', seconds: 86400 },
-  { label: '7 days', seconds: 604800 },
-  { label: '14 days', seconds: 1209600 },
-  { label: '30 days', seconds: 2592000 },
-  { label: '90 days', seconds: 7776000 },
-  { label: '365 days', seconds: 31536000 },
-] as const
+  { labelKey: 'day1' as const, seconds: 86400 },
+  { labelKey: 'days7' as const, seconds: 604800 },
+  { labelKey: 'days14' as const, seconds: 1209600 },
+  { labelKey: 'days30' as const, seconds: 2592000 },
+  { labelKey: 'days90' as const, seconds: 7776000 },
+  { labelKey: 'days365' as const, seconds: 31536000 },
+]
 
 const newBeamSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -58,6 +59,8 @@ const newBeamSchema = z.object({
 type NewBeamSchema = z.infer<typeof newBeamSchema>
 
 export default function NewBeamPage() {
+  const t = useTranslations('admin.newBeam')
+  const tc = useTranslations('admin.common')
   const {
     name: orgName,
     symbol: organizationSymbol,
@@ -166,10 +169,10 @@ export default function NewBeamPage() {
         lifetime_stats: lifetimeStats,
         memo: description,
       })
-      toast.success('Beam created successfully')
+      toast.success(t('createSuccess'))
       router.push('/admin/beams')
     } catch {
-      toast.error('Failed to create beam')
+      toast.error(t('createFailed'))
     }
   }
 
@@ -180,7 +183,7 @@ export default function NewBeamPage() {
         className="space-y-8 p-8 max-md:p-0 md:col-span-4"
       >
         <Field>
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">{tc('name')}</Label>
           <Input
             id="name"
             {...register('name')}
@@ -193,7 +196,7 @@ export default function NewBeamPage() {
           control={control}
           render={({ field }) => (
             <Field>
-              <Label htmlFor="symbol">Symbol</Label>
+              <Label htmlFor="symbol">{tc('symbol')}</Label>
               <InputSymbol
                 id="symbol"
                 aria-invalid={!!errors['symbol']}
@@ -205,7 +208,7 @@ export default function NewBeamPage() {
           )}
         />
         <Field>
-          <Label>Image</Label>
+          <Label>{tc('image')}</Label>
           <ImageUpload
             variant="avatar"
             value={image}
@@ -217,11 +220,11 @@ export default function NewBeamPage() {
           />
           <ErrorMessage>{errors['image']?.message}</ErrorMessage>
           <span className="text-body-3 text-gray-3 mt-1 block">
-            Recommended: 400 x 400px
+            {tc('recommendedSize')}
           </span>
         </Field>
         <Field>
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{tc('description')}</Label>
           <Input
             id="description"
             {...register('description')}
@@ -234,7 +237,7 @@ export default function NewBeamPage() {
           control={control}
           render={({ field }) => (
             <Field>
-              <Label htmlFor="starttime">Start Time</Label>
+              <Label htmlFor="starttime">{t('startTime')}</Label>
               <DateTimePicker
                 id="starttime"
                 value={field.value}
@@ -246,7 +249,7 @@ export default function NewBeamPage() {
           )}
         />
         <Field>
-          <Label>Cycle Length</Label>
+          <Label>{t('cycleLength')}</Label>
           <div className="flex flex-wrap gap-2 pb-2">
             {CYCLE_PRESETS.map((preset) => (
               <button
@@ -259,7 +262,7 @@ export default function NewBeamPage() {
                     : 'border-gray-3 text-gray-3 hover:border-white hover:text-white'
                 }`}
               >
-                {preset.label}
+                {t(preset.labelKey)}
               </button>
             ))}
           </div>
@@ -281,7 +284,7 @@ export default function NewBeamPage() {
             >
               {CYCLE_UNITS.map((unit) => (
                 <option key={unit.value} value={unit.value}>
-                  {unit.label}
+                  {t(unit.labelKey)}
                 </option>
               ))}
             </select>
@@ -290,7 +293,7 @@ export default function NewBeamPage() {
           <ErrorMessage>{errors['cycleLength']?.message}</ErrorMessage>
         </Field>
         <Field>
-          <Label htmlFor="supplyPerCycle">Supply per Cycle</Label>
+          <Label htmlFor="supplyPerCycle">{t('supplyPerCycle')}</Label>
           <Input
             id="supplyPerCycle"
             type="number"
@@ -303,7 +306,7 @@ export default function NewBeamPage() {
         <Field>
           <CheckboxWrapper>
             <Label htmlFor="lifetimeAggregate" className="flex-1">
-              Lifetime Aggregate
+              {tc('lifetimeAggregate')}
             </Label>
             <Checkbox
               id="lifetimeAggregate"
@@ -316,7 +319,7 @@ export default function NewBeamPage() {
         <Field>
           <CheckboxWrapper>
             <Label htmlFor="lifetimeStats" className="flex-1">
-              Lifetime Stats
+              {tc('lifetimeStats')}
             </Label>
             <Checkbox
               id="lifetimeStats"
@@ -333,14 +336,14 @@ export default function NewBeamPage() {
           size="lg"
           disabled={isSubmitting || isUploading}
         >
-          {isSubmitting || isUploading ? 'Creating...' : 'Create'}
+          {isSubmitting || isUploading ? tc('creating') : tc('create')}
         </Button>
       </form>
       <div className="border-gray-2 max-md:bg-gray-1 space-y-4 border-l p-8 max-md:rounded-2xl max-md:border max-md:p-4 md:col-span-2">
-        <h2 className="text-title-2 text-white">Beam preview</h2>
+        <h2 className="text-title-2 text-white">{t('preview')}</h2>
         <Badge
           ipfs={preview ?? image}
-          name={name ? name : 'Badge Name'}
+          name={name ? name : tc('name')}
           balance={symbol ? symbol.toUpperCase() : 'BDG'}
         />
       </div>

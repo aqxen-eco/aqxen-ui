@@ -1,10 +1,13 @@
 import Link from 'next/link'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { MdOutlineInterests, MdOutlineLocationOn, MdStar, MdWorkspacePremium } from 'react-icons/md'
 
 import { ProfileForm } from '@/components/profile-form'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
+import { intlLocaleMap } from '@/i18n/date-locale'
+import { formatNumber } from '@/utils/intl-format'
 
 import { ClaimBeamsSection } from './claim-beams-section'
 import {
@@ -31,6 +34,10 @@ type ProfilePageProps = {
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { user } = await params
+
+  const t = await getTranslations('profile')
+  const locale = await getLocale()
+  const intlLocale = intlLocaleMap[locale as keyof typeof intlLocaleMap] ?? 'en-US'
 
   const [profile, { badges, seasons, beamBadges, beamSeasons }, userOrgs, posts, reputation, reputationBreakdown] = await Promise.all([
     getUserProfile({ actor: user }),
@@ -86,7 +93,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
       {badges.length === 0 && seasons.length === 0 && (
         <div className="px-8 py-8 max-md:px-4">
-          <p className="text-body-2 text-gray-3">No badges yet.</p>
+          <p className="text-body-2 text-gray-3">{t('noBadgesYet')}</p>
         </div>
       )}
     </>
@@ -118,7 +125,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const beamsContent = (
     <>
       {beamBadges.length > 0 && (
-        <LifetimeBadgesSection badges={beamBadges} showOrgOverlay label="Beams" />
+        <LifetimeBadgesSection badges={beamBadges} showOrgOverlay label={t('tabBeams')} />
       )}
 
       {beamOrgGroups.map((group) => (
@@ -129,13 +136,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           ipfsImage={group.ipfsImage}
           badges={group.badges}
           seasons={group.seasons}
-          label="Beams"
+          label={t('tabBeams')}
         />
       ))}
 
       {beamBadges.length === 0 && beamSeasons.length === 0 && (
         <div className="px-8 py-8 max-md:px-4">
-          <p className="text-body-2 text-gray-3">No beams yet.</p>
+          <p className="text-body-2 text-gray-3">{t('noBeamsYet')}</p>
         </div>
       )}
     </>
@@ -203,7 +210,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           {profile?.about && (
             <>
               <header className="mb-4 px-8 max-md:px-4">
-                <h3 className="text-title-2 text-white">About</h3>
+                <h3 className="text-title-2 text-white">{t('about')}</h3>
               </header>
               <p className="text-gray-3 text-body-2 px-8 max-md:px-4">
                 {profile.about}
@@ -215,7 +222,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <div className={profile?.about ? 'mt-6' : ''}>
               <header className="mb-4 px-8 max-md:px-4">
                 <h4 className="text-body-2 font-medium text-white">
-                  Organizations
+                  {t('organizations')}
                 </h4>
               </header>
               <div className="flex flex-wrap gap-4 px-8 max-md:px-4">
@@ -247,13 +254,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         {displayName}
                         <span className="text-gray-3 flex items-center gap-0.5">
                           <MdWorkspacePremium className="size-4" />
-                          {reputation.perOrg[org.org] ?? 0}
+                          {formatNumber(reputation.perOrg[org.org] ?? 0, intlLocale)}
                         </span>
                       </span>
                       {org.isOwner && (
                         <MdStar
                           className="text-badge-yellow size-4"
-                          title="Owner"
+                          title={t('owner')}
                         />
                       )}
                     </Link>
@@ -265,7 +272,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
           {!profile?.about && userOrgs.length === 0 && (
             <p className="text-body-2 text-gray-3 px-8 max-md:px-4">
-              No info available.
+              {t('noInfoAvailable')}
             </p>
           )}
         </section>

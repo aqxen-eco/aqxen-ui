@@ -1,6 +1,7 @@
 'use client'
 
 import NextLink from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { MdElectricBolt } from 'react-icons/md'
 
@@ -24,6 +25,7 @@ export function ClaimableBeamsAlert() {
   const { hasClaimable, secondsUntilNextClaim, isLoading } =
     useHasClaimableBeams()
   const [countdown, setCountdown] = useState(secondsUntilNextClaim)
+  const t = useTranslations('beams')
 
   useEffect(() => {
     setCountdown(secondsUntilNextClaim)
@@ -55,13 +57,13 @@ export function ClaimableBeamsAlert() {
         className="text-body-2 flex items-center gap-1 font-medium text-yellow-400 hover:underline"
       >
         <MdElectricBolt className="size-5 flex-none" />
-        <span>Beams Claimable</span>
+        <span>{t('beamsClaimable')}</span>
       </NextLink>
     )
   }
 
   return (
-    <Tooltip content="Beams claimable in">
+    <Tooltip content={t('beamsClaimableIn')}>
       <div className="text-body-2 text-gray-3 flex items-center gap-1 font-medium">
         <MdElectricBolt className="size-5 flex-none text-white" />
         <span className="font-mono tabular-nums">{formatCountdown(countdown ?? 0)}</span>

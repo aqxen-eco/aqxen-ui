@@ -26,6 +26,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectItem } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useChain } from '@/contexts/chain'
+import { useCurrency } from '@/hooks/use-currency'
 import { uploadFile } from '@/lib/upload-file'
 
 const TIMEZONES: { value: string; label: string; offset: number }[] = [
@@ -99,6 +100,7 @@ export function CreateOrgModal({
   memberCount,
 }: CreateOrgModalProps) {
   const { session } = useChain()
+  const { formatPrice } = useCurrency()
   const router = useRouter()
   const queryClient = useQueryClient()
 
@@ -314,7 +316,7 @@ export function CreateOrgModal({
                     >
                       {isCreating
                         ? 'Creating Organization...'
-                        : `Create Organization — $${totalUsd.toFixed(2)}`}
+                        : `Create Organization — ${formatPrice(totalUsd)}`}
                     </Button>
                   </form>
                 </div>
