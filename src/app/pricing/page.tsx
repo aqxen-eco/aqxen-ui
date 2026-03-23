@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 
 import { listFees } from '@/api/chain/billing/list-fees'
 import { listCycle } from '@/api/chain/cycle/list-cycle'
@@ -14,10 +15,14 @@ import { COINGECKO_ID, TOKEN_SYMBOL } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { useGetBillingDetail } from '@/hooks/query/use-get-billing-detail'
+import { useCurrency } from '@/hooks/use-currency'
+import { useIntlLocale } from '@/hooks/use-date-locale'
+import { formatDecimal, formatNumber } from '@/utils/intl-format'
 
 export default function PricingPage() {
   const { isAuthenticated, login } = useChain()
   const { hasOrganization } = useOrganization()
+  const t = useTranslations('pricing')
 
   return (
     <section className="max-w-container-lg relative mx-auto px-4 py-16">
@@ -29,22 +34,22 @@ export default function PricingPage() {
       <header className="space-y-4 text-center max-md:pb-16 md:py-16">
         <h2 className="text-display-2 text-white">
           {hasOrganization
-            ? 'Manage Subscription'
+            ? t('manageSubscription')
             : isAuthenticated
-              ? 'Create Your Organization'
-              : 'Pricing'}
+              ? t('createYourOrganization')
+              : t('pricing')}
         </h2>
         <p className="text-body-1 text-gray-3">
           {hasOrganization
-            ? 'Renew your subscription, adjust your seat count, or add more members to your organization'
+            ? t('manageDescription')
             : isAuthenticated
-              ? 'Launch your organization on AqXen to create badge series, recognize achievements, and build reputation — all backed by blockchain'
-              : 'Create your organization to issue blockchain-backed badges, track achievements, and grow your community\'s reputation'}
+              ? t('createDescription')
+              : t('defaultDescription')}
         </p>
         {!isAuthenticated && (
           <div className="flex flex-wrap justify-center gap-4">
             <Button onClick={login} variant="primary" size="lg">
-              Log In To Create Org
+              {t('logInToCreateOrg')}
             </Button>
             <Button asChild variant="secondary" size="lg">
               <a
@@ -52,7 +57,7 @@ export default function PricingPage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Create Vaulta Account
+                {t('createVaultaAccount')}
               </a>
             </Button>
           </div>
@@ -79,6 +84,9 @@ function CurrentUsage({
 }) {
   const { actor } = useChain()
   const billing = useGetBillingDetail()
+  const t = useTranslations('pricing')
+  const intlLocale = useIntlLocale()
+  const { formatPrice } = useCurrency()
 
   const membersQuery = useQuery({
     queryKey: ['members', actor],
@@ -154,34 +162,34 @@ function CurrentUsage({
 
   const monthlyCostToken =
     tokenPriceQuery.data && monthlyCostUsd > 0
-      ? `${(monthlyCostUsd / tokenPriceQuery.data).toFixed(4)} ${TOKEN_SYMBOL}`
+      ? `${formatDecimal(monthlyCostUsd / tokenPriceQuery.data, 4, intlLocale)} ${TOKEN_SYMBOL}`
       : null
 
   return (
     <div className="mb-8 space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Box className="space-y-1 text-center">
-          <p className="text-body-2 text-gray-3">Member seats</p>
-          <p className="text-display-3 text-white">{totalSeats}</p>
+          <p className="text-body-2 text-gray-3">{t('memberSeats')}</p>
+          <p className="text-display-3 text-white">{formatNumber(totalSeats, intlLocale)}</p>
         </Box>
         <Box className="space-y-1 text-center">
-          <p className="text-body-2 text-gray-3">Active members</p>
-          <p className="text-display-3 text-white">{activeMembers}</p>
+          <p className="text-body-2 text-gray-3">{t('activeMembers')}</p>
+          <p className="text-display-3 text-white">{formatNumber(activeMembers, intlLocale)}</p>
         </Box>
         <Box className="space-y-1 text-center">
-          <p className="text-body-2 text-gray-3">Monthly cost</p>
+          <p className="text-body-2 text-gray-3">{t('monthlyCost')}</p>
           <p className="text-display-3 text-white">
-            ${monthlyCostUsd.toFixed(2)}
+            {formatPrice(monthlyCostUsd)}
           </p>
           {monthlyCostToken && (
             <p className="text-body-2 text-gray-3">({monthlyCostToken})</p>
           )}
         </Box>
         <Box className="space-y-1 text-center">
-          <p className="text-body-2 text-gray-3">Next payment due</p>
+          <p className="text-body-2 text-gray-3">{t('nextPaymentDue')}</p>
           <p className="text-display-3 text-white">
             {nextPaymentDate
-              ? nextPaymentDate.toLocaleDateString('en-US', {
+              ? nextPaymentDate.toLocaleDateString(intlLocale, {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric',
@@ -193,17 +201,14 @@ function CurrentUsage({
       {!paidForCurrentCycle && (
         <Box className="border-red-500/30 bg-red-500/10 text-center">
           <p className="text-body-2 text-red-400">
-            Your organization has not paid for the current billing cycle.
-            Purchase member seats below to keep your members able to recognize
-            one another.
+            {t('unpaidCycleWarning')}
           </p>
         </Box>
       )}
       {allSeatsUsed && paidForCurrentCycle && (
         <Box className="border-yellow-500/30 bg-yellow-500/10 text-center">
           <p className="text-body-2 text-yellow-400">
-            All member seats are in use. Purchase additional seats below to
-            invite more members to your organization.
+            {t('allSeatsUsedWarning')}
           </p>
         </Box>
       )}

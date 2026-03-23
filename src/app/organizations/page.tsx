@@ -2,6 +2,7 @@
 
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 
@@ -19,6 +20,7 @@ import { useChain } from '@/contexts/chain'
 export default function OrganizationsPage() {
   const { session, isAuthenticated, actor } = useChain()
   const queryClient = useQueryClient()
+  const t = useTranslations('organizations')
   const [requestingOrg, setRequestingOrg] = useState<string | null>(null)
   const [cancellingOrg, setCancellingOrg] = useState<string | null>(null)
 
@@ -75,9 +77,9 @@ export default function OrganizationsPage() {
       await cancelRequest({ session, org })
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await queryClient.refetchQueries({ queryKey: ['member-requests', org] })
-      toast.success('Request cancelled.')
+      toast.success(t('requestCancelled'))
     } catch {
-      toast.error('Failed to cancel request.')
+      toast.error(t('cancelFailed'))
     } finally {
       setCancellingOrg(null)
     }
@@ -90,9 +92,9 @@ export default function OrganizationsPage() {
       await requestJoin({ session, org, memo: '' })
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await queryClient.refetchQueries({ queryKey: ['member-requests', org] })
-      toast.success(`Request to join ${org} has been sent.`)
+      toast.success(t('requestSent', { org }))
     } catch {
-      toast.error('Failed to send join request.')
+      toast.error(t('requestFailed'))
     } finally {
       setRequestingOrg(null)
     }
@@ -102,10 +104,10 @@ export default function OrganizationsPage() {
     <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] px-4 py-12">
       <div className="mb-12 text-center">
         <h1 className="text-title-1 mb-2 text-white">
-          Welcome to AqXen Orgs: Building Momentum Together
+          {t('heading')}
         </h1>
         <p className="text-body-2 text-gray-3">
-          Visit Your Org or Apply to Join a New Org
+          {t('subheading')}
         </p>
       </div>
 
@@ -125,7 +127,7 @@ export default function OrganizationsPage() {
 
       {orgsQuery.isSuccess && orgsQuery.data.rows.length === 0 && (
         <p className="text-body-2 text-gray-3 text-center">
-          No organizations found.
+          {t('noOrganizations')}
         </p>
       )}
 
@@ -164,7 +166,7 @@ export default function OrganizationsPage() {
                 </div>
                 <div className="flex gap-2">
                   <Button asChild variant="primary" size="md">
-                    <Link href={`/organizations/${org.org}`}>View</Link>
+                    <Link href={`/organizations/${org.org}`}>{t('view')}</Link>
                   </Button>
                   {isAuthenticated &&
                     actor !== org.org &&
@@ -177,8 +179,8 @@ export default function OrganizationsPage() {
                         onClick={() => handleCancelRequest(org.org)}
                       >
                         {cancellingOrg === org.org
-                          ? 'Cancelling...'
-                          : 'Cancel Request'}
+                          ? t('cancelling')
+                          : t('cancelRequest')}
                       </Button>
                     ) : (
                       <Button
@@ -188,8 +190,8 @@ export default function OrganizationsPage() {
                         onClick={() => handleRequestJoin(org.org)}
                       >
                         {requestingOrg === org.org
-                          ? 'Requesting...'
-                          : 'Request to Join'}
+                          ? t('requesting')
+                          : t('requestToJoin')}
                       </Button>
                     )
                   )}

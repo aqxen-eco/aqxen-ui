@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
 import {
   HeaderAdmin,
   HeaderAdminMenu,
@@ -9,16 +11,17 @@ import { SubscriptionContent } from '@/components/subscription-content'
 import { Link } from '@/components/ui/link'
 
 export default function SubscriptionPage() {
+  const t = useTranslations('admin.subscription')
   return (
     <>
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/subscription" />
         <HeaderAdminTitle
-          title="Subscription"
-          tooltip="View your current subscription plan, track your platform usage limits, and manage your billing cycle."
+          title={t('title')}
+          tooltip={t('tooltip')}
         >
           <Link href="/pricing" variant="primary" size="md">
-            Manage Subscription
+            {t('manageSubscription')}
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>

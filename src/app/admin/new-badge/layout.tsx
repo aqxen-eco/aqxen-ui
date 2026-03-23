@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server'
+
 import {
   HeaderAdmin,
   HeaderAdminBack,
@@ -11,13 +13,17 @@ type NewBadgeLayoutProps = {
 export default async function NewBadgeLayout({
   children,
 }: NewBadgeLayoutProps) {
+  const t = await getTranslations('admin.newBadge')
+
   return (
     <>
       <HeaderAdmin>
-        <HeaderAdminBack href="/admin/badges">Badges</HeaderAdminBack>
+        <HeaderAdminBack href="/admin/badges">
+          {t('backLabel')}
+        </HeaderAdminBack>
         <HeaderAdminTitle
-          title="New Badge"
-          tooltip="Create a new custom badge. Upload your design, set the title, and write the description for this achievement."
+          title={t('title')}
+          tooltip={t('tooltip')}
           className="max-w-container-md"
         />
       </HeaderAdmin>

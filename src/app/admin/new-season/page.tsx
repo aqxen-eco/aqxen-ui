@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
@@ -32,6 +33,8 @@ const newSeasonSchema = z.object({
 type NewSeasonSchema = z.infer<typeof newSeasonSchema>
 
 export default function NewSeasonPage() {
+  const t = useTranslations('admin.newSeason')
+  const tc = useTranslations('admin.common')
   const { addOrganizationSymbol, name: orgName } = useOrganization()
   const { session } = useChain()
   const router = useRouter()
@@ -136,12 +139,12 @@ export default function NewSeasonPage() {
         description: '',
       })
       const aggSymbol = `0,${addOrganizationSymbol(symbol)}`
-      toast.success('Season created successfully')
+      toast.success(t('createSuccess'))
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await queryClient.refetchQueries({ queryKey: ['seasons', orgName] })
       router.push(`/admin/seasons/${aggSymbol}`)
     } catch {
-      toast.error('Failed to create season')
+      toast.error(t('createFailed'))
     }
   }
 
@@ -150,14 +153,14 @@ export default function NewSeasonPage() {
       {badgesQuery.isSuccess && badgesQuery.data.rows.length === 0 && (
         <div className="bg-gray-2 border-gray-3 m-8 mb-0 rounded-lg border p-4 max-md:mx-0">
           <p className="text-body-2 text-gray-4">
-            No badges found for your organization.{' '}
+            {t('noBadges')}{' '}
             <Link
               href="/admin/new-badge"
               className="text-white underline"
             >
-              Create a badge
+              {t('createBadge')}
             </Link>{' '}
-            to get started.
+            {t('toGetStarted')}
           </p>
         </div>
       )}
@@ -166,7 +169,7 @@ export default function NewSeasonPage() {
         className="space-y-8 p-8 max-md:p-0"
       >
         <Field>
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">{tc('name')}</Label>
           <Input
             id="name"
             {...register('name')}
@@ -180,7 +183,7 @@ export default function NewSeasonPage() {
           control={control}
           render={({ field }) => (
             <Field>
-              <Label htmlFor="symbol">Symbol</Label>
+              <Label htmlFor="symbol">{tc('symbol')}</Label>
               <InputSymbol
                 id="symbol"
                 aria-invalid={!!errors['symbol']}
@@ -196,7 +199,7 @@ export default function NewSeasonPage() {
           control={control}
           render={({ field }) => (
             <Field>
-              <Label>Beams</Label>
+              <Label>{t('beams')}</Label>
               <InputBadges
                 value={field.value}
                 onChange={field.onChange}
@@ -211,7 +214,7 @@ export default function NewSeasonPage() {
           control={control}
           render={({ field }) => (
             <Field>
-              <Label htmlFor="badges">Badges</Label>
+              <Label htmlFor="badges">{t('badges')}</Label>
               <InputBadges value={field.value} onChange={field.onChange} />
               <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
             </Field>
@@ -222,14 +225,14 @@ export default function NewSeasonPage() {
           control={control}
           render={({ field }) => (
             <Field>
-              <Label htmlFor="stats">Stats badges</Label>
+              <Label htmlFor="stats">{t('statsBadges')}</Label>
               <InputBadges value={field.value} onChange={field.onChange} />
               <ErrorMessage>{errors['stats']?.message}</ErrorMessage>
             </Field>
           )}
         />
         <Button type="submit" variant="primary" size="lg">
-          {isSubmitting ? 'Creating...' : 'Create'}
+          {isSubmitting ? tc('creating') : tc('create')}
         </Button>
       </form>
     </Box>

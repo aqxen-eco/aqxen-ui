@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import z from 'zod'
@@ -22,6 +23,9 @@ const contactSchema = z.object({
 export type ContactSchema = z.infer<typeof contactSchema>
 
 export default function Contact() {
+  const t = useTranslations('contact')
+  const tc = useTranslations('common')
+
   const {
     register,
     handleSubmit,
@@ -46,9 +50,9 @@ export default function Contact() {
 
     if (!result.error) {
       reset()
-      toast.success('Email sent successfully')
+      toast.success(t('successToast'))
     } else {
-      toast.error('Failed to send email')
+      toast.error(t('errorToast'))
     }
   }
 
@@ -57,14 +61,9 @@ export default function Contact() {
       <header className="max-w-container-md relative mx-auto overflow-hidden px-4 py-16">
         <div className="space-y-6 md:text-center">
           <h1 className="text-display-1 max-md:text-display-2 text-white">
-            Let&apos;s Connect
+            {t('heading')}
           </h1>
-          <p className="text-body-1 text-gray-3">
-            We&apos;re here to help you understand how AqXen Socials can
-            transform your community&apos;s productivity and positivity. Reach
-            out with any questions about unlocking access, features, or
-            partnership opportunities.
-          </p>
+          <p className="text-body-1 text-gray-3">{t('description')}</p>
         </div>
       </header>
       <div className="max-w-container-md mx-auto px-4 py-16">
@@ -73,44 +72,42 @@ export default function Contact() {
           className="space-y-8 p-8 max-md:p-0"
         >
           <Field>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('nameLabel')}</Label>
             <Input
               id="name"
               {...register('name')}
-              placeholder="Your name"
+              placeholder={t('namePlaceholder')}
               aria-invalid={!!errors['name']}
             />
             <ErrorMessage>{errors['name']?.message}</ErrorMessage>
           </Field>
           <Field>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('emailLabel')}</Label>
             <Input
               id="email"
               type="email"
               {...register('email')}
-              placeholder="you@company.com"
+              placeholder={t('emailPlaceholder')}
               aria-invalid={!!errors['email']}
             />
             <ErrorMessage>{errors['email']?.message}</ErrorMessage>
           </Field>
           <Field>
-            <Label htmlFor="organizationName">
-              Organization Name (optional)
-            </Label>
+            <Label htmlFor="organizationName">{t('orgLabel')}</Label>
             <Input
               id="organizationName"
               {...register('organizationName')}
-              placeholder="Your organization"
+              placeholder={t('orgPlaceholder')}
               aria-invalid={!!errors['organizationName']}
             />
             <ErrorMessage>{errors['organizationName']?.message}</ErrorMessage>
           </Field>
           <Field>
-            <Label htmlFor="message">Message</Label>
+            <Label htmlFor="message">{t('messageLabel')}</Label>
             <Textarea
               id="message"
               {...register('message')}
-              placeholder="How can we help?"
+              placeholder={t('messagePlaceholder')}
               aria-invalid={!!errors['message']}
             />
             <ErrorMessage>{errors['message']?.message}</ErrorMessage>
@@ -121,7 +118,7 @@ export default function Contact() {
             size="lg"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
+            {isSubmitting ? tc('submitting') : tc('submit')}
           </Button>
         </form>
       </div>

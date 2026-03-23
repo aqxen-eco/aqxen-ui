@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import z from 'zod'
@@ -28,6 +29,9 @@ const addBadgesSchema = z.object({
 type AddBadgesSchema = z.infer<typeof addBadgesSchema>
 
 export default function AddBadgesPage() {
+  const t = useTranslations('admin.addBadges')
+  const tc = useTranslations('admin.common')
+  const tn = useTranslations('admin.nav')
   const params = useParams()
   const searchParams = useSearchParams()
   const series = searchParams.get('series')
@@ -65,7 +69,7 @@ export default function AddBadgesPage() {
           badge_symbols: badges,
         })
       }
-      toast.success('Badge added successfully')
+      toast.success(t('addSuccess'))
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['seasons'] }),
@@ -74,7 +78,7 @@ export default function AddBadgesPage() {
       ])
       router.push(`/admin/seasons/${params.season_id}`)
     } catch {
-      toast.error('Failed to add badge')
+      toast.error(t('addFailed'))
     }
   }
 
@@ -87,9 +91,9 @@ export default function AddBadgesPage() {
         <HeaderAdminTitle
           title={
             <>
-              Add badge{' '}
+              {t('title')}{' '}
               <span className="text-gray-3">
-                ({series ? 'to series' : 'to season'})
+                ({series ? t('toSeries') : t('toSeason')})
               </span>
             </>
           }
@@ -104,7 +108,7 @@ export default function AddBadgesPage() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <Label>Badges</Label>
+                  <Label>{tn('badges')}</Label>
                   <InputBadges value={field.value} onChange={field.onChange} />
                   <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
                 </Field>
@@ -112,7 +116,7 @@ export default function AddBadgesPage() {
             />
 
             <Button type="submit" variant="primary" size="lg">
-              {isSubmitting ? 'Adding...' : 'Add'}
+              {isSubmitting ? tc('adding') : tc('add')}
             </Button>
           </form>
         </Box>

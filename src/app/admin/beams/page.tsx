@@ -3,6 +3,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
@@ -38,22 +39,33 @@ import {
 } from '@/components/ui/table'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useIntlLocale } from '@/hooks/use-date-locale'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
-function formatCycleLength(seconds: number) {
+function formatCycleLength(
+  seconds: number,
+  t?: (key: string, values?: Record<string, number>) => string,
+) {
   if (seconds >= 86400) {
-    const days = Math.floor(seconds / 86400)
-    return `${days} day${days !== 1 ? 's' : ''}`
+    const count = Math.floor(seconds / 86400)
+    return t
+      ? t(count !== 1 ? 'days' : 'day', { count })
+      : `${count} day${count !== 1 ? 's' : ''}`
   }
   if (seconds >= 3600) {
-    const hours = Math.floor(seconds / 3600)
-    return `${hours} hour${hours !== 1 ? 's' : ''}`
+    const count = Math.floor(seconds / 3600)
+    return t
+      ? t(count !== 1 ? 'hours' : 'hour', { count })
+      : `${count} hour${count !== 1 ? 's' : ''}`
   }
-  const minutes = Math.floor(seconds / 60)
-  return `${minutes} min${minutes !== 1 ? 's' : ''}`
+  const count = Math.floor(seconds / 60)
+  return t
+    ? t(count !== 1 ? 'mins' : 'min', { count })
+    : `${count} min${count !== 1 ? 's' : ''}`
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+function formatDate(dateStr: string, intlLocale = 'en-US') {
+  return new Date(dateStr).toLocaleDateString(intlLocale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -82,6 +94,10 @@ function EditBeamModal({
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
 
+  const t = useTranslations('admin.beamsPage')
+  const tc = useTranslations('admin.common')
+  const translateBadgeName = useTranslateBadgeName()
+
   useEffect(() => {
     if (beam && open) {
       setCycleLengthValue(String(beam.cycle_length))
@@ -98,11 +114,11 @@ function EditBeamModal({
     const cl = parseInt(cycleLength)
     const spc = parseInt(supplyPerCycle)
     if (!cl || cl <= 0) {
-      setError('Cycle length must be a positive number')
+      setError(t('cycleLengthError'))
       return
     }
     if (!spc || spc <= 0) {
-      setError('Supply per cycle must be a positive number')
+      setError(t('supplyError'))
       return
     }
     setIsSaving(true)
@@ -111,7 +127,7 @@ function EditBeamModal({
       await onSave(beam!.badge_symbol, cl, spc)
       onOpenChange(false)
     } catch {
-      setError('Failed to update beam settings')
+      setError(t('updateFailed'))
     } finally {
       setIsSaving(false)
     }
@@ -148,7 +164,7 @@ function EditBeamModal({
                   </Button>
                 </Dialog.Close>
                 <Dialog.Title className="text-title-2 text-white">
-                  Edit Beam
+                  {t('editBeam')}
                 </Dialog.Title>
                 {badge && (
                   <div className="mt-2 flex items-center gap-2">
@@ -159,14 +175,14 @@ function EditBeamModal({
                       displayName={badge.onchain_lookup_data.user.display_name}
                     />
                     <span className="text-body-2 text-gray-3">
-                      {badge.onchain_lookup_data.user.display_name}
+                      {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                     </span>
                   </div>
                 )}
                 <div className="mt-6 space-y-4">
                   <Field>
                     <Label htmlFor="edit-cycle-length">
-                      Cycle Length (seconds)
+                      {t('cycleLengthSeconds')}
                     </Label>
                     <Input
                       id="edit-cycle-length"
@@ -178,7 +194,7 @@ function EditBeamModal({
                     />
                   </Field>
                   <Field>
-                    <Label htmlFor="edit-supply">Supply / Cycle</Label>
+                    <Label htmlFor="edit-supply">{t('supplyPerCycle')}</Label>
                     <Input
                       id="edit-supply"
                       type="number"
@@ -197,7 +213,7 @@ function EditBeamModal({
                     disabled={isSaving}
                     onClick={handleSave}
                   >
-                    {isSaving ? 'Saving...' : 'Save'}
+                    {isSaving ? tc('saving') : tc('save')}
                   </Button>
                 </div>
               </motion.div>
@@ -222,15 +238,19 @@ function BeamsTable({
   onSelectBadge: (badge: Badge) => void
   onEditBeam: (beam: BeamMetadata) => void
 }) {
+  const t = useTranslations('admin.beamsPage')
+  const tc = useTranslations('admin.common')
+  const intlLocale = useIntlLocale()
+  const translateBadgeName = useTranslateBadgeName()
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-10">Sym</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Start Time</TableHead>
-          <TableHead>Cycle Length</TableHead>
-          <TableHead className="w-32 text-center">Supply / Cycle</TableHead>
+          <TableHead className="w-10">{tc('sym')}</TableHead>
+          <TableHead>{tc('name')}</TableHead>
+          <TableHead>{t('startTime')}</TableHead>
+          <TableHead>{t('cycleLength')}</TableHead>
+          <TableHead className="w-32 text-center">{t('supplyPerCycle')}</TableHead>
           <TableHead className="w-28" />
         </TableRow>
       </TableHeader>
@@ -256,15 +276,15 @@ function BeamsTable({
                       displayName={badge.onchain_lookup_data.user.display_name}
                     />
                     <span className="text-body-2 font-sans font-medium text-nowrap text-white hover:underline">
-                      {badge.onchain_lookup_data.user.display_name}
+                      {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                     </span>
                   </button>
                 ) : (
                   <span className="text-gray-3">-</span>
                 )}
               </TableCell>
-              <TableCell>{formatDate(row.starttime)}</TableCell>
-              <TableCell>{formatCycleLength(row.cycle_length)}</TableCell>
+              <TableCell>{formatDate(row.starttime, intlLocale)}</TableCell>
+              <TableCell>{formatCycleLength(row.cycle_length, t)}</TableCell>
               <TableCell className="text-center">
                 {row.supply_per_cycle}
               </TableCell>
@@ -275,7 +295,7 @@ function BeamsTable({
                     size="md"
                     onClick={() => onEditBeam(row)}
                   >
-                    Edit
+                    {tc('edit')}
                   </Button>
                   {badge && (
                     <Button
@@ -283,7 +303,7 @@ function BeamsTable({
                       size="md"
                       onClick={() => onSelectBadge(badge)}
                     >
-                      Details
+                      {tc('details')}
                     </Button>
                   )}
                 </div>
@@ -297,8 +317,11 @@ function BeamsTable({
 }
 
 export default function BeamsPage() {
+  const t = useTranslations('admin.beamsPage')
+  const tc = useTranslations('admin.common')
   const { session } = useChain()
   const { name, symbol, removeOrganizationSymbol } = useOrganization()
+  const translateBadgeName = useTranslateBadgeName()
   const queryClient = useQueryClient()
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)
   const [editingBeam, setEditingBeam] = useState<BeamMetadata | null>(null)
@@ -386,7 +409,7 @@ export default function BeamsPage() {
       for (const action of actions) {
         await action
       }
-      toast.success('Beam updated successfully')
+      toast.success(t('updateSuccess'))
       setTimeout(
         () => queryClient.refetchQueries({ queryKey: ['beams', name] }),
         1000
@@ -404,12 +427,12 @@ export default function BeamsPage() {
         .toISOString()
         .replace(/\.\d{3}Z$/, '')
       await enableBeams({ session, starttime })
-      toast.success('Beams enabled successfully!')
+      toast.success(t('enableSuccess'))
       await queryClient.refetchQueries({ queryKey: ['beams', name] })
       await queryClient.refetchQueries({ queryKey: ['badges', name] })
     } catch (e) {
       console.error('Failed to enable beams', e)
-      toast.error('Failed to enable beams')
+      toast.error(t('enableFailed'))
     } finally {
       setIsEnabling(false)
     }
@@ -420,8 +443,8 @@ export default function BeamsPage() {
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/beams" />
         <HeaderAdminTitle
-          title="Beams"
-          tooltip="Cycle-based badge distribution"
+          title={t('title')}
+          tooltip={t('tooltip')}
         />
       </HeaderAdmin>
       <div className="max-w-container-lg mx-auto min-h-[calc(100vh-24rem)] space-y-10 px-4 pb-8">
@@ -430,39 +453,38 @@ export default function BeamsPage() {
         {isSuccess && (
           <>
             <section className="space-y-4">
-              <h2 className="text-title-2 text-white">System Beams</h2>
+              <h2 className="text-title-2 text-white">{t('systemBeams')}</h2>
               {needsEnableBeams && (
                 <div className="space-y-6">
                   <p className="text-body-2 text-gray-3">
-                    Enable beams to create all template badges for your
-                    organization.
+                    {t('enableDescription')}
                   </p>
                   {hasUnenabledTemplates && (
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Suffix</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Cycle Length</TableHead>
+                          <TableHead>{t('suffix')}</TableHead>
+                          <TableHead>{tc('name')}</TableHead>
+                          <TableHead>{t('cycleLength')}</TableHead>
                           <TableHead className="text-center">
-                            Supply / Cycle
+                            {t('supplyPerCycle')}
                           </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {templatesQuery.data!.map((t) => (
-                          <TableRow key={t.badge_suffix}>
+                        {templatesQuery.data!.map((tmpl) => (
+                          <TableRow key={tmpl.badge_suffix}>
                             <TableCell className="text-gray-3">
-                              {t.badge_suffix}
+                              {tmpl.badge_suffix}
                             </TableCell>
                             <TableCell>
-                              {t.display_name}
+                              {translateBadgeName(tmpl.display_name)}
                             </TableCell>
                             <TableCell>
-                              {formatCycleLength(t.cycle_length)}
+                              {formatCycleLength(tmpl.cycle_length, t)}
                             </TableCell>
                             <TableCell className="text-center">
-                              {t.supply_per_cycle}
+                              {tmpl.supply_per_cycle}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -475,7 +497,7 @@ export default function BeamsPage() {
                     disabled={isEnabling || !session}
                     onClick={handleEnableBeams}
                   >
-                    {isEnabling ? 'Enabling...' : 'Enable Beams'}
+                    {isEnabling ? t('enabling') : t('enableBeams')}
                   </Button>
                 </div>
               )}
@@ -490,7 +512,7 @@ export default function BeamsPage() {
               )}
               {!needsEnableBeams && systemBeams.length === 0 && (
                 <p className="text-body-2 text-gray-3">
-                  No system beams.
+                  {t('noSystemBeams')}
                 </p>
               )}
             </section>

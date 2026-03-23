@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
@@ -24,6 +25,7 @@ import { InputSearchBadges } from '@/components/ui/input-search-badges'
 import { InputSymbol } from '@/components/ui/input-symbol'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 import { numberMask } from '@/utils/masks'
 
 const newBadgeAutomationSchema = z.object({
@@ -54,7 +56,10 @@ const newBadgeAutomationSchema = z.object({
 type NewBadgeAutomationSchema = z.infer<typeof newBadgeAutomationSchema>
 
 export default function NewBadgeAutomationPage() {
+  const t = useTranslations('admin.newBadgeAutomation')
+  const tc = useTranslations('admin.common')
   const { symbol: organizationSymbol, name: orgName } = useOrganization()
+  const translateBadgeName = useTranslateBadgeName()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { actor, session } = useChain()
@@ -211,15 +216,15 @@ export default function NewBadgeAutomationPage() {
 
       toast.success(
         isEditMode
-          ? 'Automation rule updated successfully'
-          : 'Automation rule created successfully'
+          ? t('updateSuccess')
+          : t('createSuccess')
       )
       router.push('/admin/badges-automation')
     } catch {
       toast.error(
         isEditMode
-          ? 'Failed to update automation rule'
-          : 'Failed to create automation rule'
+          ? t('updateFailed')
+          : t('createFailed')
       )
     }
   }
@@ -231,7 +236,7 @@ export default function NewBadgeAutomationPage() {
         className="space-y-8 p-8 max-md:p-0"
       >
         <Field>
-          <Label htmlFor="display_name">Name</Label>
+          <Label htmlFor="display_name">{tc('name')}</Label>
           <Input
             id="display_name"
             {...register('display_name')}
@@ -244,7 +249,7 @@ export default function NewBadgeAutomationPage() {
           control={control}
           render={({ field }) => (
             <Field>
-              <Label htmlFor="emission_symbol">Symbol</Label>
+              <Label htmlFor="emission_symbol">{tc('symbol')}</Label>
               <InputSymbol
                 id="emission_symbol"
                 aria-invalid={!!errors['emission_symbol']}
@@ -257,7 +262,7 @@ export default function NewBadgeAutomationPage() {
         />
 
         <Field className="space-y-2">
-          <Label>Badges criteria</Label>
+          <Label>{t('badgesCriteria')}</Label>
           <ul>
             {badgesCriteria.map((badge, badgeIndex) => (
               <li
@@ -277,16 +282,16 @@ export default function NewBadgeAutomationPage() {
                     value={badge.badge_symbol}
                   />
                   <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                    {badge.onchain_lookup_data.user.display_name}
+                    {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                   </span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-body-2 text-gray-3">Qty</span>
+                    <span className="text-body-2 text-gray-3">{t('qty')}</span>
                     <input
                       type="text"
                       className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
-                      placeholder="Quantity"
+                      placeholder={t('quantityPlaceholder')}
                     {...register(`criteria.${badgeIndex}.quantity`, {
                       onChange: (event) => {
                         event.target.value = numberMask(event.target.value)
@@ -324,7 +329,7 @@ export default function NewBadgeAutomationPage() {
         </Field>
 
         <Field className="space-y-2">
-          <Label>Badges emitted</Label>
+          <Label>{t('badgesEmitted')}</Label>
           <ul>
             {badgesEmitted.map((badge, badgeIndex) => (
               <li
@@ -344,16 +349,16 @@ export default function NewBadgeAutomationPage() {
                     value={badge.badge_symbol}
                   />
                   <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                    {badge.onchain_lookup_data.user.display_name}
+                    {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                   </span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-body-2 text-gray-3">Qty</span>
+                    <span className="text-body-2 text-gray-3">{t('qty')}</span>
                     <input
                       type="text"
                       className="placeholder-gray-3 h-10 w-full bg-transparent focus:outline-0"
-                      placeholder="Quantity"
+                      placeholder={t('quantityPlaceholder')}
                     {...register(`emitted.${badgeIndex}.quantity`, {
                       onChange: (event) => {
                         event.target.value = numberMask(event.target.value)
@@ -393,7 +398,7 @@ export default function NewBadgeAutomationPage() {
         <Field>
           <CheckboxWrapper>
             <Label htmlFor="cyclic" className="flex-1">
-              Cyclic
+              {tc('cyclic')}
             </Label>
             <Checkbox
               id="cyclic"
@@ -407,11 +412,11 @@ export default function NewBadgeAutomationPage() {
         <Button type="submit" variant="primary" size="lg">
           {isSubmitting
             ? isEditMode
-              ? 'Saving...'
-              : 'Creating...'
+              ? tc('saving')
+              : tc('creating')
             : isEditMode
-              ? 'Save'
-              : 'Create'}
+              ? tc('save')
+              : tc('create')}
         </Button>
       </form>
     </Box>

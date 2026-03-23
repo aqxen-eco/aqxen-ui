@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server'
+
 import {
   HeaderAdmin,
   HeaderAdminMenu,
@@ -12,16 +14,18 @@ type BadgesAutomationProps = {
 export default async function BadgesAutomation({
   children,
 }: BadgesAutomationProps) {
+  const t = await getTranslations('admin.badgeAutomation')
+
   return (
     <>
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/badges-automation" />
         <HeaderAdminTitle
-          title="Badges Automation"
-          tooltip="Monitor your active automation rules that instantly distribute badges to users when they hit certain milestones."
+          title={t('title')}
+          tooltip={t('tooltip')}
         >
           <Link href="/admin/new-badge-automation" variant="primary" size="md">
-            New automation rule
+            {t('newAutomationRule')}
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>

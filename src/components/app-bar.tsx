@@ -2,10 +2,12 @@
 
 import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { MdClose, MdMenu } from 'react-icons/md'
 
 import { ClaimableBeamsAlert } from '@/components/claimable-beams-alert'
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
@@ -23,6 +25,7 @@ export function AppBar() {
   const { data: userProfile } = useGetUserProfile(actor ?? null)
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations('common')
 
   const isReady = !isInitializing && (!isAuthenticated || !isOrgPending)
 
@@ -56,14 +59,14 @@ export function AppBar() {
                 href="/"
                 variant={pathname === '/' ? 'link' : 'default'}
               >
-                Home
+                {t('home')}
               </Link>
               {isReady && !isAuthenticated && (
                 <Link
                   href="/about-us"
                   variant={pathname === '/about-us' ? 'link' : 'default'}
                 >
-                  About
+                  {t('about')}
                 </Link>
               )}
               {isReady && !isAuthenticated && (
@@ -73,14 +76,14 @@ export function AppBar() {
                     pathname.includes('/pricing') ? 'link' : 'default'
                   }
                 >
-                  Pricing
+                  {t('pricing')}
                 </Link>
               )}
               <Link
                 href="/stream"
                 variant={pathname === '/stream' ? 'link' : 'default'}
               >
-                Stream
+                {t('stream')}
               </Link>
               <Link
                 href="/organizations"
@@ -90,7 +93,7 @@ export function AppBar() {
                     : 'default'
                 }
               >
-                Organizations
+                {t('organizations')}
               </Link>
               {isReady && !isAuthenticated && (
                 <>
@@ -98,20 +101,20 @@ export function AppBar() {
                     href="/faq"
                     variant={pathname === '/faq' ? 'link' : 'default'}
                   >
-                    FAQ
+                    {t('faq')}
                   </Link>
                   <Link
                     href="/contact"
                     variant={pathname === '/contact' ? 'link' : 'default'}
                   >
-                    Contact
+                    {t('contact')}
                   </Link>
                 </>
               )}
               {isReady && isAuthenticated && !hasOrganization && (
                 <Button asChild variant="primary">
                   <NextLink href="/pricing">
-                    Create Organization
+                    {t('createOrganization')}
                   </NextLink>
                 </Button>
               )}
@@ -128,7 +131,7 @@ export function AppBar() {
                   variant={pathname === '/' ? 'link' : 'default'}
                   className="text-2xl"
                 >
-                  Home
+                  {t('home')}
                 </Link>
                 {isReady && (
                   <Link
@@ -136,7 +139,7 @@ export function AppBar() {
                     variant={pathname === '/about-us' ? 'link' : 'default'}
                     className="text-2xl"
                   >
-                    About
+                    {t('about')}
                   </Link>
                 )}
                 {isReady && (
@@ -149,7 +152,7 @@ export function AppBar() {
                     }
                     className="text-2xl"
                   >
-                    Pricing
+                    {t('pricing')}
                   </Link>
                 )}
                 <Link
@@ -161,14 +164,14 @@ export function AppBar() {
                   }
                   className="text-2xl"
                 >
-                  Organizations
+                  {t('organizations')}
                 </Link>
                 <Link
                   href="/stream"
                   variant={pathname === '/stream' ? 'link' : 'default'}
                   className="text-2xl"
                 >
-                  Stream
+                  {t('stream')}
                 </Link>
                 {isReady && (
                   <>
@@ -177,14 +180,14 @@ export function AppBar() {
                       variant={pathname === '/faq' ? 'link' : 'default'}
                       className="text-2xl"
                     >
-                      FAQ
+                      {t('faq')}
                     </Link>
                     <Link
                       href="/contact"
                       variant={pathname === '/contact' ? 'link' : 'default'}
                       className="text-2xl"
                     >
-                      Contact
+                      {t('contact')}
                     </Link>
                   </>
                 )}
@@ -194,7 +197,7 @@ export function AppBar() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Create Account
+                    {t('createAccount')}
                   </a>
                 </Button>
                 <Button
@@ -208,6 +211,7 @@ export function AppBar() {
             )}
             <div className="flex items-center gap-2">
               {isReady && isAuthenticated && <ClaimableBeamsAlert />}
+              <LanguageSwitcher />
               {isReady && isAuthenticated ? (
                 <DropdownRoot
                   customTrigger={
@@ -232,24 +236,26 @@ export function AppBar() {
                 >
                   <div className="space-y-2 md:hidden">
                     <DropdownItem asChild>
-                      <NextLink href="/">Home</NextLink>
+                      <NextLink href="/">{t('home')}</NextLink>
                     </DropdownItem>
                     <DropdownItem asChild>
-                      <NextLink href="/stream">Stream</NextLink>
+                      <NextLink href="/stream">{t('stream')}</NextLink>
                     </DropdownItem>
                     <DropdownItem asChild>
                       <NextLink href="/organizations">
-                        Organizations
+                        {t('organizations')}
                       </NextLink>
                     </DropdownItem>
                   </div>
                   <DropdownItem asChild>
-                    <NextLink href={`/profile/${actor}`}>Profile</NextLink>
+                    <NextLink href={`/profile/${actor}`}>
+                      {t('profile')}
+                    </NextLink>
                   </DropdownItem>
                   {hasOrganization && (
                     <DropdownItem asChild>
                       <NextLink href="/admin/organization">
-                        Org Admin
+                        {t('orgAdmin')}
                       </NextLink>
                     </DropdownItem>
                   )}
@@ -257,19 +263,19 @@ export function AppBar() {
                     <div className="md:hidden">
                       <DropdownItem asChild>
                         <NextLink href="/pricing">
-                          Create Organization
+                          {t('createOrganization')}
                         </NextLink>
                       </DropdownItem>
                     </div>
                   )}
                   <DropdownItem onClick={logoutAndGoToHome}>
-                    Log out
+                    {t('logOut')}
                   </DropdownItem>
                 </DropdownRoot>
               ) : isReady ? (
                 <>
                   <Button onClick={login} variant="primary">
-                    Log in
+                    {t('logIn')}
                   </Button>
                   <Button asChild variant="secondary" className="max-md:hidden">
                     <a
@@ -277,7 +283,7 @@ export function AppBar() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Create Account
+                      {t('createAccount')}
                     </a>
                   </Button>
                 </>

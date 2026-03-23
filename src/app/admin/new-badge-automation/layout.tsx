@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server'
+
 import {
   HeaderAdmin,
   HeaderAdminBack,
@@ -11,15 +13,17 @@ type NewBadgeLayoutAutomationProps = {
 export default async function NewBadgeLayoutAutomation({
   children,
 }: NewBadgeLayoutAutomationProps) {
+  const t = await getTranslations('admin.newBadgeAutomation')
+
   return (
     <>
       <HeaderAdmin>
         <HeaderAdminBack href="/admin/badges-automation">
-          Badges Automation
+          {t('backLabel')}
         </HeaderAdminBack>
         <HeaderAdminTitle
-          title="New Badge Automation"
-          tooltip="Set up a new automated trigger. Define the exact user actions or point thresholds required to automatically unlock a specific badge."
+          title={t('title')}
+          tooltip={t('tooltip')}
           className="max-w-container-md"
         />
       </HeaderAdmin>

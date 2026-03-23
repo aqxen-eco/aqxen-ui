@@ -1,23 +1,29 @@
+import { getTranslations } from 'next-intl/server'
+
 import {
   HeaderAdmin,
   HeaderAdminBack,
   HeaderAdminTitle,
 } from '@/components/header-admin'
 
-type NewBadgeLayoutProps = {
+type NewSeasonLayoutProps = {
   children: React.ReactNode
 }
 
-export default async function NewBadgeLayout({
+export default async function NewSeasonLayout({
   children,
-}: NewBadgeLayoutProps) {
+}: NewSeasonLayoutProps) {
+  const t = await getTranslations('admin.newSeason')
+
   return (
     <>
       <HeaderAdmin>
-        <HeaderAdminBack href="/admin/seasons">Season</HeaderAdminBack>
+        <HeaderAdminBack href="/admin/seasons">
+          {t('backLabel')}
+        </HeaderAdminBack>
         <HeaderAdminTitle
-          title="New Season"
-          tooltip="Configure an upcoming season. Define the start and end dates, and set the specific engagement rules for this cycle."
+          title={t('title')}
+          tooltip={t('tooltip')}
           className="max-w-container-md"
         />
       </HeaderAdmin>

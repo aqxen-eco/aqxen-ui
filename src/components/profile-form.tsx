@@ -5,6 +5,7 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { MdClose } from 'react-icons/md'
@@ -39,6 +40,7 @@ export function ProfileForm() {
   const { actor } = useChain()
   const params = useParams()
   const router = useRouter()
+  const t = useTranslations('profile')
   const [open, setOpen] = useState(false)
   const [pinataGroupId, setPinataGroupId] = useState<string>()
   const [pendingAvatar, setPendingAvatar] = useState<File | null>(null)
@@ -132,11 +134,11 @@ export function ProfileForm() {
       })
       setPendingAvatar(null)
       setPendingCover(null)
-      toast('Profile updated!')
+      toast(t('profileUpdated'))
       queryClient.invalidateQueries({ queryKey: ['users'] })
       router.refresh()
     } catch {
-      toast.error('Failed to update profile')
+      toast.error(t('profileUpdateFailed'))
     }
     setOpen(false)
   }
@@ -149,7 +151,7 @@ export function ProfileForm() {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <Button variant="secondary" className="absolute top-4 right-4 z-10">
-          Edit profile
+          {t('editProfile')}
         </Button>
       </Dialog.Trigger>
       <AnimatePresence>
@@ -187,18 +189,17 @@ export function ProfileForm() {
                   </Button>
                 </Dialog.Close>
                 <Dialog.Title className="text-title-1 text-white">
-                  Profile
+                  {t('profileTitle')}
                 </Dialog.Title>
                 <Dialog.Description className="text-gray-3 text-body-2">
-                  Update your profile by selecting badges and writing a
-                  personalized message.
+                  {t('profileDescription')}
                 </Dialog.Description>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
                   className="mt-8 space-y-8"
                 >
                   <Field>
-                    <Label>Cover Photo</Label>
+                    <Label>{t('coverPhoto')}</Label>
                     <ImageUpload
                       variant="cover"
                       value={coverIpfs}
@@ -206,12 +207,12 @@ export function ProfileForm() {
                       isUploading={isUploading}
                     />
                     <span className="text-body-3 text-gray-3 mt-1 block">
-                      Recommended: 1200 x 480px
+                      {t('coverRecommended')}
                     </span>
                   </Field>
 
                   <Field>
-                    <Label>Avatar</Label>
+                    <Label>{t('avatar')}</Label>
                     <ImageUpload
                       variant="avatar"
                       value={avatarIpfs}
@@ -219,53 +220,53 @@ export function ProfileForm() {
                       isUploading={isUploading}
                     />
                     <span className="text-body-3 text-gray-3 mt-1 block">
-                      Recommended: 400 x 400px
+                      {t('avatarRecommended')}
                     </span>
                   </Field>
 
                   <Field>
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name">{t('nameLabel')}</Label>
                     <Input
                       {...register('name')}
                       id="name"
                       aria-invalid={!!errors['name']}
-                      placeholder="Write your name"
+                      placeholder={t('namePlaceholder')}
                       disabled={isLoading}
                     />
                     <ErrorMessage>{errors['name']?.message}</ErrorMessage>
                   </Field>
 
                   <Field>
-                    <Label htmlFor="location">Location</Label>
+                    <Label htmlFor="location">{t('locationLabel')}</Label>
                     <Input
                       {...register('location')}
                       id="location"
                       aria-invalid={!!errors['location']}
-                      placeholder="Write your location"
+                      placeholder={t('locationPlaceholder')}
                       disabled={isLoading}
                     />
                     <ErrorMessage>{errors['location']?.message}</ErrorMessage>
                   </Field>
 
                   <Field>
-                    <Label htmlFor="interests">Interests</Label>
+                    <Label htmlFor="interests">{t('interestsLabel')}</Label>
                     <Input
                       {...register('interests')}
                       id="interests"
                       aria-invalid={!!errors['interests']}
-                      placeholder="Write your interests"
+                      placeholder={t('interestsPlaceholder')}
                       disabled={isLoading}
                     />
                     <ErrorMessage>{errors['interests']?.message}</ErrorMessage>
                   </Field>
 
                   <Field>
-                    <Label htmlFor="about">About</Label>
+                    <Label htmlFor="about">{t('aboutLabel')}</Label>
                     <Textarea
                       {...register('about')}
                       id="about"
                       aria-invalid={!!errors['about']}
-                      placeholder="Write about you"
+                      placeholder={t('aboutPlaceholder')}
                       disabled={isLoading}
                     />
                     <ErrorMessage>{errors['about']?.message}</ErrorMessage>
@@ -277,7 +278,7 @@ export function ProfileForm() {
                     size="lg"
                     disabled={isLoading || isSubmitting || isUploading}
                   >
-                    {isSubmitting || isUploading ? 'Saving...' : 'Save'}
+                    {isSubmitting || isUploading ? t('saving') : t('save')}
                   </Button>
                 </form>
               </motion.div>

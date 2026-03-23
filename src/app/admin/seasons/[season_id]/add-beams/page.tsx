@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import z from 'zod'
@@ -30,6 +31,9 @@ const addBeamsSchema = z.object({
 type AddBeamsSchema = z.infer<typeof addBeamsSchema>
 
 export default function AddBeamsPage() {
+  const t = useTranslations('admin.addBeams')
+  const tc = useTranslations('admin.common')
+  const tn = useTranslations('admin.nav')
   const params = useParams()
   const searchParams = useSearchParams()
   const series = searchParams.get('series')
@@ -81,7 +85,7 @@ export default function AddBeamsPage() {
           badge_symbols: allBadgeSymbols,
         })
       }
-      toast.success('Beam added successfully')
+      toast.success(t('addSuccess'))
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['seasons'] }),
@@ -90,7 +94,7 @@ export default function AddBeamsPage() {
       ])
       router.push(`/admin/seasons/${params.season_id}`)
     } catch {
-      toast.error('Failed to add beam')
+      toast.error(t('addFailed'))
     }
   }
 
@@ -103,9 +107,9 @@ export default function AddBeamsPage() {
         <HeaderAdminTitle
           title={
             <>
-              Add beam{' '}
+              {t('title')}{' '}
               <span className="text-gray-3">
-                ({series ? 'to series' : 'to season'})
+                ({series ? t('toSeries') : t('toSeason')})
               </span>
             </>
           }
@@ -120,7 +124,7 @@ export default function AddBeamsPage() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <Label>Beams</Label>
+                  <Label>{tn('beams')}</Label>
                   <InputBadges
                     value={field.value}
                     onChange={field.onChange}
@@ -132,7 +136,7 @@ export default function AddBeamsPage() {
             />
 
             <Button type="submit" variant="primary" size="lg">
-              {isSubmitting ? 'Adding...' : 'Add'}
+              {isSubmitting ? tc('adding') : tc('add')}
             </Button>
           </form>
         </Box>

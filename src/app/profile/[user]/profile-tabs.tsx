@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import {
   MdElectricBolt,
@@ -18,6 +19,7 @@ export function ProfileTabs({
   badgesContent,
   beamsContent,
 }: ProfileTabsProps) {
+  const t = useTranslations('profile')
   const [activeTab, setActiveTab] = useState<'feed' | 'badges' | 'beams'>(
     'feed',
   )
@@ -35,7 +37,7 @@ export function ProfileTabs({
           onClick={() => setActiveTab('feed')}
         >
           <MdOutlineDynamicFeed className="size-5" />
-          Feed
+          {t('tabFeed')}
         </button>
         <button
           type="button"
@@ -44,7 +46,7 @@ export function ProfileTabs({
           onClick={() => setActiveTab('badges')}
         >
           <MdOutlineWorkspacePremium className="size-5" />
-          Badges
+          {t('tabBadges')}
         </button>
         <button
           type="button"
@@ -53,7 +55,7 @@ export function ProfileTabs({
           onClick={() => setActiveTab('beams')}
         >
           <MdElectricBolt className="size-5" />
-          Beams
+          {t('tabBeams')}
         </button>
       </div>
       {activeTab === 'feed' && feedContent}

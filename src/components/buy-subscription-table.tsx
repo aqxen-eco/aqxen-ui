@@ -2,6 +2,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { MdAdd, MdRemove } from 'react-icons/md'
 import { toast } from 'react-toastify'
@@ -23,7 +24,9 @@ import {
 import { COINGECKO_ID, TOKEN_SYMBOL } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
-import { formatUsd } from '@/utils/intl-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { useIntlLocale } from '@/hooks/use-date-locale'
+import { formatDecimal, formatNumber } from '@/utils/intl-format'
 
 type BuySubscriptionTableProps = {
   paidForCurrentCycle?: boolean
@@ -40,6 +43,9 @@ export function BuySubscriptionTable({
   const { hasOrganization } = useOrganization()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const t = useTranslations('pricing')
+  const intlLocale = useIntlLocale()
+  const { formatPrice, formatPriceFromString } = useCurrency()
 
   // Renewal mode: user has org but hasn't paid for current cycle
   const isRenewalMode = hasOrganization && !paidForCurrentCycle
@@ -88,7 +94,7 @@ export function BuySubscriptionTable({
     if (!tokenPriceQuery.data) return null
     const num = parseUsdNum(usdValue)
     if (isNaN(num)) return null
-    return `${((num * multiplier) / tokenPriceQuery.data).toFixed(4)} ${TOKEN_SYMBOL}`
+    return `${formatDecimal((num * multiplier) / tokenPriceQuery.data, 4, intlLocale)} ${TOKEN_SYMBOL}`
   }
 
   async function handleBuyPackage({
@@ -99,7 +105,7 @@ export function BuySubscriptionTable({
     member_fee: string
   }) {
     if (!currentCycleId) {
-      toast.error('No active billing cycle found')
+      toast.error(t('noBillingCycle'))
       return
     }
 
@@ -111,12 +117,12 @@ export function BuySubscriptionTable({
           currentCycleId,
           memberCount,
         })
-        toast.success('Subscription purchased successfully')
+        toast.success(t('purchaseSuccess'))
         await new Promise((resolve) => setTimeout(resolve, 1000))
         await queryClient.refetchQueries({ queryKey: ['billing-detail'] })
         router.push('/admin/subscription')
       } catch {
-        toast.error('Failed to purchase subscription')
+        toast.error(t('purchaseFailed'))
       }
     } else {
       setCreateOrgModal({
@@ -141,20 +147,20 @@ export function BuySubscriptionTable({
       <TableHeader>
         <TableRow>
           {!hasOrganization && (
-            <TableHead>Organization creation fee (one-time)</TableHead>
+            <TableHead>{t('orgCreationFee')}</TableHead>
           )}
           <TableHead>
-            {isRenewalMode ? 'Total seats' : 'Members'}
+            {isRenewalMode ? t('totalSeats') : t('members')}
           </TableHead>
           <TableHead>
             {isRenewalMode
-              ? 'Renewal cost (monthly)'
+              ? t('renewalCost')
               : isAddSeatsMode
-                ? 'Additional seats (monthly)'
-                : 'Member fee (monthly)'}
+                ? t('additionalSeats')
+                : t('memberFee')}
           </TableHead>
           {isAddSeatsMode && (
-            <TableHead>New total (monthly)</TableHead>
+            <TableHead>{t('newTotalMonthly')}</TableHead>
           )}
         </TableRow>
       </TableHeader>
@@ -166,7 +172,7 @@ export function BuySubscriptionTable({
             <TableRow key={item.id}>
               {!hasOrganization && (
                 <TableCell className="py-6">
-                  {formatUsd(item.org_creation_fee)}
+                  {formatPriceFromString(item.org_creation_fee)}
                   {formatToken(item.org_creation_fee) && (
                     <>
                       {' '}
@@ -191,7 +197,7 @@ export function BuySubscriptionTable({
                     <MdRemove className="size-4" />
                   </Button>
                   <span className="w-8 text-center font-medium">
-                    {memberCount}
+                    {formatNumber(memberCount, intlLocale)}
                   </span>
                   <Button
                     variant="secondary"
@@ -204,12 +210,12 @@ export function BuySubscriptionTable({
                 </div>
                 {isRenewalMode && memberCount < existingSeats && (
                   <p className="text-body-3 text-gray-3 mt-1">
-                    Reducing from {existingSeats} seats
+                    {t('reducingFromSeats', { count: existingSeats })}
                   </p>
                 )}
               </TableCell>
               <TableCell className="py-6">
-                {`$${totalMemberUsd.toFixed(2)}`}
+                {formatPrice(totalMemberUsd)}
                 {formatToken(item.member_fee, memberCount) && (
                   <>
                     {' '}
@@ -232,7 +238,7 @@ export function BuySubscriptionTable({
                   <TableCell className="py-6">
                     <div>
                       <span className="font-medium">
-                        ${newTotalUsd.toFixed(2)}
+                        {formatPrice(newTotalUsd)}
                       </span>
                       {newTotalToken && (
                         <>
@@ -244,7 +250,7 @@ export function BuySubscriptionTable({
                       )}
                     </div>
                     <p className="text-body-3 text-gray-3 mt-1">
-                      {newTotalSeats} seats total
+                      {t('seatsTotal', { count: newTotalSeats })}
                     </p>
                   </TableCell>
                 )
@@ -261,7 +267,7 @@ export function BuySubscriptionTable({
                       })
                     }
                   >
-                    {isRenewalMode ? 'Renew' : hasOrganization ? 'Buy' : 'Create Org'}
+                    {isRenewalMode ? t('renew') : hasOrganization ? t('buy') : t('createOrg')}
                   </Button>
                 )}
               </TableCell>

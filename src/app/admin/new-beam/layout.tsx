@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server'
+
 import {
   HeaderAdmin,
   HeaderAdminBack,
@@ -11,13 +13,17 @@ type NewBeamLayoutProps = {
 export default async function NewBeamLayout({
   children,
 }: NewBeamLayoutProps) {
+  const t = await getTranslations('admin.newBeam')
+
   return (
     <>
       <HeaderAdmin>
-        <HeaderAdminBack href="/admin/beams">Beams</HeaderAdminBack>
+        <HeaderAdminBack href="/admin/beams">
+          {t('backLabel')}
+        </HeaderAdminBack>
         <HeaderAdminTitle
-          title="New Beam"
-          tooltip="Create a new cycle-based beam badge"
+          title={t('title')}
+          tooltip={t('tooltip')}
           className="max-w-container-md"
         />
       </HeaderAdmin>

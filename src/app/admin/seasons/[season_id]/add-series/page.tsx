@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
@@ -49,6 +50,8 @@ const nthNumber = (number: number) => {
 }
 
 export default function AddSeriesPage() {
+  const t = useTranslations('admin.addSeriesPage')
+  const tc = useTranslations('admin.common')
   const params = useParams()
   const searchParams = useSearchParams()
   const { session } = useChain()
@@ -148,7 +151,7 @@ export default function AddSeriesPage() {
         start_right_away,
         seq_ids: [lastSeriesId ? Number(lastSeriesId) + 1 : 1],
       })
-      toast.success('Series added successfully')
+      toast.success(t('addSuccess'))
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['series'] }),
@@ -156,7 +159,7 @@ export default function AddSeriesPage() {
       ])
       router.push(`/admin/seasons/${params.season_id}`)
     } catch {
-      toast.error('Failed to add series')
+      toast.error(t('addFailed'))
     }
   }
 
@@ -169,7 +172,7 @@ export default function AddSeriesPage() {
         <HeaderAdminTitle
           title={
             <>
-              Add Series <span className="text-gray-3">({nextSeries})</span>
+              {t('title')} <span className="text-gray-3">({nextSeries})</span>
             </>
           }
           className="max-w-container-md"
@@ -179,7 +182,7 @@ export default function AddSeriesPage() {
         <Box className="max-md:rounded-none max-md:border-0 max-md:bg-black max-md:p-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <Field>
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{tc('name')}</Label>
               <Input
                 id="name"
                 {...register('name')}
@@ -193,7 +196,7 @@ export default function AddSeriesPage() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <Label>Additional Beams</Label>
+                  <Label>{t('additionalBeams')}</Label>
                   <InputBadges
                     value={field.value}
                     onChange={field.onChange}
@@ -209,7 +212,7 @@ export default function AddSeriesPage() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <Label>Additional Badges</Label>
+                  <Label>{t('additionalBadges')}</Label>
                   <InputBadges value={field.value} onChange={field.onChange} />
                   <ErrorMessage>{errors['badges']?.message}</ErrorMessage>
                 </Field>
@@ -219,7 +222,7 @@ export default function AddSeriesPage() {
             <Field>
               <CheckboxWrapper>
                 <Label htmlFor="start_right_away" className="flex-1">
-                  Start the new series right away
+                  {t('startRightAway')}
                 </Label>
                 <Checkbox
                   id="start_right_away"
@@ -231,7 +234,7 @@ export default function AddSeriesPage() {
             </Field>
 
             <Button type="submit" variant="primary" size="lg">
-              {isSubmitting ? 'Adding...' : 'Add'}
+              {isSubmitting ? tc('adding') : tc('add')}
             </Button>
           </form>
         </Box>

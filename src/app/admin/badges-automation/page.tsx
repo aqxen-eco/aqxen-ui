@@ -2,6 +2,7 @@
 
 import { useQueries } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { toast } from 'react-toastify'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
@@ -24,10 +25,14 @@ import { Tag } from '@/components/ui/tag'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
 export default function BadgeAutomationPage() {
+  const t = useTranslations('admin.badgeAutomation')
+  const tc = useTranslations('admin.common')
   const { actor, session } = useChain()
   const { name, symbol } = useOrganization()
+  const translateBadgeName = useTranslateBadgeName()
 
   const [badgeAutomationQuery, badgesQuery] = useQueries({
     queries: [
@@ -120,11 +125,11 @@ export default function BadgeAutomationPage() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-10">Sym</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Emitter criteria</TableHead>
-          <TableHead>Emit badges</TableHead>
-          <TableHead className="w-32">Status</TableHead>
+          <TableHead className="w-10">{tc('sym')}</TableHead>
+          <TableHead>{tc('name')}</TableHead>
+          <TableHead>{t('emitterCriteria')}</TableHead>
+          <TableHead>{t('emitBadges')}</TableHead>
+          <TableHead className="w-32">{tc('status')}</TableHead>
           <TableHead className="w-40" />
         </TableRow>
       </TableHeader>
@@ -136,9 +141,9 @@ export default function BadgeAutomationPage() {
             </TableCell>
             <TableCell className="space-x-2">
               <span className="inline-block">
-                {row.onchain_lookup_data.user.name}
+                {translateBadgeName(row.onchain_lookup_data.user.name)}
               </span>
-              {row.cyclic && <Tag>Cyclic</Tag>}
+              {row.cyclic && <Tag>{tc('cyclic')}</Tag>}
             </TableCell>
             <TableCell>
               <div className="space-y-1">
@@ -157,7 +162,7 @@ export default function BadgeAutomationPage() {
                       {badge.quantity}
                     </span>
                     <Tooltip
-                      content={badge.onchain_lookup_data.user.display_name}
+                      content={translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                     >
                       <span className="text-body-2 text-white">
                         {badge.badge_symbol.split(',')[1]}
@@ -184,7 +189,7 @@ export default function BadgeAutomationPage() {
                       {badge.quantity}
                     </span>
                     <Tooltip
-                      content={badge.onchain_lookup_data.user.display_name}
+                      content={translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                     >
                       <span className="text-body-2 text-white">
                         {badge.badge_symbol.split(',')[1]}
@@ -195,9 +200,9 @@ export default function BadgeAutomationPage() {
               </div>
             </TableCell>
             <TableCell>
-              {row.status === 'init' && <Tag variant="green">Created</Tag>}
-              {row.status === 'activate' && <Tag variant="green">Enabled</Tag>}
-              {row.status === 'deactivate' && <Tag variant="red">Disabled</Tag>}
+              {row.status === 'init' && <Tag variant="green">{t('created')}</Tag>}
+              {row.status === 'activate' && <Tag variant="green">{t('enabled')}</Tag>}
+              {row.status === 'deactivate' && <Tag variant="red">{t('disabled')}</Tag>}
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-2">
@@ -205,7 +210,7 @@ export default function BadgeAutomationPage() {
                   <Link
                     href={`/admin/new-badge-automation?edit=${encodeURIComponent(row.emission_symbol)}`}
                   >
-                    Edit
+                    {tc('edit')}
                   </Link>
                 </Button>
                 {row.status === 'activate' && (
@@ -218,17 +223,17 @@ export default function BadgeAutomationPage() {
                           session: session!,
                           emission_symbol: row.emission_symbol,
                         })
-                        toast.success('Automation rule disabled')
+                        toast.success(t('disableSuccess'))
                         setTimeout(
                           () => badgeAutomationQuery.refetch(),
                           1000
                         )
                       } catch {
-                        toast.error('Failed to disable automation rule')
+                        toast.error(t('disableFailed'))
                       }
                     }}
                   >
-                    Disable
+                    {tc('disable')}
                   </Button>
                 )}
                 {(row.status === 'init' || row.status === 'deactivate') && (
@@ -241,17 +246,17 @@ export default function BadgeAutomationPage() {
                           session: session!,
                           emission_symbol: row.emission_symbol,
                         })
-                        toast.success('Automation rule enabled')
+                        toast.success(t('enableSuccess'))
                         setTimeout(
                           () => badgeAutomationQuery.refetch(),
                           1000
                         )
                       } catch {
-                        toast.error('Failed to enable automation rule')
+                        toast.error(t('enableFailed'))
                       }
                     }}
                   >
-                    Enable
+                    {tc('enable')}
                   </Button>
                 )}
               </div>

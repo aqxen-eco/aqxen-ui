@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 import { MdClose } from 'react-icons/md'
 import { twMerge } from 'tailwind-merge'
@@ -8,6 +9,7 @@ import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { BadgeImage } from '@/components/ui/badge-image'
 import { Combobox, ComboboxEmpty, ComboboxItem } from '@/components/ui/combobox'
 import { useOrganization } from '@/contexts/organization'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
 type InputBadgesProps = {
   value?: string[] | null
@@ -27,6 +29,8 @@ export function InputBadges({
   beamsOnly = false,
 }: InputBadgesProps) {
   const { name } = useOrganization()
+  const tc = useTranslations('common')
+  const translateBadgeName = useTranslateBadgeName()
   const badgeScope = scope ?? name
 
   const badgesQuery = useQuery({
@@ -102,7 +106,7 @@ export function InputBadges({
                   hideRemoveBadgeButton && 'mr-3'
                 )}
               >
-                {badge.onchain_lookup_data.user.display_name}
+                {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
               </span>
               {!hideRemoveBadgeButton && (
                 <span
@@ -138,7 +142,7 @@ export function InputBadges({
     <div className="mt-2">
       {!hideSearch && (
         <Combobox
-          title="Search badges"
+          title={beamsOnly ? tc('searchBeams') : tc('searchBadges')}
           triggerContent={selectedBadgeChips}
           filter={(value, search) => {
             const badge = badgesQuery?.data?.rows.find(
@@ -174,7 +178,7 @@ export function InputBadges({
                   badgeSymbol={badge.badge_symbol}
                 />
                 <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                  {badge.onchain_lookup_data.user.display_name}
+                  {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                 </span>
               </div>
             </ComboboxItem>

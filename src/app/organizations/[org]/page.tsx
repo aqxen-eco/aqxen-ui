@@ -9,7 +9,8 @@ import {
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import {
   MdOutlineCampaign,
@@ -48,11 +49,7 @@ import {
 } from '@/components/ui/table'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
-
-const sortList = [
-  { description: 'Latest', value: 'desc' },
-  { description: 'Oldest', value: 'asc' },
-]
+import { useDateLocale } from '@/hooks/use-date-locale'
 
 const orgPostSchema = z.object({
   content: z.string().nonempty('Post content is required'),
@@ -67,11 +64,22 @@ export default function OrganizationPage() {
   const { org } = useParams<{ org: string }>()
   const { session, isAuthenticated, actor } = useChain()
   const queryClient = useQueryClient()
+  const t = useTranslations('organizations')
+  const dateLocale = useDateLocale()
   const [isRequesting, setIsRequesting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [activeTab, setActiveTab] = useState<
     'stream' | 'members' | 'announcements'
   >('stream')
+
+  const sortList = useMemo(
+    () => [
+      { description: t('sortLatest'), value: 'desc' },
+      { description: t('sortOldest'), value: 'asc' },
+    ],
+    [t],
+  )
+
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
   const loadMoreBtnRef = useRef(null)
   const announcementsLoadMoreRef = useRef(null)
@@ -203,9 +211,9 @@ export default function OrganizationPage() {
       await queryClient.refetchQueries({
         queryKey: ['member-requests', org],
       })
-      toast.success('Request cancelled.')
+      toast.success(t('requestCancelled'))
     } catch {
-      toast.error('Failed to cancel request.')
+      toast.error(t('cancelFailed'))
     } finally {
       setIsCancelling(false)
     }
@@ -220,9 +228,9 @@ export default function OrganizationPage() {
       await queryClient.refetchQueries({
         queryKey: ['member-requests', org],
       })
-      toast.success(`Request to join ${org} has been sent.`)
+      toast.success(t('requestSent', { org }))
     } catch {
-      toast.error('Failed to send join request.')
+      toast.error(t('requestFailed'))
     } finally {
       setIsRequesting(false)
     }
@@ -232,7 +240,7 @@ export default function OrganizationPage() {
 
   async function onSubmit(data: OrgPostSchema) {
     if (!actor) {
-      toast.error('You must be logged in to create a post')
+      toast.error(t('loginRequired'))
       return
     }
 
@@ -246,8 +254,8 @@ export default function OrganizationPage() {
 
         let onChainPostId: string | undefined
         const logAction = result?.response?.processed?.action_traces
-          ?.flatMap((t: { inline_traces?: { act?: { name?: string; data?: { post_id?: number } } }[] }) => t.inline_traces ?? [])
-          ?.find((t: { act?: { name?: string } }) => t.act?.name === 'logannounce')
+          ?.flatMap((tr: { inline_traces?: { act?: { name?: string; data?: { post_id?: number } } }[] }) => tr.inline_traces ?? [])
+          ?.find((tr: { act?: { name?: string } }) => tr.act?.name === 'logannounce')
         if (logAction?.act?.data?.post_id != null) {
           onChainPostId = String(logAction.act.data.post_id)
         }
@@ -259,7 +267,7 @@ export default function OrganizationPage() {
         })
 
         reset()
-        toast('Announcement published!')
+        toast(t('announcementPublished'))
         queryClient.invalidateQueries({ queryKey: ['posts'] })
         queryClient.invalidateQueries({ queryKey: ['announcements'] })
       } else {
@@ -279,14 +287,14 @@ export default function OrganizationPage() {
         })
 
         reset()
-        toast('Post published!')
+        toast(t('postPublished'))
         queryClient.invalidateQueries({ queryKey: ['posts'] })
       }
     } catch {
       toast.error(
         isOrgOwner
-          ? 'Failed to publish announcement'
-          : 'Failed to publish post'
+          ? t('announcementFailed')
+          : t('postFailed')
       )
     }
   }
@@ -327,7 +335,7 @@ export default function OrganizationPage() {
               {isAuthenticated && actor === org && (
                 <Button asChild variant="primary" size="lg">
                   <Link href="/admin/organization">
-                    Manage Organization
+                    {t('manageOrganization')}
                   </Link>
                 </Button>
               )}
@@ -341,7 +349,7 @@ export default function OrganizationPage() {
                     disabled={isCancelling}
                     onClick={handleCancelRequest}
                   >
-                    {isCancelling ? 'Cancelling...' : 'Cancel Request'}
+                    {isCancelling ? t('cancelling') : t('cancelRequest')}
                   </Button>
                 ) : (
                   <Button
@@ -350,7 +358,7 @@ export default function OrganizationPage() {
                     disabled={isRequesting}
                     onClick={handleRequestJoin}
                   >
-                    {isRequesting ? 'Requesting...' : 'Request to Join'}
+                    {isRequesting ? t('requesting') : t('requestToJoin')}
                   </Button>
                 ))}
             </div>
@@ -360,7 +368,7 @@ export default function OrganizationPage() {
 
       <section className="mb-12">
         <h2 className="text-title-2 mb-4 text-white">
-          About Organization
+          {t('aboutOrganization')}
         </h2>
         {orgQuery.isLoading && (
           <div className="animate-pulse">
@@ -371,8 +379,7 @@ export default function OrganizationPage() {
           <div className="space-y-4">
             {createdAt && (
               <p className="text-body-2 text-gray-3">
-                Created{' '}
-                {format(new Date(createdAt * 1000), 'MMMM d, yyyy')}
+                {t('created', { date: format(new Date(createdAt * 1000), 'MMMM d, yyyy', { locale: dateLocale }) })}
               </p>
             )}
             {aboutText && (
@@ -387,7 +394,7 @@ export default function OrganizationPage() {
       {(orgQuery.isLoading || purposeText) && (
         <section className="mb-12">
           <h2 className="text-title-2 mb-4 text-white">
-            Organization Purpose
+            {t('organizationPurpose')}
           </h2>
           {orgQuery.isLoading && (
             <div className="animate-pulse">
@@ -411,7 +418,7 @@ export default function OrganizationPage() {
           onClick={() => setActiveTab('stream')}
         >
           <MdOutlineDynamicFeed className="size-5" />
-          Stream
+          {t('tabStream')}
         </button>
         <button
           type="button"
@@ -420,7 +427,7 @@ export default function OrganizationPage() {
           onClick={() => setActiveTab('members')}
         >
           <MdOutlinePeople className="size-5" />
-          Members
+          {t('tabMembers')}
         </button>
         <button
           type="button"
@@ -429,7 +436,7 @@ export default function OrganizationPage() {
           onClick={() => setActiveTab('announcements')}
         >
           <MdOutlineCampaign className="size-5" />
-          Announcements
+          {t('tabAnnouncements')}
         </button>
       </div>
 
@@ -459,8 +466,8 @@ export default function OrganizationPage() {
                       {...register('content')}
                       placeholder={
                         isOrgOwner
-                          ? 'Announce to your organization...'
-                          : 'Share what you\'ve accomplished that\'s contributed value to your community.'
+                          ? t('announcePlaceholder')
+                          : t('postPlaceholder')
                       }
                       className="text-body-1 placeholder:text-gray-3 mb-6 block min-h-20 w-full resize-none outline-none"
                       rows={4}
@@ -474,7 +481,7 @@ export default function OrganizationPage() {
                         variant="primary"
                         disabled={!canSubmit}
                       >
-                        {isOrgOwner ? 'Announce' : 'Post'}
+                        {isOrgOwner ? t('announce') : t('postButton')}
                       </Button>
                     </div>
                   </div>
@@ -529,7 +536,7 @@ export default function OrganizationPage() {
             <div className="flex items-center justify-center">
               {postsQuery.data.pages[0].posts?.length === 0 ? (
                 <p className="text-body-2 text-gray-3 py-14">
-                  No posts available. Be the first to create one!
+                  {t('noPostsAvailable')}
                 </p>
               ) : (
                 <Button
@@ -543,12 +550,12 @@ export default function OrganizationPage() {
                   }
                 >
                   {postsQuery.isFetchingNextPage
-                    ? 'Loading more...'
+                    ? t('loadingMore')
                     : postsQuery.hasNextPage
-                      ? 'Load Newer'
+                      ? t('loadNewer')
                       : postsQuery.isFetching
-                        ? 'Loading...'
-                        : 'Nothing more to load'}
+                        ? t('loading')
+                        : t('nothingMore')}
                 </Button>
               )}
             </div>
@@ -565,7 +572,7 @@ export default function OrganizationPage() {
           {membersQuery.isSuccess &&
             membersQuery.data.rows.length === 0 && (
               <p className="text-body-2 text-gray-3">
-                No members yet.
+                {t('noMembersYet')}
               </p>
             )}
           {membersQuery.isSuccess &&
@@ -573,9 +580,9 @@ export default function OrganizationPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Account</TableHead>
-                    <TableHead>Reputation</TableHead>
-                    <TableHead>Joined</TableHead>
+                    <TableHead>{t('account')}</TableHead>
+                    <TableHead>{t('reputation')}</TableHead>
+                    <TableHead>{t('joined')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -595,7 +602,8 @@ export default function OrganizationPage() {
                       <TableCell className="text-gray-3">
                         {format(
                           new Date(row.joined_at),
-                          'EEE d MMM yyyy'
+                          'EEE d MMM yyyy',
+                          { locale: dateLocale }
                         )}
                       </TableCell>
                     </TableRow>
@@ -654,7 +662,7 @@ export default function OrganizationPage() {
             <div className="flex items-center justify-center">
               {announcementsQuery.data.pages[0].posts?.length === 0 ? (
                 <p className="text-body-2 text-gray-3 py-14">
-                  No announcements yet.
+                  {t('noAnnouncementsYet')}
                 </p>
               ) : (
                 <Button
@@ -668,12 +676,12 @@ export default function OrganizationPage() {
                   }
                 >
                   {announcementsQuery.isFetchingNextPage
-                    ? 'Loading more...'
+                    ? t('loadingMore')
                     : announcementsQuery.hasNextPage
-                      ? 'Load Newer'
+                      ? t('loadNewer')
                       : announcementsQuery.isFetching
-                        ? 'Loading...'
-                        : 'Nothing more to load'}
+                        ? t('loading')
+                        : t('nothingMore')}
                 </Button>
               )}
             </div>

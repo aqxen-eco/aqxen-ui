@@ -2,6 +2,7 @@
 
 import { useQueries } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { MdOutlineAdd, MdOutlineInfo } from 'react-icons/md'
 import { toast } from 'react-toastify'
 
@@ -38,9 +39,16 @@ import { Tooltip } from '@/components/ui/tooltip'
 import { Contract } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
 export default function SeasonPage() {
+  const t = useTranslations('admin.seasonDetail')
+  const tc = useTranslations('admin.common')
+  const tn = useTranslations('admin.seasonsPage')
+  const tb = useTranslations('admin.badgesPage')
+  const ta = useTranslations('admin.badgeAutomation')
   const { name, removeOrganizationSymbol } = useOrganization()
+  const translateBadgeName = useTranslateBadgeName()
   const { season_id } = useParams()
   const { session } = useChain()
   const seasonIdDecoded = decodeURIComponent(season_id as string)
@@ -227,7 +235,7 @@ export default function SeasonPage() {
   return (
     <>
       <HeaderAdmin>
-        <HeaderAdminBack href="/admin/seasons">Seasons</HeaderAdminBack>
+        <HeaderAdminBack href="/admin/seasons">{tn('title')}</HeaderAdminBack>
         <HeaderAdminTitle
           title={season?.onchain_lookup_data.user.display_name}
         />
@@ -236,8 +244,8 @@ export default function SeasonPage() {
         <section className="space-y-4">
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
-              <h2 className="text-title-2 text-white">Beams</h2>
-              <Tooltip content="Cycle-based badge distribution linked to this season. Beams automatically award badges based on recurring engagement cycles.">
+              <h2 className="text-title-2 text-white">{t('beamsSection')}</h2>
+              <Tooltip content={t('beamsTooltip')}>
                 <Button variant="link" size="md" square>
                   <MdOutlineInfo className="size-6" />
                 </Button>
@@ -249,7 +257,7 @@ export default function SeasonPage() {
                 variant="secondary"
                 size="md"
               >
-                Add beams
+                {t('addBeams')}
               </Link>
             </div>
           </header>
@@ -259,10 +267,10 @@ export default function SeasonPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-10">Sym</TableHead>
-                      <TableHead>Name</TableHead>
+                      <TableHead className="w-10">{tc('sym')}</TableHead>
+                      <TableHead>{tc('name')}</TableHead>
                       <TableHead className="w-32 text-center">
-                        Total awarded
+                        {tb('totalAwarded')}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -281,7 +289,7 @@ export default function SeasonPage() {
                               displayName={badge.onchain_lookup_data.user.display_name}
                             />
                             <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                              {badge.onchain_lookup_data.user.display_name}
+                              {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                             </span>
                           </div>
                         </TableCell>
@@ -295,7 +303,7 @@ export default function SeasonPage() {
               ) : (
                 <Box className="flex h-50 w-full items-center justify-center text-center">
                   <p className="text-body-2 text-gray-3">
-                    No beams in this season
+                    {t('noBeams')}
                   </p>
                 </Box>
               )}
@@ -305,8 +313,8 @@ export default function SeasonPage() {
         <section className="space-y-4">
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
-              <h2 className="text-title-2 text-white">Badges</h2>
-              <Tooltip content="Standalone badges linked to this season. These are awarded manually or through automations independently of beam cycles.">
+              <h2 className="text-title-2 text-white">{t('badgesSection')}</h2>
+              <Tooltip content={t('badgesTooltip')}>
                 <Button variant="link" size="md" square>
                   <MdOutlineInfo className="size-6" />
                 </Button>
@@ -318,7 +326,7 @@ export default function SeasonPage() {
                 variant="secondary"
                 size="md"
               >
-                Add badges
+                {t('addBadges')}
               </Link>
             </div>
           </header>
@@ -328,10 +336,10 @@ export default function SeasonPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-10">Sym</TableHead>
-                      <TableHead>Name</TableHead>
+                      <TableHead className="w-10">{tc('sym')}</TableHead>
+                      <TableHead>{tc('name')}</TableHead>
                       <TableHead className="w-32 text-center">
-                        Total awarded
+                        {tb('totalAwarded')}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -350,7 +358,7 @@ export default function SeasonPage() {
                               displayName={badge.onchain_lookup_data.user.display_name}
                             />
                             <span className="text-body-2 font-sans font-medium text-nowrap text-white">
-                              {badge.onchain_lookup_data.user.display_name}
+                              {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                             </span>
                           </div>
                         </TableCell>
@@ -364,7 +372,7 @@ export default function SeasonPage() {
               ) : (
                 <Box className="flex h-50 w-full items-center justify-center text-center">
                   <p className="text-body-2 text-gray-3">
-                    No badges in this season
+                    {t('noBadges')}
                   </p>
                 </Box>
               )}
@@ -374,8 +382,8 @@ export default function SeasonPage() {
         <section className="space-y-4">
           <header className="flex items-center">
             <div className="flex flex-1 items-center gap-1">
-              <h2 className="text-title-2 text-white">Series</h2>
-              <Tooltip content="Time-bound periods within this season. Each series can include its own beams and badges, and tracks awards separately.">
+              <h2 className="text-title-2 text-white">{t('seriesSection')}</h2>
+              <Tooltip content={t('seriesTooltip')}>
                 <Button variant="link" size="md" square>
                   <MdOutlineInfo className="size-6" />
                 </Button>
@@ -387,7 +395,7 @@ export default function SeasonPage() {
                 variant="secondary"
                 size="md"
               >
-                Add series
+                {t('addSeries')}
               </Link>
             </div>
           </header>
@@ -397,15 +405,15 @@ export default function SeasonPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-10 text-center">ID</TableHead>
-                      <TableHead>Name</TableHead>
+                      <TableHead className="w-10 text-center">{t('id')}</TableHead>
+                      <TableHead>{tc('name')}</TableHead>
                       <TableHead className="max-w-[17rem]">
-                        Additional Beams
+                        {t('additionalBeams')}
                       </TableHead>
                       <TableHead className="max-w-[17rem]">
-                        Additional Badges
+                        {t('additionalBadges')}
                       </TableHead>
-                      <TableHead className="w-40">Status</TableHead>
+                      <TableHead className="w-40">{tc('status')}</TableHead>
                       <TableHead className="w-40" />
                     </TableRow>
                   </TableHeader>
@@ -426,8 +434,8 @@ export default function SeasonPage() {
                                   <Tooltip
                                     key={badge.badge_symbol}
                                     content={
-                                      badge.onchain_lookup_data.user
-                                        .display_name
+                                      translateBadgeName(badge.onchain_lookup_data.user
+                                        .display_name)
                                     }
                                   >
                                     <div>
@@ -444,7 +452,7 @@ export default function SeasonPage() {
                                   </Tooltip>
                                 ))}
                               {seriesItem.seq_status !== 'end' && (
-                                <Tooltip content="Add beam">
+                                <Tooltip content={t('addBeamTooltip')}>
                                   <Link
                                     href={`/admin/seasons/${season_id}/add-beams?series=${seriesItem.seq_id}`}
                                     variant="secondary"
@@ -464,8 +472,8 @@ export default function SeasonPage() {
                                   <Tooltip
                                     key={badge.badge_symbol}
                                     content={
-                                      badge.onchain_lookup_data.user
-                                        .display_name
+                                      translateBadgeName(badge.onchain_lookup_data.user
+                                        .display_name)
                                     }
                                   >
                                     <div>
@@ -482,7 +490,7 @@ export default function SeasonPage() {
                                   </Tooltip>
                                 ))}
                               {seriesItem.seq_status !== 'end' && (
-                                <Tooltip content="Add badge">
+                                <Tooltip content={t('addBadgeTooltip')}>
                                   <Link
                                     href={`/admin/seasons/${season_id}/add-badges?series=${seriesItem.seq_id}`}
                                     variant="secondary"
@@ -497,11 +505,11 @@ export default function SeasonPage() {
                           </TableCell>
                           <TableCell>
                             {seriesItem.seq_status === 'init' ? (
-                              <Tag variant="blue">Created</Tag>
+                              <Tag variant="blue">{ta('created')}</Tag>
                             ) : seriesItem.seq_status === 'end' ? (
-                              <Tag variant="red">Ended</Tag>
+                              <Tag variant="red">{t('ended')}</Tag>
                             ) : seriesItem.seq_status === 'active' ? (
-                              <Tag variant="green">Started</Tag>
+                              <Tag variant="green">{t('started')}</Tag>
                             ) : (
                               <></>
                             )}
@@ -519,17 +527,17 @@ export default function SeasonPage() {
                                         agg_symbol: seasonIdDecoded,
                                         seq_ids: [seriesItem.seq_id],
                                       })
-                                      toast.success('Series started successfully')
+                                      toast.success(t('seriesStartSuccess'))
                                       setTimeout(() => {
                                         seasonQuery.refetch()
                                         seriesQuery.refetch()
                                       }, 1000)
                                     } catch {
-                                      toast.error('Failed to start series')
+                                      toast.error(t('seriesStartFailed'))
                                     }
                                   }}
                                 >
-                                  Start
+                                  {tc('start')}
                                 </Button>
                               </>
                             ) : seriesItem.seq_status === 'end' ? (
@@ -546,17 +554,17 @@ export default function SeasonPage() {
                                         agg_symbol: seasonIdDecoded,
                                         seq_ids: [seriesItem.seq_id],
                                       })
-                                      toast.success('Series ended successfully')
+                                      toast.success(t('seriesEndSuccess'))
                                       setTimeout(() => {
                                         seasonQuery.refetch()
                                         seriesQuery.refetch()
                                       }, 1000)
                                     } catch {
-                                      toast.error('Failed to end series')
+                                      toast.error(t('seriesEndFailed'))
                                     }
                                   }}
                                 >
-                                  End
+                                  {tc('end')}
                                 </Button>
                               </>
                             ) : (
@@ -570,17 +578,17 @@ export default function SeasonPage() {
                                       agg_symbol: seasonIdDecoded,
                                       seq_ids: [seriesItem.seq_id],
                                     })
-                                    toast.success('Series started successfully')
+                                    toast.success(t('seriesStartSuccess'))
                                     setTimeout(() => {
                                       seasonQuery.refetch()
                                       seriesQuery.refetch()
                                     }, 1000)
                                   } catch {
-                                    toast.error('Failed to start series')
+                                    toast.error(t('seriesStartFailed'))
                                   }
                                 }}
                               >
-                                Start
+                                {tc('start')}
                               </Button>
                             )}
                           </TableCell>
@@ -591,7 +599,7 @@ export default function SeasonPage() {
               ) : (
                 <Box className="flex h-50 w-full items-center justify-center text-center">
                   <p className="text-body-2 text-gray-3">
-                    No series in this season
+                    {t('noSeries')}
                   </p>
                 </Box>
               )}

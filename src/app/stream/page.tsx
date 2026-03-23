@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
@@ -29,17 +30,6 @@ import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 
-const sortList = [
-  {
-    description: 'Latest',
-    value: 'desc',
-  },
-  {
-    description: 'Oldest',
-    value: 'asc',
-  },
-]
-
 const postSchema = z.object({
   content: z.string().nonempty('Post content is required'),
   organization: z.string().nonempty('Select an organization'),
@@ -52,6 +42,7 @@ const tabClass =
 
 export default function Stream() {
   const { isAuthenticated, isInitializing, actor, login } = useChain()
+  const t = useTranslations('stream')
 
   if (isInitializing) {
     return null
@@ -66,56 +57,50 @@ export default function Stream() {
       <header className="max-w-container-md relative mx-auto overflow-hidden px-4 py-16">
         <div className="space-y-6 md:py-32 md:text-center">
           <h1 className="text-display-1 max-md:text-display-2 text-white">
-            Welcome to the AqXen Stream: Progress in Action
+            {t('heroHeading')}
           </h1>
           <p className="text-body-1 text-gray-3">
-            The first social activity stream focused purely on celebrating
-            achievements and driving organizational success.
+            {t('heroDescription')}
           </p>
         </div>
       </header>
       <section className="max-w-container-lg mx-auto px-4 py-16 max-md:space-y-6 md:grid md:grid-cols-3 md:gap-8">
         <div className="col-span-1">
           <h2 className="text-display-2 max-md:text-title-1 text-white">
-            A Stream Free From Noise.
+            {t('noiseTitle')}
           </h2>
         </div>
         <div className="col-span-2">
           <p className="text-body-1 text-gray-3">
-            Unlike other platforms, the AqXen Stream is designed to be
-            motivating, not distracting. You will only see posts aligned with
-            your interests, validated with &apos;Beams&apos; from your
-            colleagues, teammates, or fellow community member. All focused on
-            positive steps toward shared goals.
+            {t('noiseDescription')}
           </p>
         </div>
       </section>
       <section className="max-w-container-lg mx-auto px-4 py-16 max-md:space-y-6 md:grid md:grid-cols-3 md:gap-8">
         <div className="col-span-1">
           <h2 className="text-display-2 max-md:text-title-1 text-white">
-            What You&apos;ll Find Here
+            {t('whatYoullFindTitle')}
           </h2>
         </div>
         <div className="col-span-2">
           <p className="text-body-1 text-gray-3">
-            1. Real-Time Recognition: See who is making an impact, right now.
+            {t('whatYoullFind1')}
           </p>
           <p className="text-body-1 text-gray-3">
-            2. Community Goals: Posts are tied to measurable objectives.
+            {t('whatYoullFind2')}
           </p>
           <p className="text-body-1 text-gray-3">
-            3. Reputation Tally: Instantly see your Beams and reputation score
-            grow.
+            {t('whatYoullFind3')}
           </p>
         </div>
       </section>
       <section className="max-w-container-lg mx-auto px-4 py-16 max-md:space-y-6">
         <div className="bg-gray-1 border-gray-2 w-full space-y-4 rounded-2xl border p-4 text-center md:py-16">
           <h2 className="text-display-2 max-md:text-title-1 max-w-container-md mx-auto text-white">
-            Ready to See Real Progress?
+            {t('ctaHeading')}
           </h2>
           <Button onClick={login} variant="primary" size="lg">
-            Log in to the AqXen Stream
+            {t('ctaButton')}
           </Button>
         </div>
       </section>
@@ -133,6 +118,16 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
     displayName: ownedOrgDisplayName,
     ipfs: ownedOrgIpfs,
   } = useOrganization()
+  const t = useTranslations('stream')
+
+  const sortList = useMemo(
+    () => [
+      { description: t('sortLatest'), value: 'desc' },
+      { description: t('sortOldest'), value: 'asc' },
+    ],
+    [t],
+  )
+
   const [sort, setSort] = useState<Record<string, string>>(sortList[0])
   const [activeTab, setActiveTab] = useState<string>(
     () => searchParams.get('tab') || 'all'
@@ -246,7 +241,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
 
   async function onSubmit(data: PostSchema) {
     if (!actor) {
-      toast.error('You must be logged in to create a post')
+      toast.error(t('loginRequiredPost'))
       return
     }
 
@@ -270,16 +265,16 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
       if (isOrgTab) {
         setValue('organization', activeTab)
       }
-      toast('Post published!')
+      toast(t('postPublished'))
       queryClient.invalidateQueries({ queryKey: ['posts'] })
     } catch {
-      toast.error('Failed to publish post')
+      toast.error(t('postFailed'))
     }
   }
 
   async function onSubmitAnnouncement(data: PostSchema) {
     if (!actor || !session) {
-      toast.error('You must be logged in to create an announcement')
+      toast.error(t('loginRequiredAnnouncement'))
       return
     }
 
@@ -293,18 +288,18 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
       let onChainPostId: string | undefined
       const logAction = result?.response?.processed?.action_traces
         ?.flatMap(
-          (t: {
+          (tr: {
             inline_traces?: {
               act?: {
                 name?: string
                 data?: { post_id?: number }
               }
             }[]
-          }) => t.inline_traces ?? []
+          }) => tr.inline_traces ?? []
         )
         ?.find(
-          (t: { act?: { name?: string } }) =>
-            t.act?.name === 'logannounce'
+          (tr: { act?: { name?: string } }) =>
+            tr.act?.name === 'logannounce'
         )
       if (logAction?.act?.data?.post_id != null) {
         onChainPostId = String(logAction.act.data.post_id)
@@ -316,11 +311,11 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
         onChainPostId,
       })
       reset()
-      toast('Announcement published!')
+      toast(t('announcementPublished'))
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       queryClient.invalidateQueries({ queryKey: ['announcements'] })
     } catch {
-      toast.error('Failed to publish announcement')
+      toast.error(t('announcementFailed'))
     }
   }
 
@@ -329,7 +324,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
   return (
     <div className="max-w-container-md mx-auto space-y-4 px-4 py-8">
       <header className="flex items-center justify-between">
-        <h1 className="text-title-1 text-white">Stream</h1>
+        <h1 className="text-title-1 text-white">{t('heading')}</h1>
         <DropdownRoot label={sort.description} align="end">
           {sortList.map((item) => (
             <DropdownItem
@@ -352,7 +347,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
           className={tabClass}
           onClick={() => handleTabChange('all')}
         >
-          All
+          {t('tabAll')}
         </button>
         <button
           type="button"
@@ -360,7 +355,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
           className={tabClass}
           onClick={() => handleTabChange('my-posts')}
         >
-          My Posts
+          {t('tabMyPosts')}
         </button>
         {hasOrganization && !ownedOrgInMemberList && (
           <button
@@ -417,7 +412,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                 <label>
                   <textarea
                     {...register('content')}
-                    placeholder="Announce to your organization..."
+                    placeholder={t('announcePlaceholder')}
                     className="text-body-1 placeholder:text-gray-3 mb-6 block min-h-20 w-full resize-none outline-none"
                     rows={4}
                   />
@@ -429,7 +424,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                     variant="primary"
                     disabled={!contentWatched}
                   >
-                    Announce
+                    {t('announceButton')}
                   </Button>
                 </div>
               </div>
@@ -444,7 +439,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                 <label>
                   <textarea
                     {...register('content')}
-                    placeholder="Share what you've accomplished that's contributed value to your community."
+                    placeholder={t('postPlaceholder')}
                     className="text-body-1 placeholder:text-gray-3 mb-6 block min-h-20 w-full resize-none outline-none"
                     rows={4}
                   />
@@ -458,8 +453,8 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                         control={control}
                         render={({ field }) => (
                           <Select
-                            label="Organization"
-                            placeholder="Select org"
+                            label={t('orgSelectLabel')}
+                            placeholder={t('orgSelectPlaceholder')}
                             value={field.value}
                             onValueChange={(value) => {
                               if (
@@ -525,7 +520,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                       variant="primary"
                       disabled={!canSubmit}
                     >
-                      Post
+                      {t('postButton')}
                     </Button>
                   </div>
                 </div>
@@ -576,7 +571,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
           <div className="flex items-center justify-center">
             {query.data.pages[0].posts?.length === 0 ? (
               <p className="text-body-2 text-gray-3 py-14">
-                No posts available. Be the first to create one!
+                {t('noPostsMessage')}
               </p>
             ) : (
               <Button
@@ -590,12 +585,12 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
                 }
               >
                 {query.isFetchingNextPage
-                  ? 'Loading more...'
+                  ? t('loadingMore')
                   : query.hasNextPage
-                    ? 'Load Newer'
+                    ? t('loadNewer')
                     : query.isFetching
-                      ? 'Loading...'
-                      : 'Nothing more to load'}
+                      ? t('loading')
+                      : t('nothingMore')}
               </Button>
             )}
           </div>

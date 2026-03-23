@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import { listBadge } from '@/api/chain/badge/list-badge'
@@ -27,10 +28,17 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useOrganization } from '@/contexts/organization'
+import { useIntlLocale } from '@/hooks/use-date-locale'
+import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
+import { formatNumber } from '@/utils/intl-format'
 
 export default function BadgesPage() {
+  const t = useTranslations('admin.badgesPage')
+  const tc = useTranslations('admin.common')
   const { name, symbol, removeOrganizationSymbol } = useOrganization()
+  const intlLocale = useIntlLocale()
+  const translateBadgeName = useTranslateBadgeName()
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)
 
   const query = useQuery({
@@ -63,9 +71,9 @@ export default function BadgesPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/badges" />
-        <HeaderAdminTitle title="Badges" tooltip="Manage your community's badge library. View, edit, or archive existing badges available for users to earn.">
+        <HeaderAdminTitle title={t('title')} tooltip={t('tooltip')}>
           <Link href="/admin/new-badge" variant="primary" size="md">
-            New badge
+            {t('newBadge')}
           </Link>
         </HeaderAdminTitle>
       </HeaderAdmin>
@@ -75,10 +83,10 @@ export default function BadgesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">Sym</TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead className="w-10">{tc('sym')}</TableHead>
+                <TableHead>{tc('name')}</TableHead>
                 <TableHead className="w-40 text-center">
-                  Total awarded
+                  {t('totalAwarded')}
                 </TableHead>
                 <TableHead className="w-28" />
               </TableRow>
@@ -102,12 +110,12 @@ export default function BadgesPage() {
                         displayName={row.onchain_lookup_data.user.display_name}
                       />
                       <span className="text-body-2 font-sans font-medium text-nowrap text-white hover:underline">
-                        {row.onchain_lookup_data.user.display_name}
+                        {translateBadgeName(row.onchain_lookup_data.user.display_name)}
                       </span>
                     </button>
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.rarity_counts}
+                    {formatNumber(Number(row.rarity_counts), intlLocale)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -116,7 +124,7 @@ export default function BadgesPage() {
                         size="md"
                         onClick={() => setSelectedBadge(row)}
                       >
-                        Details
+                        {tc('details')}
                       </Button>
                       {!beamAndTrackingSymbols.has(row.badge_symbol) && (
                         <Link
@@ -124,7 +132,7 @@ export default function BadgesPage() {
                           variant="secondary"
                           size="md"
                         >
-                          Send
+                          {tc('send')}
                         </Link>
                       )}
                     </div>
@@ -139,15 +147,15 @@ export default function BadgesPage() {
                     colSpan={Object.keys(query.data.rows[0]).length + 1}
                   >
                     <div className="text-body-2 flex items-center justify-center gap-2 pt-8 text-white">
-                      Page
-                      <Select label="Page" placeholder="Page" defaultValue="1">
+                      {tc('page')}
+                      <Select label={tc('page')} placeholder={tc('page')} defaultValue="1">
                         {['1', '2', '3', '4', '5', '6'].map((item) => (
                           <SelectItem key={item} value={item}>
                             {item}
                           </SelectItem>
                         ))}
                       </Select>
-                      of 6
+                      {tc('ofPages', { count: 6 })}
                     </div>
                   </TableCell>
                 </TableRow>

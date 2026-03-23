@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 import { MdClose } from 'react-icons/md'
 
@@ -20,6 +21,12 @@ import { listBoundedBadgeRanks } from '@/api/chain/statistics/list-bounded-badge
 import type { Badge } from '@/api/model/badge'
 import { getPostsByBadge } from '@/app/feed/actions'
 import { Contract, IPFS_IMAGE_SOURCE } from '@/constants'
+import { useDateLocale, useIntlLocale } from '@/hooks/use-date-locale'
+import {
+  useTranslateBadgeDescription,
+  useTranslateBadgeName,
+} from '@/hooks/use-translate-badge-name'
+import { formatNumber } from '@/utils/intl-format'
 
 import { Avatar } from './avatar'
 import { BadgeImage } from './badge-image'
@@ -48,6 +55,11 @@ export function BadgeDetailModal({
   scope,
   badge: badgeProp,
 }: BadgeDetailModalProps) {
+  const t = useTranslations('badgeDetail')
+  const translateBadgeName = useTranslateBadgeName()
+  const translateBadgeDescription = useTranslateBadgeDescription()
+  const dateLocale = useDateLocale()
+  const intlLocale = useIntlLocale()
   const [selected, setSelected] = useState<'all-time' | number>('all-time')
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -127,9 +139,9 @@ export function BadgeDetailModal({
 
   const selectedLabel =
     selected === 'all-time'
-      ? 'All Time'
+      ? t('allTime')
       : seasonOptions.find((o) => o.badgeAggSeqId === selected)?.label ??
-        'All Time'
+        t('allTime')
 
   // All-time stats (always fetched so they serve as fallback)
   const allTimeStatsQuery = useQuery({
@@ -224,7 +236,7 @@ export function BadgeDetailModal({
                 <div className="max-h-[80vh] overflow-y-auto p-6 max-md:max-h-svh [scrollbar-width:none] md:p-8">
                   {isLoading ? (
                     <div className="flex h-40 items-center justify-center">
-                      <p className="text-body-2 text-gray-3">Loading...</p>
+                      <p className="text-body-2 text-gray-3">{t('loading')}</p>
                     </div>
                   ) : badge ? (
                     <>
@@ -236,13 +248,13 @@ export function BadgeDetailModal({
                           displayName={badge.onchain_lookup_data.user.display_name}
                         />
                         <Dialog.Title className="text-title-2 mt-4 text-white">
-                          {badge.onchain_lookup_data.user.display_name}
+                          {translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                         </Dialog.Title>
                         <p className="text-body-3 text-gray-3 mt-1 font-mono">
                           {badgeSymbol.replace(/^\d+,/, '')}
                         </p>
                         <Dialog.Description className="text-body-2 text-gray-3 mt-1">
-                          {badge.onchain_lookup_data.user.description}
+                          {translateBadgeDescription(badge.onchain_lookup_data.user.description, badge.onchain_lookup_data.user.display_name)}
                         </Dialog.Description>
                       </div>
 
@@ -259,7 +271,7 @@ export function BadgeDetailModal({
                                   isSelected={selected === 'all-time'}
                                   onClick={() => setSelected('all-time')}
                                 >
-                                  All Time
+                                  {t('allTime')}
                                 </DropdownItem>
                                 {seasonOptions.map((option) => (
                                   <DropdownItem
@@ -277,7 +289,7 @@ export function BadgeDetailModal({
                               </DropdownRoot>
                             ) : (
                               <span className="text-body-2 font-medium text-white">
-                                All Time
+                                {t('allTime')}
                               </span>
                             )}
                           </div>
@@ -285,18 +297,18 @@ export function BadgeDetailModal({
                           <div className="mt-6 grid grid-cols-2 gap-3">
                             <div className="border-gray-2 rounded-xl border p-4 text-center">
                               <p className="text-title-2 text-white">
-                                {stats?.total_issued ?? '—'}
+                                {stats?.total_issued != null ? formatNumber(stats.total_issued, intlLocale) : '—'}
                               </p>
                               <p className="text-body-3 text-gray-3">
-                                Total Issued
+                                {t('totalIssued')}
                               </p>
                             </div>
                             <div className="border-gray-2 rounded-xl border p-4 text-center">
                               <p className="text-title-2 text-white">
-                                {stats?.total_recipients ?? '—'}
+                                {stats?.total_recipients != null ? formatNumber(stats.total_recipients, intlLocale) : '—'}
                               </p>
                               <p className="text-body-3 text-gray-3">
-                                Total Recipients
+                                {t('totalRecipients')}
                               </p>
                             </div>
                           </div>
@@ -305,7 +317,7 @@ export function BadgeDetailModal({
                             <>
                               <div className="bg-gray-2 my-6 h-px" />
                               <h3 className="text-body-1 mb-4 font-medium text-white">
-                                Leaderboard
+                                {t('leaderboard')}
                               </h3>
                               <div className="space-y-2">
                                 {ranks.map((rank, index) =>
@@ -325,7 +337,7 @@ export function BadgeDetailModal({
                                         {account}
                                       </span>
                                       <span className="text-body-2 text-gray-3 font-medium">
-                                        {rank.balance}
+                                        {formatNumber(rank.balance, intlLocale)}
                                       </span>
                                     </Link>
                                   ))
@@ -341,7 +353,7 @@ export function BadgeDetailModal({
                           <div className="bg-gray-2 my-6 h-px" />
 
                           <h3 className="text-body-1 mb-4 font-medium text-white">
-                            Recent Recognitions
+                            {t('recentRecognitions')}
                           </h3>
 
                           <div className="space-y-4">
@@ -397,7 +409,8 @@ export function BadgeDetailModal({
                                     <p className="text-body-3 text-gray-3">
                                       {format(
                                         new Date(post.createdAt),
-                                        'EEE d MMM yyyy'
+                                        'EEE d MMM yyyy',
+                                        { locale: dateLocale }
                                       )}
                                     </p>
                                   </div>
@@ -416,7 +429,7 @@ export function BadgeDetailModal({
                   ) : (
                     <div className="flex h-40 items-center justify-center">
                       <p className="text-body-2 text-gray-3">
-                        Badge not found.
+                        {t('notFound')}
                       </p>
                     </div>
                   )}

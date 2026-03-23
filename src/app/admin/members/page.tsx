@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { MdClose } from 'react-icons/md'
 import { toast } from 'react-toastify'
@@ -38,7 +39,8 @@ import {
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { useGetBillingDetail } from '@/hooks/query/use-get-billing-detail'
-import { formatUsd } from '@/utils/intl-format'
+import { useCurrency } from '@/hooks/use-currency'
+import { useDateLocale } from '@/hooks/use-date-locale'
 
 type PendingMemberAction = {
   type: 'add' | 'accept'
@@ -50,6 +52,10 @@ const MEMBER_FEE_ERROR =
   'org has not fully paid member fees for current cycle'
 
 export default function MembersPage() {
+  const t = useTranslations('admin.members')
+  const tc = useTranslations('admin.common')
+  const dateLocale = useDateLocale()
+  const { formatPriceFromString } = useCurrency()
   const { name } = useOrganization()
   const { session } = useChain()
   const queryClient = useQueryClient()
@@ -134,13 +140,13 @@ export default function MembersPage() {
       setMemo('')
       setShowAddForm(false)
       await refetchAfterChainAction([['members', name], ['member-requests', name]])
-      toast.success(`${account.trim()} has been added as a member.`)
+      toast.success(t('addSuccess', { account: account.trim() }))
     } catch (error) {
       if (isMemberFeeError(error)) {
-        toast.error('Member limit reached. Please purchase an additional seat.')
+        toast.error(t('limitError'))
         await refetchAfterChainAction([['members', name], ['member-requests', name]])
       } else {
-        toast.error('Failed to update member')
+        toast.error(t('updateFailed'))
       }
     } finally {
       setIsSubmitting(false)
@@ -158,13 +164,13 @@ export default function MembersPage() {
     try {
       await acceptMember({ session, org: name, user, memo: '' })
       await refetchAfterChainAction([['members', name], ['member-requests', name]])
-      toast.success(`${user} has been accepted.`)
+      toast.success(t('acceptSuccess', { user }))
     } catch (error) {
       if (isMemberFeeError(error)) {
-        toast.error('Member limit reached. Please purchase an additional seat.')
+        toast.error(t('limitError'))
         await refetchAfterChainAction([['members', name], ['member-requests', name]])
       } else {
-        toast.error('Failed to update member')
+        toast.error(t('updateFailed'))
       }
     }
   }
@@ -174,9 +180,9 @@ export default function MembersPage() {
     try {
       await rejectMember({ session, org: name, user, memo: '' })
       await refetchAfterChainAction([['members', name], ['member-requests', name]])
-      toast.success(`${user} has been rejected.`)
+      toast.success(t('rejectSuccess', { user }))
     } catch {
-      toast.error('Failed to reject member')
+      toast.error(t('rejectFailed'))
     }
   }
 
@@ -185,9 +191,9 @@ export default function MembersPage() {
     try {
       await removeMember({ session, org: name, user, memo: '' })
       await refetchAfterChainAction([['members', name], ['member-requests', name]])
-      toast.success(`${user} has been removed.`)
+      toast.success(t('removeSuccess', { user }))
     } catch {
-      toast.error('Failed to remove member')
+      toast.error(t('removeFailed'))
     }
   }
 
@@ -204,9 +210,9 @@ export default function MembersPage() {
       })
       await refetchAfterChainAction([['billing-detail']])
       setPendingAction(null)
-      toast.success('Member slot purchased! You can now retry the action.')
+      toast.success(t('slotPurchased'))
     } catch {
-      toast.error('Failed to purchase member slot')
+      toast.error(t('slotFailed'))
     } finally {
       setIsPurchasing(false)
     }
@@ -218,13 +224,13 @@ export default function MembersPage() {
     <>
       <HeaderAdmin>
         <HeaderAdminMenu activeHref="/admin/members" />
-        <HeaderAdminTitle title="Members">
+        <HeaderAdminTitle title={t('title')}>
           <Button
             variant="primary"
             size="md"
             onClick={() => setShowAddForm(!showAddForm)}
           >
-            {showAddForm ? 'Cancel' : 'Add member'}
+            {showAddForm ? tc('cancel') : t('addMember')}
           </Button>
         </HeaderAdminTitle>
       </HeaderAdmin>
@@ -234,11 +240,11 @@ export default function MembersPage() {
             onSubmit={handleAddMember}
             className="border-gray-2 bg-gray-1 mb-8 rounded-2xl border p-6"
           >
-            <h2 className="text-title-2 mb-4 text-white">Add member</h2>
+            <h2 className="text-title-2 mb-4 text-white">{t('addMember')}</h2>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               <div className="flex-1">
                 <Input
-                  placeholder="Account name"
+                  placeholder={t('accountPlaceholder')}
                   value={account}
                   onChange={(e) => setAccount(e.target.value)}
                   required
@@ -246,7 +252,7 @@ export default function MembersPage() {
               </div>
               <div className="flex-1">
                 <Input
-                  placeholder="Memo (optional)"
+                  placeholder={t('memoPlaceholder')}
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}
                 />
@@ -257,24 +263,24 @@ export default function MembersPage() {
                 size="md"
                 disabled={isSubmitting || !account.trim() || isSelfAdd}
               >
-                {isSubmitting ? 'Adding...' : 'Add'}
+                {isSubmitting ? tc('adding') : tc('add')}
               </Button>
             </div>
             {isSelfAdd && (
               <p className="text-body-2 mt-2 text-red-400">
-                You cannot add yourself as a member.
+                {t('selfAddError')}
               </p>
             )}
           </form>
         )}
 
         <section className="mb-8">
-          <h2 className="text-title-2 mb-4 text-white">Pending requests</h2>
+          <h2 className="text-title-2 mb-4 text-white">{t('pendingRequests')}</h2>
           {requestsQuery.isLoading && <TableSkeleton columns={4} rows={3} />}
           {requestsQuery.isSuccess &&
             requestsQuery.data.rows.length === 0 && (
               <p className="text-body-2 text-gray-3">
-                No pending requests.
+                {t('noPendingRequests')}
               </p>
             )}
           {requestsQuery.isSuccess &&
@@ -282,9 +288,9 @@ export default function MembersPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Account</TableHead>
-                    <TableHead>Memo</TableHead>
-                    <TableHead>Requested at</TableHead>
+                    <TableHead>{t('account')}</TableHead>
+                    <TableHead>{t('memo')}</TableHead>
+                    <TableHead>{t('requestedAt')}</TableHead>
                     <TableHead className="w-28" />
                   </TableRow>
                 </TableHeader>
@@ -303,7 +309,7 @@ export default function MembersPage() {
                         {row.memo || '-'}
                       </TableCell>
                       <TableCell className="text-gray-3">
-                        {format(new Date(row.requested_at), 'EEE d MMM yyyy')}
+                        {format(new Date(row.requested_at), 'EEE d MMM yyyy', { locale: dateLocale })}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -312,14 +318,14 @@ export default function MembersPage() {
                             size="md"
                             onClick={() => handleAccept(row.account)}
                           >
-                            Accept
+                            {tc('accept')}
                           </Button>
                           <Button
                             variant="secondary"
                             size="md"
                             onClick={() => handleReject(row.account)}
                           >
-                            Reject
+                            {tc('reject')}
                           </Button>
                         </div>
                       </TableCell>
@@ -334,15 +340,15 @@ export default function MembersPage() {
           <div className="mb-4 flex items-center gap-4">
             <h2 className="text-title-2 text-white">
               {memberCount !== undefined && maxMembers !== undefined
-                ? `Members (${memberCount} / ${maxMembers})`
-                : 'Members'}
+                ? `${t('title')} (${memberCount} / ${maxMembers})`
+                : t('title')}
             </h2>
             {memberCount !== undefined &&
               maxMembers !== undefined &&
               memberCount >= maxMembers && (
                 <Button asChild variant="primary" size="md">
                   <Link href="/pricing">
-                    Buy Additional Seats
+                    {t('buyAdditionalSeats')}
                   </Link>
                 </Button>
               )}
@@ -350,16 +356,16 @@ export default function MembersPage() {
           {membersQuery.isLoading && <TableSkeleton columns={3} rows={6} />}
           {membersQuery.isSuccess &&
             membersQuery.data.rows.length === 0 && (
-              <p className="text-body-2 text-gray-3">No members yet.</p>
+              <p className="text-body-2 text-gray-3">{t('noMembers')}</p>
             )}
           {membersQuery.isSuccess &&
             membersQuery.data.rows.length > 0 && (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Account</TableHead>
-                    <TableHead>Reputation</TableHead>
-                    <TableHead>Joined at</TableHead>
+                    <TableHead>{t('account')}</TableHead>
+                    <TableHead>{t('reputation')}</TableHead>
+                    <TableHead>{t('joinedAt')}</TableHead>
                     <TableHead className="w-28" />
                   </TableRow>
                 </TableHeader>
@@ -378,7 +384,7 @@ export default function MembersPage() {
                         {reputationQuery.data?.[row.account] ?? 0}
                       </TableCell>
                       <TableCell className="text-gray-3">
-                        {format(new Date(row.joined_at), 'EEE d MMM yyyy')}
+                        {format(new Date(row.joined_at), 'EEE d MMM yyyy', { locale: dateLocale })}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -386,7 +392,7 @@ export default function MembersPage() {
                           size="md"
                           onClick={() => handleRemove(row.account)}
                         >
-                          Remove
+                          {tc('remove')}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -432,15 +438,15 @@ export default function MembersPage() {
                     </Button>
                   </Dialog.Close>
                   <Dialog.Title className="text-title-1 text-white">
-                    Member limit reached
+                    {t('memberLimitReached')}
                   </Dialog.Title>
                   <Dialog.Description className="text-body-2 text-gray-3 mt-2">
-                    {`Your organization has used all ${maxMembers ?? '?'} paid member slot${maxMembers === 1 ? '' : 's'}. Purchase an additional seat to ${pendingAction.type === 'add' ? 'add' : 'accept'} ${pendingAction.user}.`}
+                    {t('memberLimitDescription', { maxMembers: maxMembers ?? '?', action: pendingAction.type === 'add' ? tc('add').toLowerCase() : tc('accept').toLowerCase(), user: pendingAction.user })}
                   </Dialog.Description>
                   {memberFee && (
                     <p className="text-body-2 mt-4 text-white">
-                      Monthly member fee:{' '}
-                      <span className="font-semibold">{formatUsd(memberFee)}</span>
+                      {t('monthlyMemberFee')}{' '}
+                      <span className="font-semibold">{formatPriceFromString(memberFee)}</span>
                     </p>
                   )}
                   <div className="mt-6">
@@ -451,8 +457,8 @@ export default function MembersPage() {
                       onClick={handleBuySlot}
                     >
                       {isPurchasing
-                        ? 'Purchasing...'
-                        : 'Buy Additional Seat'}
+                        ? t('purchasing')
+                        : t('buyAdditionalSeat')}
                     </Button>
                   </div>
                 </motion.div>
