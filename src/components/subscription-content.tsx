@@ -1,6 +1,5 @@
 'use client'
 
-import type { UInt64 } from '@wharfkit/antelope'
 import { useTranslations } from 'next-intl'
 
 import { TableSkeleton } from '@/components/skeleton'
@@ -16,33 +15,7 @@ import {
 import { useGetBillingDetail } from '@/hooks/query/use-get-billing-detail'
 import { useCurrency } from '@/hooks/use-currency'
 import { useIntlLocale } from '@/hooks/use-date-locale'
-import { decodeActionKey } from '@/utils/decode-action-key'
 import { formatNumber } from '@/utils/intl-format'
-
-function ActionList({
-  actions,
-}: {
-  actions: Array<{ key: string; value: UInt64 }>
-}) {
-  const tc = useTranslations('admin.common')
-  if (actions.length === 0) return <span className="text-gray-3">{tc('none')}</span>
-
-  return (
-    <ul className="inline-block space-y-1 text-left">
-      {actions.map((entry) => {
-        const { contract, action } = decodeActionKey(entry.key)
-        return (
-          <li key={entry.key}>
-            <span className="text-gray-2">{contract}</span>
-            <span className="text-gray-3">::</span>
-            <span>{action}</span>
-            <span className="text-gray-3"> ({String(entry.value)})</span>
-          </li>
-        )
-      })}
-    </ul>
-  )
-}
 
 export function SubscriptionContent() {
   const t = useTranslations('admin.subscription')
@@ -66,12 +39,6 @@ export function SubscriptionContent() {
                       <TableHead className="text-center">
                         {t('membersPaidFor')}
                       </TableHead>
-                      <TableHead className="text-center">
-                        {t('allowedActions')}
-                      </TableHead>
-                      <TableHead className="text-center">
-                        {t('usedActions')}
-                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -85,12 +52,6 @@ export function SubscriptionContent() {
                         </TableCell>
                         <TableCell className="py-6 text-center">
                           {formatNumber(Number(row.members_paid_for), intlLocale)}
-                        </TableCell>
-                        <TableCell className="py-6 text-center">
-                          <ActionList actions={row.allowed_actions} />
-                        </TableCell>
-                        <TableCell className="py-6 text-center">
-                          <ActionList actions={row.used_actions} />
                         </TableCell>
                       </TableRow>
                     ))}
