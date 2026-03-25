@@ -22,7 +22,7 @@ import { formatNumber } from '@/utils/intl-format'
 function ActionList({
   actions,
 }: {
-  actions: Array<{ pair_name: string; uint64: UInt64 }>
+  actions: Array<{ key: string; value: UInt64 }>
 }) {
   const tc = useTranslations('admin.common')
   if (actions.length === 0) return <span className="text-gray-3">{tc('none')}</span>
@@ -30,13 +30,13 @@ function ActionList({
   return (
     <ul className="inline-block space-y-1 text-left">
       {actions.map((entry) => {
-        const { contract, action } = decodeActionKey(entry.pair_name)
+        const { contract, action } = decodeActionKey(entry.key)
         return (
-          <li key={entry.pair_name}>
+          <li key={entry.key}>
             <span className="text-gray-2">{contract}</span>
             <span className="text-gray-3">::</span>
             <span>{action}</span>
-            <span className="text-gray-3"> ({String(entry.uint64)})</span>
+            <span className="text-gray-3"> ({String(entry.value)})</span>
           </li>
         )
       })}
