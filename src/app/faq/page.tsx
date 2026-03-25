@@ -14,6 +14,8 @@ const faqKeys = [
   'q7',
   'q8',
   'q9',
+  'q10',
+  'q11',
 ] as const
 
 export default function FaqPage() {
