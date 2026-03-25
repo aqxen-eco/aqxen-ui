@@ -14,10 +14,9 @@ export type BillingDetail = {
   bill_cycle_id: UInt64
   amount_paid: string
   members_paid_for: UInt64
-  allowed_actions: Array<{ pair_name: string; uint64: UInt64 }>
-  used_actions: Array<{ pair_name: string; uint64: UInt64 }>
+  allowed_actions: Array<{ key: string; value: UInt64 }>
+  used_actions: Array<{ key: string; value: UInt64 }>
   payment_symbol: string
-  payment_precision: symbol
 }
 
 export type GetBillingDetailProps = {
