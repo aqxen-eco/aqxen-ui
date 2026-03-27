@@ -18,6 +18,10 @@
     "searchBadges": "Search badges",
     "searchBeams": "Search beams"
   },
+  "metadata": {
+    "title": "AqXen Reputation System",
+    "description": "AqXen Socials is the social platform built for organizations to track, recognize, and celebrate the productive achievements that drive real growth."
+  },
   "home": {
     "heading": "Where Positive Actions Beam",
     "description": "AqXen Socials is the social platform built for organizations to track, recognize, and celebrate the productive achievements that drive real growth."
@@ -568,6 +572,32 @@
     "descReputation": "Composite {type} reputation score",
     "descSenderReputation": "Algorithmic representation of sender's composite {type} reputation score",
     "descSenderUniqueness": "Awarded when a {type} beam is received from a unique sender"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "descriptionRequired": "Description is required",
+    "symbolRequired": "Symbol is required",
+    "symbolLength": "Symbol must be 3 characters",
+    "emailInvalid": "Email is invalid",
+    "orgNameRequired": "Organization name is required",
+    "subjectRequired": "Subject is required",
+    "messageRequired": "Message is required",
+    "postContentRequired": "Post content is required",
+    "selectOrganization": "Select an organization",
+    "amountRequired": "Amount is required",
+    "toRequired": "To is required",
+    "imageRequired": "Image is required",
+    "logoRequired": "Logo is required",
+    "startTimeRequired": "Start time is required",
+    "startTimeFuture": "Start time must be in the future",
+    "cycleLengthRequired": "Cycle length is required",
+    "supplyPerCycleRequired": "Supply per cycle is required",
+    "badgesRequired": "Badges is required",
+    "statsBadgesRequired": "Stats badges is required",
+    "badgeRequired": "Badge is required",
+    "quantityRequired": "Quantity is required",
+    "cantBeEmpty": "Can't be empty!",
+    "shortDescriptionMax": "Short description must be 255 characters or less"
   },
   "languageSwitcher": {
     "en": "English",

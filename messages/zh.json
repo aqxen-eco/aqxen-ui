@@ -18,6 +18,10 @@
     "searchBadges": "搜索徽章",
     "searchBeams": "搜索光束"
   },
+  "metadata": {
+    "title": "AqXen 声誉系统",
+    "description": "AqXen Socials 是一个为组织打造的社交平台，用于追踪、认可和庆祝推动真正增长的生产性成就。"
+  },
   "home": {
     "heading": "让积极行动闪耀光芒",
     "description": "AqXen Socials 是一个为组织打造的社交平台，用于追踪、认可和庆祝推动真正增长的生产性成就。"
@@ -568,6 +572,32 @@
     "descReputation": "{type}综合声誉分数",
     "descSenderReputation": "发送者{type}综合声誉分数的算法表示",
     "descSenderUniqueness": "当从唯一发送者收到{type}光束时授予"
+  },
+  "validation": {
+    "nameRequired": "请输入名称",
+    "descriptionRequired": "请输入描述",
+    "symbolRequired": "请输入符号",
+    "symbolLength": "符号必须为3个字符",
+    "emailInvalid": "电子邮件格式无效",
+    "orgNameRequired": "请输入组织名称",
+    "subjectRequired": "请输入主题",
+    "messageRequired": "请输入消息",
+    "postContentRequired": "请输入帖子内容",
+    "selectOrganization": "请选择组织",
+    "amountRequired": "请输入数量",
+    "toRequired": "请选择接收者",
+    "imageRequired": "请上传图片",
+    "logoRequired": "请上传标志",
+    "startTimeRequired": "请选择开始时间",
+    "startTimeFuture": "开始时间必须在未来",
+    "cycleLengthRequired": "请输入周期长度",
+    "supplyPerCycleRequired": "请输入每周期供应量",
+    "badgesRequired": "请选择徽章",
+    "statsBadgesRequired": "请选择统计徽章",
+    "badgeRequired": "请选择徽章",
+    "quantityRequired": "请输入数量",
+    "cantBeEmpty": "不能为空！",
+    "shortDescriptionMax": "简短描述不能超过255个字符"
   },
   "languageSwitcher": {
     "en": "English",

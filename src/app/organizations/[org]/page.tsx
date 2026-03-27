@@ -51,11 +51,13 @@ import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useDateLocale } from '@/hooks/use-date-locale'
 
-const orgPostSchema = z.object({
-  content: z.string().nonempty('Post content is required'),
-})
+function createOrgPostSchema(t: (key: string) => string) {
+  return z.object({
+    content: z.string().nonempty(t('postContentRequired')),
+  })
+}
 
-type OrgPostSchema = z.infer<typeof orgPostSchema>
+type OrgPostSchema = z.infer<ReturnType<typeof createOrgPostSchema>>
 
 const tabClass =
   'text-body-2 text-gray-3 relative flex shrink-0 cursor-pointer items-center gap-2 pb-4 font-medium data-[state=active]:text-white data-[state=active]:before:absolute data-[state=active]:before:bottom-0 data-[state=active]:before:left-0 data-[state=active]:before:h-0.5 data-[state=active]:before:w-full data-[state=active]:before:bg-white'
@@ -65,6 +67,7 @@ export default function OrganizationPage() {
   const { session, isAuthenticated, actor } = useChain()
   const queryClient = useQueryClient()
   const t = useTranslations('organizations')
+  const tv = useTranslations('validation')
   const dateLocale = useDateLocale()
   const [isRequesting, setIsRequesting] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
@@ -127,7 +130,7 @@ export default function OrganizationPage() {
 
   // Post form
   const { register, handleSubmit, watch, reset } = useForm<OrgPostSchema>({
-    resolver: zodResolver(orgPostSchema),
+    resolver: zodResolver(createOrgPostSchema(tv)),
     defaultValues: {
       content: '',
     },

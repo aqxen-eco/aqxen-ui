@@ -26,14 +26,16 @@ import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
 
-const addSeriesSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  beams: z.array(z.string()).nullish(),
-  badges: z.array(z.string()).nullish(),
-  start_right_away: z.boolean(),
-})
+function createAddSeriesSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t('nameRequired')),
+    beams: z.array(z.string()).nullish(),
+    badges: z.array(z.string()).nullish(),
+    start_right_away: z.boolean(),
+  })
+}
 
-type AddSeriesSchema = z.infer<typeof addSeriesSchema>
+type AddSeriesSchema = z.infer<ReturnType<typeof createAddSeriesSchema>>
 
 const nthNumber = (number: number) => {
   if (number > 3 && number < 21) return `${number}th`
@@ -52,6 +54,7 @@ const nthNumber = (number: number) => {
 export default function AddSeriesPage() {
   const t = useTranslations('admin.addSeriesPage')
   const tc = useTranslations('admin.common')
+  const tv = useTranslations('validation')
   const params = useParams()
   const searchParams = useSearchParams()
   const { session } = useChain()
@@ -81,7 +84,7 @@ export default function AddSeriesPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<AddSeriesSchema>({
-    resolver: zodResolver(addSeriesSchema),
+    resolver: zodResolver(createAddSeriesSchema(tv)),
   })
 
   const prevTrackingRef = useRef<string[]>([])

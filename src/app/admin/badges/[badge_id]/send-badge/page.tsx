@@ -32,19 +32,22 @@ import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { numberMask } from '@/utils/masks'
 
-const sendBadgeSchema = z.object({
-  badges: z.string().array().min(1, 'Badges is required'),
-  amount: z.string().min(1, 'Amount is required'),
-  to: z.string().min(1, 'To is required'),
-  message: z.string().min(1, 'Message is required'),
-})
+function createSendBadgeSchema(t: (key: string) => string) {
+  return z.object({
+    badges: z.string().array().min(1, t('badgesRequired')),
+    amount: z.string().min(1, t('amountRequired')),
+    to: z.string().min(1, t('toRequired')),
+    message: z.string().min(1, t('messageRequired')),
+  })
+}
 
-type SendBadgeSchema = z.infer<typeof sendBadgeSchema>
+type SendBadgeSchema = z.infer<ReturnType<typeof createSendBadgeSchema>>
 
 export default function SendBadgePage() {
   const t = useTranslations('admin.sendBadge')
   const tc = useTranslations('admin.common')
   const tn = useTranslations('admin.nav')
+  const tv = useTranslations('validation')
   const params = useParams()
   const { session } = useChain()
   const router = useRouter()
@@ -69,7 +72,7 @@ export default function SendBadgePage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SendBadgeSchema>({
-    resolver: zodResolver(sendBadgeSchema),
+    resolver: zodResolver(createSendBadgeSchema(tv)),
     defaultValues: {
       badges: [badgeIdDecoded],
     },
