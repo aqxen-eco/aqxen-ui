@@ -13,19 +13,22 @@ import { Textarea } from '@/components/ui/textarea'
 
 import { sendContactEmail } from './functions'
 
-const contactSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Email is invalid'),
-  organizationName: z.string().min(1, 'Organization name is required'),
-  subject: z.string().min(1, 'Subject is required'),
-  message: z.string().min(1, 'Message is required'),
-})
+type ContactSchema = z.infer<ReturnType<typeof createContactSchema>>
 
-export type ContactSchema = z.infer<typeof contactSchema>
+function createContactSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t('nameRequired')),
+    email: z.string().email(t('emailInvalid')),
+    organizationName: z.string().min(1, t('orgNameRequired')),
+    subject: z.string().min(1, t('subjectRequired')),
+    message: z.string().min(1, t('messageRequired')),
+  })
+}
 
 export default function Contact() {
   const t = useTranslations('contact')
   const tc = useTranslations('common')
+  const tv = useTranslations('validation')
 
   const {
     register,
@@ -33,7 +36,7 @@ export default function Contact() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ContactSchema>({
-    resolver: zodResolver(contactSchema),
+    resolver: zodResolver(createContactSchema(tv)),
   })
 
   async function onSubmit({

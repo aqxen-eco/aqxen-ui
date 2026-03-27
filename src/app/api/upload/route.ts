@@ -149,15 +149,10 @@ export async function POST(request: Request) {
     }
 
     if (duplicateCid) {
-      console.log(
-        'Pinata duplicate detected (status %d), using existing CID: %s',
-        response.status,
-        duplicateCid,
-      )
       return NextResponse.json({ ipfsHash: duplicateCid })
     }
 
-    console.error('Pinata upload failed:', response.status, errorBody)
+    console.error('Pinata upload failed: status %d', response.status)
     return NextResponse.json(
       { error: 'Failed to upload to IPFS' },
       { status: 502 },
@@ -167,13 +162,6 @@ export async function POST(request: Request) {
   const data = await response.json()
   const fileId = data.data?.id
   const cid = data.data?.cid
-  const isDuplicate = data.data?.is_duplicate
-
-  if (isDuplicate) {
-    console.log('Pinata duplicate upload (200), CID: %s', cid)
-  } else {
-    console.log('Pinata upload response:', JSON.stringify(data.data))
-  }
 
   if (resolvedGroupId && fileId && !data.data?.group_id) {
     try {
@@ -182,8 +170,8 @@ export async function POST(request: Request) {
         groupId: resolvedGroupId,
         files: [fileId],
       })
-    } catch (error) {
-      console.error('Failed to add file to group:', error)
+    } catch {
+      console.error('Failed to add file to Pinata group')
     }
   }
 

@@ -39,28 +39,31 @@ const CYCLE_PRESETS = [
   { labelKey: 'days365' as const, seconds: 31536000 },
 ]
 
-const newBeamSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  symbol: z.string().length(3, 'Symbol must be 3 characters'),
-  image: z.string().optional(),
-  description: z.string().min(1, 'Description is required'),
-  starttime: z
-    .string()
-    .min(1, 'Start time is required')
-    .refine((val) => new Date(val) > new Date(), {
-      message: 'Start time must be in the future',
-    }),
-  cycleLength: z.coerce.number().min(1, 'Cycle length is required'),
-  supplyPerCycle: z.coerce.number().min(1, 'Supply per cycle is required'),
-  lifetimeAggregate: z.boolean(),
-  lifetimeStats: z.boolean(),
-})
+function createNewBeamSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t('nameRequired')),
+    symbol: z.string().length(3, t('symbolLength')),
+    image: z.string().optional(),
+    description: z.string().min(1, t('descriptionRequired')),
+    starttime: z
+      .string()
+      .min(1, t('startTimeRequired'))
+      .refine((val) => new Date(val) > new Date(), {
+        message: t('startTimeFuture'),
+      }),
+    cycleLength: z.coerce.number().min(1, t('cycleLengthRequired')),
+    supplyPerCycle: z.coerce.number().min(1, t('supplyPerCycleRequired')),
+    lifetimeAggregate: z.boolean(),
+    lifetimeStats: z.boolean(),
+  })
+}
 
-type NewBeamSchema = z.infer<typeof newBeamSchema>
+type NewBeamSchema = z.infer<ReturnType<typeof createNewBeamSchema>>
 
 export default function NewBeamPage() {
   const t = useTranslations('admin.newBeam')
   const tc = useTranslations('admin.common')
+  const tv = useTranslations('validation')
   const {
     name: orgName,
     symbol: organizationSymbol,
@@ -83,7 +86,7 @@ export default function NewBeamPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<NewBeamSchema>({
-    resolver: zodResolver(newBeamSchema),
+    resolver: zodResolver(createNewBeamSchema(tv)),
     defaultValues: {
       lifetimeAggregate: false,
       lifetimeStats: false,
@@ -137,7 +140,7 @@ export default function NewBeamPage() {
     lifetimeStats,
   }: NewBeamSchema) {
     if (!pendingFile && !image) {
-      setError('image', { message: 'Image is required' })
+      setError('image', { message: tv('imageRequired') })
       return
     }
 

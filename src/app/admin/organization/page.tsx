@@ -21,22 +21,25 @@ import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { uploadFile } from '@/lib/upload-file'
 
-const organizationSchema = z.object({
-  displayName: z.string().min(1, 'Name is required'),
-  ipfs: z.string().optional(),
-  shortDescription: z
-    .string()
-    .max(255, 'Short description must be 255 characters or less')
-    .optional(),
-  about: z.string().optional(),
-  purpose: z.string().optional(),
-})
+function createOrganizationSchema(t: (key: string) => string) {
+  return z.object({
+    displayName: z.string().min(1, t('nameRequired')),
+    ipfs: z.string().optional(),
+    shortDescription: z
+      .string()
+      .max(255, t('shortDescriptionMax'))
+      .optional(),
+    about: z.string().optional(),
+    purpose: z.string().optional(),
+  })
+}
 
-type OrganizationSchema = z.infer<typeof organizationSchema>
+type OrganizationSchema = z.infer<ReturnType<typeof createOrganizationSchema>>
 
 export default function OrganizationPage() {
   const t = useTranslations('admin.organization')
   const tc = useTranslations('admin.common')
+  const tv = useTranslations('validation')
   const { session, actor } = useChain()
   const queryClient = useQueryClient()
   const {
@@ -61,7 +64,7 @@ export default function OrganizationPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<OrganizationSchema>({
-    resolver: zodResolver(organizationSchema),
+    resolver: zodResolver(createOrganizationSchema(tv)),
     defaultValues: {
       displayName: displayName,
       ipfs: ipfs,
@@ -81,7 +84,7 @@ export default function OrganizationPage() {
     purpose,
   }: OrganizationSchema) {
     if (!pendingFile && !ipfs) {
-      setError('ipfs', { message: 'Logo is required' })
+      setError('ipfs', { message: tv('logoRequired') })
       return
     }
 

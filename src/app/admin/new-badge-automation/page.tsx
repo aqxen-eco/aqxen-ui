@@ -28,36 +28,41 @@ import { useOrganization } from '@/contexts/organization'
 import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 import { numberMask } from '@/utils/masks'
 
-const newBadgeAutomationSchema = z.object({
-  display_name: z.string().nonempty('Name is required'),
-  emission_symbol: z.string().length(3, 'Symbol is required'),
-  criteria: z
-    .object({
-      badge_symbol: z.string().nonempty('Badge is required'),
-      quantity: z.string().nonempty('Quantity is required'),
-    })
-    .array()
-    .nonempty({
-      message: "Can't be empty!",
-    }),
-  emitted: z
-    .array(
-      z.object({
-        badge_symbol: z.string().nonempty('Badge is required'),
-        quantity: z.string().nonempty('Quantity is required'),
+function createNewBadgeAutomationSchema(t: (key: string) => string) {
+  return z.object({
+    display_name: z.string().nonempty(t('nameRequired')),
+    emission_symbol: z.string().length(3, t('symbolRequired')),
+    criteria: z
+      .object({
+        badge_symbol: z.string().nonempty(t('badgeRequired')),
+        quantity: z.string().nonempty(t('quantityRequired')),
       })
-    )
-    .nonempty({
-      message: "Can't be empty!",
-    }),
-  cyclic: z.boolean(),
-})
+      .array()
+      .nonempty({
+        message: t('cantBeEmpty'),
+      }),
+    emitted: z
+      .array(
+        z.object({
+          badge_symbol: z.string().nonempty(t('badgeRequired')),
+          quantity: z.string().nonempty(t('quantityRequired')),
+        })
+      )
+      .nonempty({
+        message: t('cantBeEmpty'),
+      }),
+    cyclic: z.boolean(),
+  })
+}
 
-type NewBadgeAutomationSchema = z.infer<typeof newBadgeAutomationSchema>
+type NewBadgeAutomationSchema = z.infer<
+  ReturnType<typeof createNewBadgeAutomationSchema>
+>
 
 export default function NewBadgeAutomationPage() {
   const t = useTranslations('admin.newBadgeAutomation')
   const tc = useTranslations('admin.common')
+  const tv = useTranslations('validation')
   const { symbol: organizationSymbol, name: orgName } = useOrganization()
   const translateBadgeName = useTranslateBadgeName()
   const router = useRouter()
@@ -101,7 +106,7 @@ export default function NewBadgeAutomationPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<NewBadgeAutomationSchema>({
-    resolver: zodResolver(newBadgeAutomationSchema),
+    resolver: zodResolver(createNewBadgeAutomationSchema(tv)),
   })
 
   useEffect(() => {

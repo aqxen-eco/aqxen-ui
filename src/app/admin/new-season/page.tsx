@@ -22,19 +22,22 @@ import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { getBeamWithTrackingBadges } from '@/utils/get-beam-tracking-badges'
 
-const newSeasonSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  symbol: z.string().min(3, 'Symbol is required'),
-  beams: z.array(z.string()).nullish(),
-  badges: z.string().array().min(1, 'Badges is required'),
-  stats: z.string().array().min(1, 'Stats badges is required'),
-})
+function createNewSeasonSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t('nameRequired')),
+    symbol: z.string().min(3, t('symbolRequired')),
+    beams: z.array(z.string()).nullish(),
+    badges: z.string().array().min(1, t('badgesRequired')),
+    stats: z.string().array().min(1, t('statsBadgesRequired')),
+  })
+}
 
-type NewSeasonSchema = z.infer<typeof newSeasonSchema>
+type NewSeasonSchema = z.infer<ReturnType<typeof createNewSeasonSchema>>
 
 export default function NewSeasonPage() {
   const t = useTranslations('admin.newSeason')
   const tc = useTranslations('admin.common')
+  const tv = useTranslations('validation')
   const { addOrganizationSymbol, name: orgName } = useOrganization()
   const { session } = useChain()
   const router = useRouter()
@@ -55,7 +58,7 @@ export default function NewSeasonPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<NewSeasonSchema>({
-    resolver: zodResolver(newSeasonSchema),
+    resolver: zodResolver(createNewSeasonSchema(tv)),
   })
 
   const prevTrackingRef = useRef<string[]>([])

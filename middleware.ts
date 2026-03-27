@@ -1,10 +1,27 @@
+import { unsealData } from 'iron-session'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  const session = request.cookies.get('upscale_session')
+type SessionData = {
+  actor?: string
+}
 
-  if (!session?.value) {
+export async function middleware(request: NextRequest) {
+  const cookie = request.cookies.get('upscale_session')
+
+  if (!cookie?.value) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
+  try {
+    const session = await unsealData<SessionData>(cookie.value, {
+      password: process.env.SESSION_SECRET!,
+    })
+
+    if (!session.actor) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+  } catch {
     return NextResponse.redirect(new URL('/', request.url))
   }
 

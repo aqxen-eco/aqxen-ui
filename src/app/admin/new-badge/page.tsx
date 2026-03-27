@@ -21,20 +21,23 @@ import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 import { uploadFile } from '@/lib/upload-file'
 
-const newBadgeSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  symbol: z.string().length(3, 'Symbol is required'),
-  image: z.string().optional(),
-  description: z.string().min(1, 'Description is required'),
-  lifetimeAggregate: z.boolean(),
-  lifetimeStats: z.boolean(),
-})
+function createNewBadgeSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t('nameRequired')),
+    symbol: z.string().length(3, t('symbolRequired')),
+    image: z.string().optional(),
+    description: z.string().min(1, t('descriptionRequired')),
+    lifetimeAggregate: z.boolean(),
+    lifetimeStats: z.boolean(),
+  })
+}
 
-type NewBadgeSchema = z.infer<typeof newBadgeSchema>
+type NewBadgeSchema = z.infer<ReturnType<typeof createNewBadgeSchema>>
 
 export default function NewBadgePage() {
   const t = useTranslations('admin.newBadge')
   const tc = useTranslations('admin.common')
+  const tv = useTranslations('validation')
   const {
     name: orgName,
     symbol: organizationSymbol,
@@ -54,7 +57,7 @@ export default function NewBadgePage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<NewBadgeSchema>({
-    resolver: zodResolver(newBadgeSchema),
+    resolver: zodResolver(createNewBadgeSchema(tv)),
   })
 
   const name = watch('name')
@@ -70,7 +73,7 @@ export default function NewBadgePage() {
     lifetimeStats,
   }: NewBadgeSchema) {
     if (!pendingFile && !image) {
-      setError('image', { message: 'Image is required' })
+      setError('image', { message: tv('imageRequired') })
       return
     }
 

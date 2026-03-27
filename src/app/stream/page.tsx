@@ -30,12 +30,14 @@ import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
 
-const postSchema = z.object({
-  content: z.string().nonempty('Post content is required'),
-  organization: z.string().nonempty('Select an organization'),
-})
+function createPostSchema(t: (key: string) => string) {
+  return z.object({
+    content: z.string().nonempty(t('postContentRequired')),
+    organization: z.string().nonempty(t('selectOrganization')),
+  })
+}
 
-type PostSchema = z.infer<typeof postSchema>
+type PostSchema = z.infer<ReturnType<typeof createPostSchema>>
 
 const tabClass =
   'text-body-2 text-gray-3 relative flex shrink-0 cursor-pointer items-center gap-2 pb-4 font-medium data-[state=active]:text-white data-[state=active]:before:absolute data-[state=active]:before:bottom-0 data-[state=active]:before:left-0 data-[state=active]:before:h-0.5 data-[state=active]:before:w-full data-[state=active]:before:bg-white'
@@ -119,6 +121,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
     ipfs: ownedOrgIpfs,
   } = useOrganization()
   const t = useTranslations('stream')
+  const tv = useTranslations('validation')
 
   const sortList = useMemo(
     () => [
@@ -155,7 +158,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
 
   const { control, register, handleSubmit, watch, reset, setValue } =
     useForm<PostSchema>({
-      resolver: zodResolver(postSchema),
+      resolver: zodResolver(createPostSchema(tv)),
       defaultValues: {
         content: '',
         organization: '',
