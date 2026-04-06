@@ -14,7 +14,7 @@ import { requestJoin } from '@/api/chain/organization/request-join'
 import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
-import { IPFS_IMAGE_SOURCE } from '@/constants'
+import { HIDDEN_ORGS, IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 
 export default function OrganizationsPage() {
@@ -29,7 +29,9 @@ export default function OrganizationsPage() {
     queryFn: async () => await listOrganization({}),
   })
 
-  const orgs = orgsQuery.data?.rows ?? []
+  const orgs = (orgsQuery.data?.rows ?? []).filter(
+    (org) => !HIDDEN_ORGS.includes(org.org),
+  )
 
   const nonOwnedOrgs = orgs.filter((org) => org.org !== actor)
 
