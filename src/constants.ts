@@ -60,5 +60,7 @@ const mainnetContracts = {
 export const Contract =
   NETWORK === 'mainnet' ? mainnetContracts : testnetContracts
 
+const TEST_ORGS = ['loyalnine313', 'ayellowlemon']
+
 export const HIDDEN_ORGS: string[] =
-  NETWORK === 'mainnet' ? ['loyalnine313', 'ayellowlemon'] : []
+  process.env.NEXT_PUBLIC_SHOW_TEST_ORGS === 'true' ? [] : TEST_ORGS
