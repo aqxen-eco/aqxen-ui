@@ -4,7 +4,6 @@ import { twMerge } from 'tailwind-merge'
 
 import { listOrganization } from '@/api/chain/organization/list-organization'
 import { Combobox, ComboboxEmpty, ComboboxItem } from '@/components/ui/combobox'
-import { HIDDEN_ORGS } from '@/constants'
 import { useChain } from '@/contexts/chain'
 
 import { Button } from './button'
@@ -69,9 +68,8 @@ export function InputOrganization({
       <Combobox title="Search a member">
         <ComboboxEmpty />
 
-        {data?.rows
-          .filter((item) => !HIDDEN_ORGS.includes(item.org))
-          .map((item) =>
+        {data?.rows.map(
+          (item) =>
             item.org !== actor && (
               <ComboboxItem
                 key={item.org}

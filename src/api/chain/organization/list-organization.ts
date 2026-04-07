@@ -2,7 +2,7 @@ import { Name } from '@wharfkit/antelope'
 
 import { jungleClient } from '@/api/chain/jungle-client'
 import { ListOrganizationResult } from '@/api/model/organization'
-import { Contract } from '@/constants'
+import { Contract, HIDDEN_ORGS } from '@/constants'
 import { safeParse } from '@/utils/safe-parse'
 
 type ListOrganizationProps = {
@@ -24,11 +24,13 @@ export async function listOrganization({
     limit: 1000,
   })
 
-  rows = rows.map((row) => ({
-    ...row,
-    offchain_lookup_data: safeParse(row.offchain_lookup_data),
-    onchain_lookup_data: safeParse(row.onchain_lookup_data),
-  }))
+  rows = rows
+    .map((row) => ({
+      ...row,
+      offchain_lookup_data: safeParse(row.offchain_lookup_data),
+      onchain_lookup_data: safeParse(row.onchain_lookup_data),
+    }))
+    .filter((row) => !HIDDEN_ORGS.includes(row.org))
 
   return {
     rows,
