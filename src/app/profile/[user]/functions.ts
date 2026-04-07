@@ -51,7 +51,7 @@ export async function getUserBadges({
     { rows: seasonalBadges },
     beamTemplates,
   ] = await Promise.all([
-    listOrganization({}),
+    listOrganization({ actor: user }),
     listLifetimeBadge({ scope: user }),
     listSeasonalBadge({ scope: user }),
     listBeamTemplates(),
@@ -360,7 +360,7 @@ export async function getUserOrganizations({
 }: {
   user: string
 }): Promise<UserOrganization[]> {
-  const { rows: orgs } = await listOrganization({})
+  const { rows: orgs } = await listOrganization({ actor: user })
 
   const memberResults = await Promise.all(
     orgs.map(async (org) => {

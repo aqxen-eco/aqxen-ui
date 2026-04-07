@@ -20,8 +20,8 @@ export function InputOrganization({
   const { actor } = useChain()
 
   const { isSuccess, data } = useQuery({
-    queryKey: ['organization'],
-    queryFn: async () => await listOrganization({}),
+    queryKey: ['organization', actor],
+    queryFn: async () => await listOrganization({ actor: actor ?? undefined }),
   })
 
   if (!isSuccess) {

@@ -25,8 +25,8 @@ export default function OrganizationsPage() {
   const [cancellingOrg, setCancellingOrg] = useState<string | null>(null)
 
   const orgsQuery = useQuery({
-    queryKey: ['organizations'],
-    queryFn: async () => await listOrganization({}),
+    queryKey: ['organizations', actor],
+    queryFn: async () => await listOrganization({ actor: actor ?? undefined }),
   })
 
   const orgs = orgsQuery.data?.rows ?? []
