@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { Avatar, randomVariant } from '@/components/ui/avatar'
+import { Avatar } from '@/components/ui/avatar'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Checkbox, CheckboxWrapper } from '@/components/ui/checkbox'
@@ -76,7 +76,7 @@ export default function StyleGuidePage() {
           Style Guide
         </h1>
         <p className="text-body-1 text-gray-3">
-          Visual reference for the Upscale UI design system
+          Visual reference for the AqXen design system
         </p>
         <div
           className="mx-auto h-1 w-32 rounded-full"
@@ -102,27 +102,27 @@ export default function StyleGuidePage() {
         <SubSection title="Badge Colors">
           <div className="flex flex-wrap gap-6">
             <ColorSwatch
-              name="Red"
+              name="Participation"
               hex="#d17650"
               className="bg-badge-red"
             />
             <ColorSwatch
-              name="Yellow"
+              name="Transparency"
               hex="#e6c97e"
               className="bg-badge-yellow"
             />
             <ColorSwatch
-              name="Green"
+              name="Responsibility"
               hex="#b6c190"
               className="bg-badge-green"
             />
             <ColorSwatch
-              name="Blue"
+              name="Reliability"
               hex="#8ca3da"
               className="bg-badge-blue"
             />
             <ColorSwatch
-              name="Purple"
+              name="Charity"
               hex="#a36ab7"
               className="bg-badge-purple"
             />
@@ -292,42 +292,17 @@ export default function StyleGuidePage() {
           </div>
         </SubSection>
 
-        <SubSection title="Colors">
-          <div className="flex flex-wrap items-center gap-4">
-            <Avatar size="md" color="red">
-              RE
-            </Avatar>
-            <Avatar size="md" color="yellow">
-              YE
-            </Avatar>
-            <Avatar size="md" color="green">
-              GR
-            </Avatar>
-            <Avatar size="md" color="blue">
-              BL
-            </Avatar>
-            <Avatar size="md" color="purple">
-              PU
-            </Avatar>
-            <Avatar size="md" color={randomVariant()}>
-              RN
-            </Avatar>
-            <span className="text-body-3 text-gray-3">
-              + randomVariant()
-            </span>
-          </div>
-        </SubSection>
       </Section>
 
       {/* Tags */}
       <Section title="Tags">
         <div className="flex flex-wrap items-center gap-3">
           <Tag variant="default">Default</Tag>
-          <Tag variant="red">Red</Tag>
-          <Tag variant="yellow">Yellow</Tag>
-          <Tag variant="green">Green</Tag>
-          <Tag variant="blue">Blue</Tag>
-          <Tag variant="purple">Purple</Tag>
+          <Tag variant="red">Participation</Tag>
+          <Tag variant="yellow">Transparency</Tag>
+          <Tag variant="green">Responsibility</Tag>
+          <Tag variant="blue">Reliability</Tag>
+          <Tag variant="purple">Charity</Tag>
         </div>
       </Section>
 
