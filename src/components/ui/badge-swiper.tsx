@@ -26,8 +26,8 @@ export function BadgeSwiper({ children }: { children: React.ReactNode }) {
       slidesPerGroup: 2,
       breakpoints: {
         768: {
-          slidesPerView: 4,
-          slidesPerGroup: 4,
+          slidesPerView: 5,
+          slidesPerGroup: 5,
         },
       },
     })

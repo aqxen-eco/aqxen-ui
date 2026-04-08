@@ -201,6 +201,9 @@ export async function getUserBadges({
     )
     beam.balance = reputationScore
   }
+  const filteredBeamLifetimeBadges = beamLifetimeBadges.filter(
+    (b) => b.balance > 0,
+  )
 
   const seriesPerSeason = await Promise.all(
     seasons.map((season) =>
@@ -304,7 +307,7 @@ export async function getUserBadges({
   return {
     badges: lifeTimeBadges,
     seasons: seasonsWithBadgesAndSeries,
-    beamBadges: beamLifetimeBadges,
+    beamBadges: filteredBeamLifetimeBadges,
     beamSeasons: beamSeasonsData,
   }
 }
@@ -436,7 +439,7 @@ export async function getReputationBreakdown({
     .map(([symbol, score]) => {
       const badge = badgesBySymbol.get(symbol)
       const name =
-        badge?.onchain_lookup_data.user.display_name ?? symbol
+        badge?.onchain_lookup_data?.user?.display_name ?? symbol
       return { name, score: Math.round(score * 100) / 100 }
     })
     .filter((r) => r.score > 0)

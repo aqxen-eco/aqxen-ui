@@ -517,7 +517,10 @@
     "claimableInHours": "Claimable in {count}h",
     "claimableInDays": "Claimable in {count}d",
     "noBeamContributions": "No beam contributions",
-    "total": "Total"
+    "total": "Total",
+    "errorLoadingProfile": "Unable to load profile",
+    "errorLoadingProfileDescription": "Something went wrong while loading this profile. Please try again.",
+    "tryAgain": "Try Again"
   },
   "postItem": {
     "comment": "Comment",
