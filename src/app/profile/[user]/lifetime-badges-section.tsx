@@ -56,6 +56,7 @@ export function LifetimeBadgesSection({
                 onClick={() => setSelectedBadge(badge)}
               >
                 <Badge
+                  size="md"
                   name={translateBadgeName(badge.onchain_lookup_data.user.display_name)}
                   balance={String(badge.balance)}
                   ipfs={badge.offchain_lookup_data.user.ipfs_image}

@@ -8,11 +8,13 @@ import { safeParse } from '@/utils/safe-parse'
 type ListOrganizationProps = {
   lower_bound?: string
   upper_bound?: string
+  actor?: string
 }
 
 export async function listOrganization({
   lower_bound,
   upper_bound,
+  actor,
 }: ListOrganizationProps): Promise<ListOrganizationResult> {
   let { rows, more } = await jungleClient.v1.chain.get_table_rows({
     code: Contract.ORGANIZATION,
@@ -30,7 +32,7 @@ export async function listOrganization({
       offchain_lookup_data: safeParse(row.offchain_lookup_data),
       onchain_lookup_data: safeParse(row.onchain_lookup_data),
     }))
-    .filter((row) => !HIDDEN_ORGS.includes(row.org))
+    .filter((row) => row.org === actor || !HIDDEN_ORGS.includes(row.org))
 
   return {
     rows,

@@ -8,6 +8,7 @@ export async function requireOrgAdmin(): Promise<string> {
   const { rows } = await listOrganization({
     lower_bound: actor,
     upper_bound: actor,
+    actor,
   })
 
   if (!rows[0]?.org) {

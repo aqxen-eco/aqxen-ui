@@ -90,7 +90,7 @@ export default function OrganizationPage() {
   const orgQuery = useQuery({
     queryKey: ['organization', org],
     queryFn: async () =>
-      await listOrganization({ lower_bound: org, upper_bound: org }),
+      await listOrganization({ lower_bound: org, upper_bound: org, actor: actor ?? undefined }),
   })
 
   const membersQuery = useQuery({

@@ -11,7 +11,6 @@ import { formatNumber } from '@/utils/intl-format'
 
 import { ClaimBeamsSection } from './claim-beams-section'
 import {
-  getReputationBreakdown,
   getUserBadges,
   getUserOrganizations,
   getUserPosts,
@@ -22,7 +21,6 @@ import { LifetimeBadgesSection } from './lifetime-badges-section'
 import { OrgBadgesSection } from './org-badges-section'
 import { ProfileFeed } from './profile-feed'
 import { ProfileTabs } from './profile-tabs'
-import { ReputationTooltip } from './reputation-tooltip'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,13 +37,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const locale = await getLocale()
   const intlLocale = intlLocaleMap[locale as keyof typeof intlLocaleMap] ?? 'en-US'
 
-  const [profile, { badges, seasons, beamBadges, beamSeasons }, userOrgs, posts, reputation, reputationBreakdown] = await Promise.all([
+  const [profile, { badges, seasons, beamBadges, beamSeasons }, userOrgs, posts, reputation] = await Promise.all([
     getUserProfile({ actor: user }),
     getUserBadges({ user }),
     getUserOrganizations({ user }),
     getUserPosts({ user }),
     getUserReputation({ user }),
-    getReputationBreakdown({ user }),
   ])
 
   if (!user) {
@@ -124,10 +121,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const beamsContent = (
     <>
-      {beamBadges.length > 0 && (
-        <LifetimeBadgesSection badges={beamBadges} showOrgOverlay label={t('tabBeams')} />
-      )}
-
       {beamOrgGroups.map((group) => (
         <OrgBadgesSection
           key={group.orgAccount}
@@ -186,10 +179,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   user
                 )}
               </h1>
-              <ReputationTooltip
-                total={reputation.total}
-                breakdown={reputationBreakdown}
-              />
             </div>
             <div className="flex max-md:flex-col md:flex-wrap md:items-center md:gap-4">
               {profile?.location && (

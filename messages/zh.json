@@ -517,7 +517,10 @@
     "claimableInHours": "{count}小时后可领取",
     "claimableInDays": "{count}天后可领取",
     "noBeamContributions": "无光束贡献",
-    "total": "总计"
+    "total": "总计",
+    "errorLoadingProfile": "无法加载个人资料",
+    "errorLoadingProfileDescription": "加载此个人资料时出现问题，请重试。",
+    "tryAgain": "重试"
   },
   "postItem": {
     "comment": "评论",
