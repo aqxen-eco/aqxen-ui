@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/table'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useGetEffectiveSupply } from '@/hooks/query/use-get-effective-supply'
 import { useIntlLocale } from '@/hooks/use-date-locale'
 import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
 
@@ -228,12 +229,14 @@ function EditBeamModal({
 function BeamsTable({
   beams,
   badgesBySymbol,
+  effectiveSupplyMap,
   removeOrganizationSymbol,
   onSelectBadge,
   onEditBeam,
 }: {
   beams: BeamMetadata[]
   badgesBySymbol: Map<string, Badge>
+  effectiveSupplyMap?: Map<string, number>
   removeOrganizationSymbol: (value: string) => string
   onSelectBadge: (badge: Badge) => void
   onEditBeam: (beam: BeamMetadata) => void
@@ -286,7 +289,12 @@ function BeamsTable({
               <TableCell>{formatDate(row.starttime, intlLocale)}</TableCell>
               <TableCell>{formatCycleLength(row.cycle_length, t)}</TableCell>
               <TableCell className="text-center">
-                {row.supply_per_cycle}
+                {(() => {
+                  const symbolName = row.badge_symbol.includes(',')
+                    ? row.badge_symbol.split(',')[1]
+                    : row.badge_symbol
+                  return effectiveSupplyMap?.get(symbolName) ?? row.supply_per_cycle
+                })()}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
@@ -373,6 +381,12 @@ export default function BeamsPage() {
   const badgesBySymbol = new Map(
     badgesQuery.data?.rows.map((b) => [b.badge_symbol, b]) ?? [],
   )
+
+  const effectiveSupplyQuery = useGetEffectiveSupply({
+    orgScope: name,
+    beams: beamsQuery.data ?? [],
+  })
+  const effectiveSupplyMap = effectiveSupplyQuery.data
 
   async function handleSaveBeam(
     badgeSymbol: string,
@@ -505,6 +519,7 @@ export default function BeamsPage() {
                 <BeamsTable
                   beams={systemBeams}
                   badgesBySymbol={badgesBySymbol}
+                  effectiveSupplyMap={effectiveSupplyMap}
                   removeOrganizationSymbol={removeOrganizationSymbol}
                   onSelectBadge={setSelectedBadge}
                   onEditBeam={setEditingBeam}

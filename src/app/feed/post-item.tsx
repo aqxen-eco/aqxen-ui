@@ -40,6 +40,7 @@ import { Tooltip } from '@/components/ui/tooltip'
 import { IPFS_IMAGE_SOURCE } from '@/constants'
 import { useChain } from '@/contexts/chain'
 import { useOrganization } from '@/contexts/organization'
+import { useGetEffectiveSupply } from '@/hooks/query/use-get-effective-supply'
 import { useGetOrganization } from '@/hooks/query/use-get-organization'
 import { useDateLocale, useIntlLocale } from '@/hooks/use-date-locale'
 import { useTranslateBadgeName } from '@/hooks/use-translate-badge-name'
@@ -248,6 +249,12 @@ export function PostItem({
     enabled: !!currentActor,
   })
   const beamStats = beamStatsQuery.data ?? []
+
+  const effectiveSupplyQuery = useGetEffectiveSupply({
+    orgScope: badgeScope,
+    beams: beamMetadata ?? [],
+  })
+  const effectiveSupplyMap = effectiveSupplyQuery.data
 
   const isOwnPost = currentActor === actor
   const isOrgPost = !!organization && actor === organization
@@ -731,12 +738,6 @@ export function PostItem({
                                 {(() => {
                                   const symbolName =
                                     badge.badge_symbol.split(',')[1]
-                                  const meta = beamMetadata?.find(
-                                    (m) =>
-                                      (m.badge_symbol.includes(',')
-                                        ? m.badge_symbol.split(',')[1]
-                                        : m.badge_symbol) === symbolName,
-                                  )
                                   const stat = beamStats.find(
                                     (s) =>
                                       s.badge_asset.split(' ')[1] ===
@@ -749,7 +750,7 @@ export function PostItem({
                                       ) || 0
                                     : 0
                                   const supply =
-                                    meta?.supply_per_cycle ?? 0
+                                    effectiveSupplyMap?.get(symbolName) ?? 0
                                   return (
                                     <span className="text-gray-3 ml-1">
                                       {balance} / {supply}
