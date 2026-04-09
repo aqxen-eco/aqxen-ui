@@ -516,6 +516,7 @@
     "claimableInMinutes": "Claimable in {count}m",
     "claimableInHours": "Claimable in {count}h",
     "claimableInDays": "Claimable in {count}d",
+    "nextCycleIn": "Next cycle in",
     "noBeamContributions": "No beam contributions",
     "total": "Total",
     "errorLoadingProfile": "Unable to load profile",

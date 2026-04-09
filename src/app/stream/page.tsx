@@ -131,7 +131,9 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
     [t],
   )
 
-  const [sort, setSort] = useState<Record<string, string>>(sortList[0])
+  const [sortValue, setSortValue] = useState<string>('desc')
+  const sort =
+    sortList.find((item) => item.value === sortValue) ?? sortList[0]
   const [activeTab, setActiveTab] = useState<string>(
     () => searchParams.get('tab') || 'all'
   )
@@ -334,7 +336,7 @@ function AuthenticatedStream({ actor }: { actor: string | undefined }) {
               key={item.value}
               isSelected={sort.value === item.value}
               onClick={() => {
-                setSort(item)
+                setSortValue(item.value)
               }}
             >
               {item.description}

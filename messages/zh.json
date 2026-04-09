@@ -516,6 +516,7 @@
     "claimableInMinutes": "{count}分钟后可领取",
     "claimableInHours": "{count}小时后可领取",
     "claimableInDays": "{count}天后可领取",
+    "nextCycleIn": "下一周期",
     "noBeamContributions": "无光束贡献",
     "total": "总计",
     "errorLoadingProfile": "无法加载个人资料",
