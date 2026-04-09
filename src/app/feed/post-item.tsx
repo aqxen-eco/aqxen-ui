@@ -27,8 +27,14 @@ import { sendMultiBadge } from '@/api/chain/badge/send-multi-badge'
 import { listBadgeAutomation } from '@/api/chain/badge-automation/list-badge-automation'
 import { getTrackingBadgeSymbols } from '@/api/chain/beams/get-tracking-badge-symbols'
 import { giveBeamsBatch } from '@/api/chain/beams/give-beams-batch'
-import { listBeamMetadata } from '@/api/chain/beams/list-beam-metadata'
-import { listBeamStats } from '@/api/chain/beams/list-beam-stats'
+import {
+  type BeamMetadata,
+  listBeamMetadata,
+} from '@/api/chain/beams/list-beam-metadata'
+import {
+  type BeamStats,
+  listBeamStats,
+} from '@/api/chain/beams/list-beam-stats'
 import { listBeamTemplates } from '@/api/chain/beams/list-beam-templates'
 import { postBeam } from '@/api/chain/beams/post-beam'
 import { Avatar } from '@/components/ui/avatar'
@@ -48,6 +54,30 @@ import { formatNumber, getListFormat } from '@/utils/intl-format'
 
 import { createPost } from './actions'
 import { processBeamGive } from './reputation'
+
+function getBeamBalance(
+  meta: BeamMetadata | undefined,
+  stat: BeamStats | undefined,
+): number {
+  if (!stat) return 0
+  const rawBalance = parseInt(stat.badge_asset.split(' ')[0], 10) || 0
+  if (!meta) return rawBalance
+
+  const now = Date.now() / 1000
+  const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
+  const cycleLength = meta.cycle_length
+  if (cycleLength <= 0 || now < starttime) return rawBalance
+
+  const elapsed = now - starttime
+  const currentCycleStart =
+    starttime + Math.floor(elapsed / cycleLength) * cycleLength
+  const lastClaimed =
+    new Date(`${stat.last_claimed_time}Z`).getTime() / 1000
+
+  // Balance from a previous cycle is unusable — treat as 0.
+  if (lastClaimed < currentCycleStart) return 0
+  return rawBalance
+}
 
 type BeamBreakdownRow = { name: string; score: number }
 
@@ -743,12 +773,11 @@ export function PostItem({
                                       s.badge_asset.split(' ')[1] ===
                                       symbolName,
                                   )
-                                  const balance = stat
-                                    ? parseInt(
-                                        stat.badge_asset.split(' ')[0],
-                                        10,
-                                      ) || 0
-                                    : 0
+                                  const meta = (beamMetadata ?? []).find(
+                                    (m) =>
+                                      m.badge_symbol === badge.badge_symbol,
+                                  )
+                                  const balance = getBeamBalance(meta, stat)
                                   const supply =
                                     effectiveSupplyMap?.get(symbolName) ?? 0
                                   return (
