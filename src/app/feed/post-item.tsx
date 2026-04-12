@@ -195,15 +195,15 @@ export function PostItem({
     enabled: !!badgeScope,
   })
 
-  const beamTemplatesQuery = useQuery({
-    queryKey: ['beam-templates'],
-    queryFn: listBeamTemplates,
-  })
-
   const beamMetadataQuery = useQuery({
     queryKey: ['beam-metadata', badgeScope],
     queryFn: async () => await listBeamMetadata({ scope: badgeScope }),
     enabled: !!badgeScope,
+  })
+
+  const beamTemplatesQuery = useQuery({
+    queryKey: ['beam-templates'],
+    queryFn: listBeamTemplates,
   })
 
   const automationsQuery = useQuery({
@@ -213,8 +213,8 @@ export function PostItem({
   })
 
   const badgeRows = query.data?.rows
-  const beamTemplates = beamTemplatesQuery.data
   const beamMetadata = beamMetadataQuery.data
+  const beamTemplates = beamTemplatesQuery.data
   const automations = automationsQuery.data?.rows
 
   const { beamBadges, customBadges } = useMemo(() => {
@@ -222,38 +222,33 @@ export function PostItem({
       return { beamBadges: [], customBadges: [] }
     }
 
-    // Top-level beam badge symbols (from beam metadata)
-    const topLevelBeamSymbols = new Set(
+    // Beam badges are identified by having beam metadata for the org.
+    const beamSymbols = new Set(
       (beamMetadata ?? []).map((m) => m.badge_symbol.split(',')[1])
     )
 
-    // All beam-related symbols (top-level + tracking/automation badges)
-    const allBeamSymbols = new Set(topLevelBeamSymbols)
+    // Tracking badges (the auto-awarded counters that sit alongside
+    // each default beam) are identified by display-name convention,
+    // matching the canonical filter used in
+    // src/app/profile/[user]/functions.ts. A badge is a tracking
+    // badge when its display name is "{Beam} Giving" / " Rep" /
+    // " Uniqueness" and {Beam} matches a beam template name. We also
+    // exclude badges whose display name *is* a beam template name —
+    // those are inactive beam shells the user can't recognize with.
+    const trackingMetrics = ['Giving', 'Rep', 'Uniqueness']
+    const templateNames = new Set(
+      (beamTemplates ?? []).map((t) => t.display_name)
+    )
 
-    if (automations) {
-      for (const automation of automations) {
-        for (const criterion of automation.emitter_criteria) {
-          allBeamSymbols.add(criterion.key)
-        }
-        for (const asset of automation.emit_assets) {
-          const symbol = asset.emit_asset.split(' ')[1]
-          if (symbol) allBeamSymbols.add(symbol)
-        }
-      }
-    }
-
-    if (beamTemplates) {
-      const templateNames = new Set(
-        beamTemplates.map((t) => t.display_name)
-      )
-      for (const badge of badgeRows) {
-        const displayName =
-          badge.onchain_lookup_data.user.display_name
-        if (templateNames.has(displayName)) {
-          const name = badge.badge_symbol.split(',')[1]
-          if (name) allBeamSymbols.add(name)
-        }
-      }
+    const isTrackingBadge = (badge: (typeof badgeRows)[number]) => {
+      const displayName = badge.onchain_lookup_data?.user?.display_name
+      if (!displayName) return false
+      if (templateNames.has(displayName)) return true
+      return trackingMetrics.some((metric) => {
+        if (!displayName.endsWith(` ${metric}`)) return false
+        const beamName = displayName.slice(0, -(metric.length + 1))
+        return templateNames.has(beamName)
+      })
     }
 
     const beams: typeof badgeRows = []
@@ -261,15 +256,15 @@ export function PostItem({
 
     for (const badge of badgeRows) {
       const symbolName = badge.badge_symbol.split(',')[1]
-      if (symbolName && topLevelBeamSymbols.has(symbolName)) {
+      if (symbolName && beamSymbols.has(symbolName)) {
         beams.push(badge)
-      } else if (!symbolName || !allBeamSymbols.has(symbolName)) {
+      } else if (!isTrackingBadge(badge)) {
         custom.push(badge)
       }
     }
 
     return { beamBadges: beams, customBadges: custom }
-  }, [badgeRows, beamTemplates, beamMetadata, automations])
+  }, [badgeRows, beamMetadata, beamTemplates])
 
   const { actor: currentActor, session } = useChain()
 

@@ -40,12 +40,14 @@ function getSymbol(meta: BeamMetadata) {
     : meta.badge_symbol
 }
 
-function findStat(meta: BeamMetadata, stats: BeamStats[]) {
+function findStat(meta: BeamMetadata, stats: BeamStats[], org: string) {
   const symbol = getSymbol(meta)
-  return stats.find((s) => s.badge_asset.split(' ')[1] === symbol)
+  return stats.find(
+    (s) => s.org === org && s.badge_asset.split(' ')[1] === symbol,
+  )
 }
 
-function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
+function isClaimable(meta: BeamMetadata, stats: BeamStats[], org: string) {
   const now = Date.now() / 1000
   const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
   const cycleLength = meta.cycle_length
@@ -56,7 +58,7 @@ function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
   const currentCycleStart =
     starttime + Math.floor(elapsed / cycleLength) * cycleLength
 
-  const stat = findStat(meta, stats)
+  const stat = findStat(meta, stats, org)
   if (!stat) return true
 
   const lastClaimed =
@@ -64,8 +66,8 @@ function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
   return lastClaimed < currentCycleStart
 }
 
-function getBalance(meta: BeamMetadata, stats: BeamStats[]) {
-  const stat = findStat(meta, stats)
+function getBalance(meta: BeamMetadata, stats: BeamStats[], org: string) {
+  const stat = findStat(meta, stats, org)
   if (!stat) return 0
   return parseInt(stat.badge_asset.split(' ')[0], 10) || 0
 }
@@ -185,7 +187,11 @@ function CountdownTimer({ target }: { target: number }) {
   )
 }
 
-function getNextClaimableRaw(meta: BeamMetadata, stats: BeamStats[]) {
+function getNextClaimableRaw(
+  meta: BeamMetadata,
+  stats: BeamStats[],
+  org: string,
+) {
   const now = Date.now() / 1000
   const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
   const cycleLength = meta.cycle_length
@@ -197,7 +203,7 @@ function getNextClaimableRaw(meta: BeamMetadata, stats: BeamStats[]) {
   const currentCycleStart =
     starttime + Math.floor(elapsed / cycleLength) * cycleLength
 
-  const stat = findStat(meta, stats)
+  const stat = findStat(meta, stats, org)
 
   if (!stat) return { key: 'claimableNow' as const }
 
@@ -303,10 +309,10 @@ export function ClaimBeamsSection({
       const beams = filteredMetadata.map((meta) => ({
         ...meta,
         org,
-        claimable: isClaimable(meta, stats),
-        balance: getBalance(meta, stats),
+        claimable: isClaimable(meta, stats, org),
+        balance: getBalance(meta, stats, org),
         nextClaimableLabel: (() => {
-          const raw = getNextClaimableRaw(meta, stats)
+          const raw = getNextClaimableRaw(meta, stats, org)
           if ('count' in raw && raw.count !== undefined)
             return t(raw.key, { count: raw.count })
           return t(raw.key)

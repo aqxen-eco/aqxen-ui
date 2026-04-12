@@ -18,7 +18,7 @@ function getSymbol(meta: BeamMetadata) {
     : meta.badge_symbol
 }
 
-function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
+function isClaimable(meta: BeamMetadata, stats: BeamStats[], org: string) {
   const now = Date.now() / 1000
   const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
   const cycleLength = meta.cycle_length
@@ -30,7 +30,9 @@ function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
     starttime + Math.floor(elapsed / cycleLength) * cycleLength
 
   const symbol = getSymbol(meta)
-  const stat = stats.find((s) => s.badge_asset.split(' ')[1] === symbol)
+  const stat = stats.find(
+    (s) => s.org === org && s.badge_asset.split(' ')[1] === symbol,
+  )
   if (!stat) return true
 
   const lastClaimed =
@@ -38,7 +40,11 @@ function isClaimable(meta: BeamMetadata, stats: BeamStats[]) {
   return lastClaimed < currentCycleStart
 }
 
-function getSecondsUntilClaimable(meta: BeamMetadata, stats: BeamStats[]) {
+function getSecondsUntilClaimable(
+  meta: BeamMetadata,
+  stats: BeamStats[],
+  org: string,
+) {
   const now = Date.now() / 1000
   const starttime = new Date(`${meta.starttime}Z`).getTime() / 1000
   const cycleLength = meta.cycle_length
@@ -50,7 +56,9 @@ function getSecondsUntilClaimable(meta: BeamMetadata, stats: BeamStats[]) {
     starttime + Math.floor(elapsed / cycleLength) * cycleLength
 
   const symbol = getSymbol(meta)
-  const stat = stats.find((s) => s.badge_asset.split(' ')[1] === symbol)
+  const stat = stats.find(
+    (s) => s.org === org && s.badge_asset.split(' ')[1] === symbol,
+  )
   if (!stat) return 0
 
   const lastClaimed =
@@ -122,21 +130,25 @@ export function useHasClaimableBeams() {
     ),
   )
 
-  const allBeamMeta = orgNames.flatMap((_, i) => {
+  const allBeamMeta = orgNames.flatMap((org, i) => {
     const metadata = metadataQueries[i]?.data ?? []
-    return metadata.filter((meta) => {
-      const badge = badgesBySymbol.get(meta.badge_symbol)
-      if (!badge) return false
-      return templateNames.has(badge.onchain_lookup_data.user.display_name)
-    })
+    return metadata
+      .filter((meta) => {
+        const badge = badgesBySymbol.get(meta.badge_symbol)
+        if (!badge) return false
+        return templateNames.has(badge.onchain_lookup_data.user.display_name)
+      })
+      .map((meta) => ({ meta, org }))
   })
 
-  const hasClaimable = allBeamMeta.some((meta) => isClaimable(meta, stats))
+  const hasClaimable = allBeamMeta.some(({ meta, org }) =>
+    isClaimable(meta, stats, org),
+  )
 
   // Find the shortest time until any beam becomes claimable
   let minSeconds = Infinity
-  for (const meta of allBeamMeta) {
-    const s = getSecondsUntilClaimable(meta, stats)
+  for (const { meta, org } of allBeamMeta) {
+    const s = getSecondsUntilClaimable(meta, stats, org)
     if (s < minSeconds) minSeconds = s
   }
 
