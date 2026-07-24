@@ -2,6 +2,7 @@
 
 import { Chains } from '@wharfkit/common'
 import SessionKit, { type Session } from '@wharfkit/session'
+import { TransactPluginResourceProvider } from '@wharfkit/transact-plugin-resource-provider'
 import { WalletPluginAnchor } from '@wharfkit/wallet-plugin-anchor'
 import WebRenderer from '@wharfkit/web-renderer'
 import { createContext, use, useCallback, useEffect, useState } from 'react'
@@ -21,12 +22,17 @@ const appName = 'reputationsystem'
 const chain =
   process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? Chains.EOS : Chains.Jungle4
 
-const sessionKit = new SessionKit({
-  appName,
-  chains: [chain],
-  ui: new WebRenderer(),
-  walletPlugins: [new WalletPluginAnchor()],
-})
+const sessionKit = new SessionKit(
+  {
+    appName,
+    chains: [chain],
+    ui: new WebRenderer(),
+    walletPlugins: [new WalletPluginAnchor()],
+  },
+  {
+    transactPlugins: [new TransactPluginResourceProvider()],
+  }
+)
 
 const localStorageSessionKey = `wharf-${sessionKit.appName}-session`
 

@@ -35,6 +35,7 @@
     "@wharfkit/common": "^1.5.0",
     "@wharfkit/contract": "^1.2.0",
     "@wharfkit/session": "^1.6.1",
+    "@wharfkit/transact-plugin-resource-provider": "1.2.0",
     "@wharfkit/wallet-plugin-anchor": "^1.6.1",
     "@wharfkit/wallet-plugin-cloudwallet": "^1.6.2",
     "@wharfkit/web-renderer": "^1.4.3",
