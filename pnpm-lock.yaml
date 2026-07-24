@@ -80,6 +80,9 @@ importers:
       '@wharfkit/session':
         specifier: ^1.6.1
         version: 1.6.1
+      '@wharfkit/transact-plugin-resource-provider':
+        specifier: 1.2.0
+        version: 1.2.0(@wharfkit/session@1.6.1)
       '@wharfkit/wallet-plugin-anchor':
         specifier: ^1.6.1
         version: 1.6.1(@wharfkit/session@1.6.1)
@@ -2056,6 +2059,9 @@ packages:
     peerDependencies:
       '@wharfkit/session': ^1.2.7
 
+  '@wharfkit/resources@1.5.0':
+    resolution: {integrity: sha512-wcfww9UOc03JlIrLMIxbHSlrDnGtPRuzOCJtp7i4xEUyJbbWBQLEUStPuR2GsxGbRa2pxKdo8Z1pfyS6AI/gRQ==}
+
   '@wharfkit/sealed-messages@1.2.0':
     resolution: {integrity: sha512-AnJJY1U6gOLyhcw7HTJUb0t6uSb/cO3FACuOMnKBmKtp8AFrhEDntwgm5yF8kBh/eoreLDvILlAPANOsig8JGA==}
 
@@ -2064,6 +2070,11 @@ packages:
 
   '@wharfkit/signing-request@3.2.0':
     resolution: {integrity: sha512-rIMzqwAKA5vb09+1BI+9fUXbj73JIkYcD1XT/Tom+k/+bqi51JcmC0trjCOjTUOK9UYDabpxYFixrf1ZvQymKw==}
+
+  '@wharfkit/transact-plugin-resource-provider@1.2.0':
+    resolution: {integrity: sha512-zb/m1NZwRGXknrWyp/7GYVJi8+p1b1K1Tt2sd+Lb/Tn8ejM0BbZZb355o3I5ZF+mqnUk37M4FYpoQ8fl3/bZAA==}
+    peerDependencies:
+      '@wharfkit/session': ^1.6.1
 
   '@wharfkit/wallet-plugin-anchor@1.6.1':
     resolution: {integrity: sha512-IZaIFcM/7wQ2EWa5D3YsW/NRAVeW/+JlpjwsLGARo0rIaWxCPWlUOBjBf533EUnbnGLzpEpGI0ol5WZR97fhdA==}
@@ -3013,6 +3024,9 @@ packages:
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
+
+  js-big-decimal@2.2.0:
+    resolution: {integrity: sha512-qJFDTcgBGvuPzsck0jNm1puKvJQ3AL8J3bIyrvF1KfsbljOVj8N/o9Kbr8RXlBx1J8aapcRpMCiG6h1l6QgYhQ==}
 
   js-cookie@3.0.5:
     resolution: {integrity: sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==}
@@ -6394,6 +6408,13 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@wharfkit/resources@1.5.0':
+    dependencies:
+      '@wharfkit/antelope': 1.1.1
+      bn.js: 5.2.3
+      js-big-decimal: 2.2.0
+      tslib: 2.8.1
+
   '@wharfkit/sealed-messages@1.2.0':
     dependencies:
       '@greymass/miniaes': 1.0.0
@@ -6411,6 +6432,12 @@ snapshots:
   '@wharfkit/signing-request@3.2.0':
     dependencies:
       '@wharfkit/antelope': 1.1.1
+      tslib: 2.8.1
+
+  '@wharfkit/transact-plugin-resource-provider@1.2.0(@wharfkit/session@1.6.1)':
+    dependencies:
+      '@wharfkit/resources': 1.5.0
+      '@wharfkit/session': 1.6.1
       tslib: 2.8.1
 
   '@wharfkit/wallet-plugin-anchor@1.6.1(@wharfkit/session@1.6.1)':
@@ -7540,6 +7567,8 @@ snapshots:
       set-function-name: 2.0.2
 
   jiti@2.6.1: {}
+
+  js-big-decimal@2.2.0: {}
 
   js-cookie@3.0.5: {}
 
